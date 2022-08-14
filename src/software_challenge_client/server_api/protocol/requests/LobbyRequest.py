@@ -1,24 +1,22 @@
-import src.software_challenge_client.server_api.decorations as xml
-import paxb as pb
-
 from dataclasses import dataclass
 
+import src.software_challenge_client.server_api.XStreamDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import LobbyRequest
 
 
 @dataclass
-@xml.model(name='join')
+@XStrDec.alias(name='join')
 class JoinGameRequest(LobbyRequest):
-    gameType: str = xml.asAttribute()
+    gameType: str = XStrDec.asAttribute()
 
 
 @dataclass
-@xml.model(name='joinPrepared')
+@XStrDec.alias(name='joinPrepared')
 class JoinPreparedRoomRequest(LobbyRequest):
-    reservationCode: str = None
+    reservationCode: str = XStrDec.asAttribute()
 
 
 @dataclass
-@xml.model(name='joinRoom')
+@XStrDec.alias(name='joinRoom')
 class JoinRoomRequest(LobbyRequest):
-    roomId: str = None
+    roomId: str = XStrDec.asAttribute()

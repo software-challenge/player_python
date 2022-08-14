@@ -1,30 +1,33 @@
 from dataclasses import dataclass
 
-import src.software_challenge_client.server_api.decorations as xml
+import src.software_challenge_client.server_api.XStreamDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket
 
 
 @dataclass
-@xml.model(name="prepared")
+@XStrDec.alias(name="prepared")
 class GamePreparedResponse(ResponsePacket):
-    roomId: str = None
-    reservations: list = None
+    roomId: str = XStrDec.asAttribute()
+    reservations: list[str] = XStrDec.implicitArray(itemFieldName="reservation")
 
 
 @dataclass
-@xml.model(name="joined")
+@XStrDec.alias(name="joined")
 class JoinedRoomResponse(ResponsePacket):
-    roomId: str = None
+    roomId: str = XStrDec.asAttribute()
 
 
 @dataclass
-@xml.model(name="observed")
+@XStrDec.alias(name="observed")
 class ObservationResponse(ResponsePacket):
-    roomId: str = None
+    roomId: str = XStrDec.asAttribute()
 
 
 @dataclass
-@xml.model(name="joinedGameRoom")
+@XStrDec.alias(name="joinedGameRoom")
 class RoomJoinedResponse(ResponsePacket):
-    roomId: str = None
-    playerCount: int = None
+    """
+    Originally named **RoomWasJoinedEvent**
+    """
+    roomId: str = XStrDec.asAttribute()
+    playerCount: int = XStrDec.asAttribute()

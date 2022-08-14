@@ -1,10 +1,11 @@
 import logging
 import xml.etree.ElementTree as ET
+from typing import Any
 
 from src.software_challenge_client.server_api.networking.NetworkInterface import NetworkInterface
 from src.software_challenge_client.server_api.protocol import *
 
-protocol = protocolClasses
+protocol: dict[Any, Any] = protocolClasses
 
 
 class _XMLParser:
@@ -60,16 +61,16 @@ class XStream:
 
 
 logging.basicConfig(level=logging.INFO)
-#network = NetworkInterface("localhost", 13050)
-#network.connect()
-#xmlStream = XStream(network)
-join = JoinGameRequest("test")
-print(join)
+# network = NetworkInterface("localhost", 13050)
+# network.connect()
+# xmlStream = XStrDec(network)
+prepare = PrepareGameRequest()
+print(prepare)
 print(protocol)
-#xmlStream.outStream(join)
+# xmlStream.outStream(join)
 """
 xmlStream.outStream(join)
-xml = xmlStream.inStream()
-print(xml)
-print(type(xml))
+XStrDec = xmlStream.inStream()
+print(XStrDec)
+print(type(XStrDec))
 """

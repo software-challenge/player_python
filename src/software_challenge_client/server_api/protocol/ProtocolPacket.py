@@ -1,13 +1,15 @@
 """
 {
-className : {
-    type : classType,
-    variableName1 : XMLDefinition,
-    variableName2 : XMLDefinition
-    }
+    className : {
+        variableName : {
+            "type" : XmlType,
+            "itemFieldName": itemFieldName
+        }
+    },
+    XmlAlias: class
 }
 """
-protocolClasses = {}
+protocolClasses: dict = {}
 
 
 class ProtocolPacket:

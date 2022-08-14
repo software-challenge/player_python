@@ -49,63 +49,59 @@ Dieser Verhaltenskodex gilt in allen Community-Bereichen und auch dann, wenn ein
 E-Mail-Adresse, das Posten über ein offizielles Social-Media-Konto oder das Handeln als ernannter Vertreter bei einer 
 Online- oder Offline-Veranstaltung.
 
-## Enforcement
+## Durchsetzung
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at <stu222782@mail.uni-kiel.de>.
-All complaints will be reviewed and investigated promptly and fairly.
+Fälle von beleidigendem, belästigendem oder anderweitig inakzeptablem Verhalten können bei den für die Durchsetzung
+zuständigen Verantwortlichen der Community unter <stu222782@mail.uni-kiel.de> gemeldet werden. Alle Beschwerden werden
+unverzüglich und fair geprüft und untersucht.
 
-All community leaders are obligated to respect the privacy and security of the
-reporter of any incident.
+Alle Verantwortlichen der Community sind verpflichtet, die Privatsphäre und die Sicherheit der Person, die einen Vorfall
+meldet, zu respektieren.
 
-## Enforcement Guidelines
+## Leitlinien für die Durchsetzung
 
-Community leaders will follow these Community Impact Guidelines in determining
-the consequences for any action they deem in violation of this Code of Conduct:
+Die Verantwortlichen der Community werden sich bei der Festlegung der Konsequenzen für Handlungen, die sie als Verstoß
+gegen diesen Verhaltenskodex ansehen, an diesen Leitlinien für die Auswirkungen auf die Community orientieren:
 
-### 1. Correction
+### 1. Richtigstellung
 
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
+**Auswirkungen auf die Community**: Verwendung unangemessener Sprache oder anderes Verhalten, das als unprofessionell
+oder in der Gemeinschaft unerwünscht angesehen wird.
 
-**Consequence**: A private, written warning from community leaders, providing
-clarity around the nature of the violation and an explanation of why the
-behavior was inappropriate. A public apology may be requested.
+**Konsequenz**: Eine private, schriftliche Verwarnung von Verantwortlichen der Community, die Klarheit über die Art des
+Verstoßes und eine Erklärung, warum das Verhalten unangemessen war. Eine öffentliche Entschuldigung kann verlangt
+werden.
 
-### 2. Warning
+### 2. Verwarnung
 
-**Community Impact**: A violation through a single incident or series
-of actions.
+**Auswirkungen auf die Community**: Ein Verstoß durch einen einzelnen Vorfall oder eine Reihe von Handlungen.
 
-**Consequence**: A warning with consequences for continued behavior. No
-interaction with the people involved, including unsolicited interaction with
-those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
-like social media. Violating these terms may lead to a temporary or
-permanent ban.
+**Konsequenz**: Eine Warnung mit Konsequenzen für fortgesetztes Verhalten. Keine Interaktion mit den betroffenen
+Personen, einschließlich unaufgeforderter Interaktion mit denjenigen, die den Verhaltenskodex durchsetzen, für einen
+bestimmten Zeitraum. Dazu gehört auch die Vermeidung von Interaktionen in Gemeinschaftsräumen sowie in externen Kanälen
+wie den sozialen Medien. Ein Verstoß gegen diese Bedingungen kann zu einem vorübergehenden oder dauerhaften Ausschluss
+führen.
 
-### 3. Temporary Ban
+### 3. Vorübergehender Ban
 
-**Community Impact**: A serious violation of community standards, including
-sustained inappropriate behavior.
+**Auswirkungen auf die Community**: Ein schwerwiegender Verstoß gegen die Community-Richtlinien, einschließlich
+anhaltend unangemessenen Verhaltens.
 
-**Consequence**: A temporary ban from any sort of interaction or public
-communication with the community for a specified period of time. No public or
-private interaction with the people involved, including unsolicited interaction
-with those enforcing the Code of Conduct, is allowed during this period.
-Violating these terms may lead to a permanent ban.
+**Konsequenz**: Ein vorübergehendes Verbot jeglicher Interaktion oder öffentlicher Kommunikation mit der Gemeinschaft
+für einen bestimmten Zeitraum. Während dieses Zeitraums ist keine öffentliche oder private Interaktion mit den
+betroffenen Personen erlaubt, einschließlich unaufgeforderter Interaktion mit denjenigen, die den Verhaltenskodex
+durchsetzen. Ein Verstoß gegen diese Bedingungen kann zu einer permanenten Sperre führen.
 
-### 4. Permanent Ban
+### 4. Permanenter Ban
 
-**Community Impact**: Demonstrating a pattern of violation of community
-standards, including sustained inappropriate behavior,  harassment of an
-individual, or aggression toward or disparagement of classes of individuals.
+**Auswirkungen auf die Community**: Nachweis eines Musters der Verletzung von Community-Richtlinien, einschließlich
+anhaltend unangemessenen Verhaltens, Belästigung oder Aggression gegenüber einer Person oder Verunglimpfung von Gruppen
+von Personen.
 
-**Consequence**: A permanent ban from any sort of public interaction within
-the community.
+**Konsequenz**: Ein dauerhaftes Verbot jeglicher öffentlicher Interaktion innerhalb der der Gemeinschaft.
 
-## Attribution
+## Namensnennung
 
-This Code of Conduct is adapted from the [Contributor Covenant](https://contributor-covenant.org/), version
-[1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md) and
-[2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md).
+Der vorliegende Verhaltenskodex ist an den [Contributor Covenant](https://contributor-covenant.org/), Version
+[1.4](https://www.contributor-covenant.org/version/1/4/code-of-conduct/code_of_conduct.md) und
+[2.0](https://www.contributor-covenant.org/version/2/0/code_of_conduct/code_of_conduct.md) angelehnt.

@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-import src.software_challenge_client.server_api.decorations as xml
+import src.software_challenge_client.server_api.XStreamDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket, ProtocolPacket
 
 
 @dataclass
-@xml.model(name="errorpacket")
+@XStrDec.alias(name="errorpacket")
 class ErrorPacket(ResponsePacket):
     originalRequest: ProtocolPacket = None
-    message: str = None
+    message: str = XStrDec.asAttribute()
