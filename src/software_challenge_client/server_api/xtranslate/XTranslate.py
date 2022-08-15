@@ -8,7 +8,7 @@ from src.software_challenge_client.server_api.protocol import *
 protocol: dict[Any, Any] = protocolClasses
 
 
-class _XMLParser:
+class _XParse:
     def __init__(self):
         global protocol
         protocol = self._dictionary(ProtocolPacket)
@@ -17,12 +17,10 @@ class _XMLParser:
     def readObject(self, obj: ProtocolPacket) -> bytes:
         self.logger.info("Converting object to XML")
         root = ET.Element(obj.__class__.__name__)
-        for attr in obj.__dict__:
-            if attr == "__class__" or obj.__getattribute__(attr) is None:
-                continue
-            print(type(attr))
-            ET.SubElement(root, attr).text = str(getattr(obj, attr))
-            ET.SubElement(root, attr)
+        # For each variable in the object
+        for attr, value in obj.__dict__.items():
+            value.setXmlSpecifics(root)
+
         return ET.tostring(root)
 
     def readXML(self, xString: str) -> ProtocolPacket:
@@ -45,10 +43,10 @@ class _XMLParser:
         return dict(dictionary)
 
 
-class XStream:
+class XTranslate:
     def __init__(self, networkInterface: NetworkInterface):
         self.networkInterface = networkInterface
-        self.parser = _XMLParser()
+        self.parser = _XParse()
 
     def inStream(self) -> ProtocolPacket:
         receiving = self.networkInterface.receive()
@@ -64,13 +62,13 @@ logging.basicConfig(level=logging.INFO)
 # network = NetworkInterface("localhost", 13050)
 # network.connect()
 # xmlStream = XStrDec(network)
-prepare = PrepareGameRequest()
-print(prepare)
-print(protocol)
-# xmlStream.outStream(join)
-"""
-xmlStream.outStream(join)
-XStrDec = xmlStream.inStream()
-print(XStrDec)
-print(type(XStrDec))
-"""
+prepare = JoinGameRequest()
+# Print prepare object with attributes
+# print(prepare)
+# print(prepare)
+# print(prepare.__class__)
+# print(protocol)
+parse = _XParse()
+string = parse.readObject(prepare)
+
+print(string)

@@ -1,4 +1,4 @@
-## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a> Python Client der Software-Challenge Germany 2022!
+## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a> Python Client der Software-Challenge Germany 2023!
 
 In diesem Repository befindet sich das Python Package der [Software-Challenge](https://www.software-challenge.de), ein
 Programmierwettbewerb für Schüler. Dabei wird für ein jährlich wechselndes Spiel eine künstliche Intelligenz entwickelt,
