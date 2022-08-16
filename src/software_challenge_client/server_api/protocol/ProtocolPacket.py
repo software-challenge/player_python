@@ -1,12 +1,7 @@
 """
 {
-    className : {
-        variableName : {
-            "type" : XmlType,
-            "itemFieldName": itemFieldName
-        }
-    },
-    XmlAlias: class
+    XmlAlias: class,
+    ...
 }
 """
 protocolClasses: dict = {}

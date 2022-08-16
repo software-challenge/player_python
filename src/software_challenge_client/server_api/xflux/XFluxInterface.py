@@ -10,9 +10,6 @@ class IXObject:
     def setXmlSpecifics(self, element: Element):
         ...
 
-    def getObject(self):
-        ...
-
 
 @dataclass
 class Attribute(IXObject):
