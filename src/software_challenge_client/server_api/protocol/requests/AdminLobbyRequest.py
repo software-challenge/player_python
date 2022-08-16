@@ -1,6 +1,6 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
 from src.software_challenge_client.server_api.Shared import SlotDescriptor
-from src.software_challenge_client.server_api.protocol.ProtocolPacket import AdminLobbyRequest
+from src.software_challenge_client.server_api.protocol.IProtocolPacket import AdminLobbyRequest
 from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute, ImplicitArray
 
 
@@ -78,7 +78,7 @@ class PauseGameRequest(AdminLobbyRequest):
 @XStrDec.alias(name='prepare')
 class PrepareGameRequest(AdminLobbyRequest):
     """
-     Prepare a game of gameType with slots according to slotDescriptors.
+     Prepare a game of __gameType with slots according to slotDescriptors.
     """
 
     def __init__(self, gameType: str = None, slotDescriptors=None, pause: str = None):

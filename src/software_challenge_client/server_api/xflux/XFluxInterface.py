@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from typing import Any
 from xml.etree.ElementTree import Element
 
-from src.software_challenge_client.server_api.protocol import *
-
 
 class IXObject:
 
@@ -13,7 +11,7 @@ class IXObject:
 
 @dataclass
 class Attribute(IXObject):
-    caller: ProtocolPacket
+    caller: Any
     fieldName: str
     fieldValue: Any
 
@@ -27,7 +25,7 @@ class ImplicitArray(IXObject):
     """
     This class is used to define the class attribute as an implicit xml array.
     """
-    caller: ProtocolPacket
+    caller: Any
     fieldName: str
     fieldValue: list[Any]
     itemFieldName: str

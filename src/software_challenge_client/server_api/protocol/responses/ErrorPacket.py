@@ -1,5 +1,5 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket, ProtocolPacket
+from src.software_challenge_client.server_api.protocol.IProtocolPacket import ResponsePacket, ProtocolPacket
 from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute
 
 
