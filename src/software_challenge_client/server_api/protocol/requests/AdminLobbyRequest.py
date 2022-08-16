@@ -1,7 +1,7 @@
-import src.software_challenge_client.server_api.xtranslate.XTranslateDecorator as XStrDec
+import src.software_challenge_client.server_api.xflux.XTranslateDecorator as XStrDec
 from src.software_challenge_client.server_api.Shared import SlotDescriptor
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import AdminLobbyRequest
-from src.software_challenge_client.server_api.xtranslate.XTranslateInterface import Attribute, ImplicitArray
+from src.software_challenge_client.server_api.xflux.XTranslateInterface import Attribute, ImplicitArray
 
 
 @XStrDec.alias(name='authenticate')
@@ -104,13 +104,13 @@ class PrepareGameRequest(AdminLobbyRequest):
     def __hash__(self) -> int:
         return (hash(self.getGameType()) * 31 + hash(self.getSlotDescriptors())) * 31 + hash(self.getPause())
 
-    def getGameType(self):
+    def getGameType(self) -> str:
         return self.__gameType.fieldValue
 
-    def getSlotDescriptors(self):
+    def getSlotDescriptors(self) -> list[SlotDescriptor]:
         return self.__slotDescriptors.fieldValue
 
-    def getPause(self):
+    def getPause(self) -> bool:
         return self.__pause.fieldValue
 
     def setGameType(self, gameType: str):

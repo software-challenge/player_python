@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.xtranslate.XTranslateDecorator as XStrDec
+import src.software_challenge_client.server_api.xflux.XTranslateDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import LobbyRequest
-from src.software_challenge_client.server_api.xtranslate.XTranslateInterface import Attribute
+from src.software_challenge_client.server_api.xflux.XTranslateInterface import Attribute
 
 
 @XStrDec.alias(name='join')

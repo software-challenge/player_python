@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.xtranslate.XTranslateDecorator as XStrDec
+import src.software_challenge_client.server_api.xflux.XTranslateDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket
-from src.software_challenge_client.server_api.xtranslate.XTranslateInterface import Attribute, ImplicitArray
+from src.software_challenge_client.server_api.xflux.XTranslateInterface import Attribute, ImplicitArray
 
 
 @XStrDec.alias(name="prepared")

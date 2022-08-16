@@ -1,4 +1,4 @@
-from src.software_challenge_client.server_api.xtranslate.XTranslateInterface import *
+from src.software_challenge_client.server_api.xflux.XTranslateInterface import *
 
 protocol = protocolClasses
 
