@@ -1,6 +1,6 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove, IBoard, IField, ITeam
-from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray
+from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove, IBoard, IField, ITeam, IGameState
+from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray, Attribute
 
 
 class Vector:
@@ -430,5 +430,52 @@ class Board(IBoard, HexBoard):
         """
         return [field for field in self.fields.getAllFields() if field.isOccupied()]
 
+    def getTeamsPenguins(self, team: ITeam) -> list[Field]:
+        """
+        Searches the board for all penguins of the given team.
+        :param team: The team to search for.
+        :return: A list of all fields that are occupied by a penguin of the given team.
+        """
+        return [field for field in self.fields.getAllFields() if field.isOccupied() and field.penguin == team]
+
     def __eq__(self, other):
         return self.fields == other.fields
+
+
+class TwoPlayerGameState(IGameState):
+    def __init__(self, startTeam: Team):
+        self.startTeam = startTeam
+        self.round = int((self.turn + 1) / 2)
+        self.currentTeam = self.currentTeamFromTurn()
+        self.otherTeam = self.currentTeamFromTurn().opponent()
+        self.lastMove = None
+
+    def performMove(self, move: Move):
+        ...
+
+    def currentTeamFromTurn(self) -> Team:
+        return self.startTeam if self.turn % 2 == 0 else self.startTeam.other()
+
+    def __str__(self):
+        return "GameState[turn={}, currentTeam={}, lastMove={}]".format(self.turn, self.currentTeam, self.lastMove)
+
+
+@XStrDec.alias(name='state')
+class GameState(TwoPlayerGameState):
+    def __init__(self, board: Board, turn: int = 0, lastMove: Move = None, fishes: list = None):
+        super().__init__(Team(0))
+        self.board: Board = board
+        self.__turn = Attribute(caller=self, fieldName="turn", fieldValue=turn)
+        self.lastMove = lastMove
+        self.fishes = fishes
+        self.currentPieces = self.board.getTeamsPenguins(self.currentTeam)
+
+    def getPossibleMoves(self) -> list[Move]:
+        moves = []
+        for piece in self.currentPieces:
+            moves.extend(self.board.possibleMovesFrom(piece.coordinates))
+        return moves
+
+    def __eq__(self, __o: object) -> bool:
+        return isinstance(__o, GameState) and self.board == __o.board and self.turn == __o.turn and self.lastMove == \
+               __o.lastMove and self.fishes == __o.fishes and self.currentPieces == __o.currentPieces
