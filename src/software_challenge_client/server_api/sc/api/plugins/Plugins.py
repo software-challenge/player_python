@@ -1,5 +1,6 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove
+from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove, IBoard, IField, ITeam
+from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray
 
 
 class Vector:
@@ -76,6 +77,13 @@ class Vector:
         """
         return abs(self.dx) == abs(self.dy) or (self.dx % 2 == 0 and self.dy == 0)
 
+    def toCoordinates(self) -> 'Coordinates':
+        """
+        Converts the vector to coordinate object.
+        :return:    The coordinate object.
+        """
+        return Coordinates(self.dx, self.dy)
+
 
 @XStrDec.alias(name='coordinates')
 class Coordinates:
@@ -95,38 +103,39 @@ class Coordinates:
     def __str__(self) -> str:
         return "[{}, {}]".format(self.x, self.y)
 
-    def addVector(self, vector: Vector):
+    def addVector(self, vector: Vector) -> 'Coordinates':
         """
         Adds a vector to the coordinate.
         :param vector: The vector to add.
         :return: The new coordinate.
         """
-        return Coordinates(self.x + vector.dx, self.y + vector.dy)
 
-    def minusVector(self, vector: Vector):
+        return self.getVector().plus(vector).toCoordinates()
+
+    def minusVector(self, vector: Vector) -> 'Coordinates':
         """
         Subtracts a vector from the coordinate.
         :param vector: The vector to subtract.
         :return: The new coordinate.
         """
-        return Coordinates(self.x - vector.dx, self.y - vector.dy)
+        return self.getVector().minus(vector).toCoordinates()
 
-    def getDistance(self, other: 'Coordinates'):
+    def getDistance(self, other: 'Coordinates') -> 'Coordinates':
         """
         Calculates the distance between two coordinates.
         :param other: The other coordinate to calculate the distance to.
         :return: The distance between the two coordinates as Vector object.
         """
-        return Vector(self.x - other.x, self.y - other.y)
+        return self.getVector().minus(other.getVector()).toCoordinates()
 
-    def getVector(self):
+    def getVector(self) -> Vector:
         """
         Gets the vector from the coordinate to the origin.
         :return: The vector from the coordinate to the origin.
         """
         return Vector(self.x, self.y)
 
-    def getHexNeighbors(self):
+    def getHexNeighbors(self) -> list[Vector]:
         """
         Gets the six neighbors of the coordinate.
         :return: A list of the six neighbors of the coordinate.
@@ -188,3 +197,238 @@ class Move(IMove):
         :param destination: The new destination of the move.
         """
         self.__to = destination
+
+
+"""
+=====================================================================================================================
+=====================================================================================================================
+"""
+
+
+@XStrDec.alias(name='field')
+class Team(ITeam):
+    ONE = {}
+    TWO = {}
+
+    def __init__(self, index: int):
+        self.ONE = {
+            'opponent': self.TWO,
+            'index': 1,
+            'letter': 'R',
+            'color': 'Rot'
+        }
+        self.TWO = {
+            'opponent': self.ONE,
+            'index': 2,
+            'letter': 'B',
+            'color': 'Blau'
+        }
+        self.teamEnum = None
+        if index is 0:
+            self.teamEnum = self.ONE
+        else:
+            self.teamEnum = self.TWO
+
+    def color(self) -> str:
+        return self.teamEnum['color']
+
+    def opponent(self) -> 'Team':
+        return Team(self.teamEnum['opponent']['index'])
+
+
+@XStrDec.alias(name='field')
+class Field(IField):
+    def __init__(self, fish: int = 0, penguin: Team = None):
+        self.fish = fish
+        self.penguin = penguin
+        super().__init__()
+
+    def isEmpty(self) -> bool:
+        return self.fish == 0 and self.penguin is None
+
+    def isOccupied(self) -> bool:
+        return self.penguin is not None
+
+    def __copy__(self):
+        return Field(self.fish, self.penguin)
+
+    def __str__(self):
+        return "Field with {} fish and {} penguin".format(self.fish, self.penguin)
+
+
+class HexBoard(IBoard):
+    def __init__(self, gameField: list[list[Field]] = None):
+        self.__gameField = ImplicitArray(caller=self, fieldName="gameField", fieldValue=gameField)
+
+    def areFieldsEmpty(self) -> bool:
+        for row in self.__gameField.fieldValue:
+            for field in row:
+                if not field.isEmpty():
+                    return False
+        return True
+
+    def isOccupied(self, coordinates: Coordinates) -> bool:
+        return self.__gameField.fieldValue[coordinates.x][coordinates.y].isOccupied()
+
+    def isValid(self, coordinates: Coordinates) -> bool:
+        return 0 <= coordinates.x < len(self.__gameField.fieldValue) and 0 <= coordinates.y < len(self.__gameField.
+                                                                                                  fieldValue[0])
+
+    def width(self) -> int:
+        return len(self.__gameField.fieldValue)
+
+    def height(self) -> int:
+        return len(self.__gameField.fieldValue[0])
+
+    def __getField(self, x: int, y: int) -> Field:
+        """
+        Gets the field at the given coordinates.
+        *Used only internally*
+
+        :param x: The x-coordinate of the field.
+        :param y: The y-coordinate of the field.
+        :return: The field at the given coordinates.
+        """
+        return self.__gameField.fieldValue[x][y]
+
+    def getField(self, position: Coordinates) -> Field:
+        """
+        Gets the field at the given position.
+        :param position: The position of the field.
+        :return: The field at the given position.
+        :raise IndexError: If the position is not valid.
+        """
+        if self.isValid(position):
+            return self.__getField(position.x, position.y)
+        else:
+            raise IndexError("Index out of range")
+
+    def getFieldOrNone(self, position: Coordinates) -> Field | None:
+        """
+        Gets the field at the given position no matter if it is valid or not.
+        :param position: The position of the field.
+        :return: The field at the given position,or None if the position is not valid.
+        """
+        if self.isValid(position):
+            return self.__getField(position.x, position.y)
+        else:
+            return None
+
+    def getFieldByIndex(self, index: int) -> Field:
+        """
+        Gets the field at the given index. The index is the position of the field in the board. 
+        The field of the board is calculated as follows:
+
+        - `x = index / width`
+        - `y = index % width`
+        - The index is 0-based. The index is calculated from the top left corner of the board. 
+
+        :param index: The index of the field.
+        :return: The field at the given index.
+        """
+        x = index // self.width()
+        y = index % self.width()
+        return self.getField(Coordinates(x, y))
+
+    def getAllFields(self) -> list[Field]:
+        """
+        Gets all fields of the board.
+        :return: All fields of the board.
+        """
+        return [self.getFieldByIndex(i) for i in range(self.width() * self.height())]
+
+    def compareTo(self, other: 'HexBoard') -> list[Field]:
+        """
+        Compares two boards and returns a list of the fields that are different.
+        :param other: The other board to compare to.
+        :return: A list of fields that are different or a empty list if the boards are equal.
+        """
+        fields = []
+        for x in range(len(self.__gameField.fieldValue)):
+            for y in range(len(self.__gameField.fieldValue[0])):
+                if self.__gameField.fieldValue[x][y] != other.__gameField.fieldValue[x][y]:
+                    fields.append(self.__gameField.fieldValue[x][y])
+        return fields
+
+    def contains(self, field: Field) -> bool:
+        for row in self.__gameField.fieldValue:
+            if field in row:
+                return True
+        return False
+
+    def containsAll(self, fields: list[Field]) -> bool:
+        for field in fields:
+            if not self.contains(field):
+                return False
+        return True
+
+    def __str__(self) -> str:
+        return '\n'.join([' '.join([str(field) for field in row]) for row in self.__gameField.fieldValue])
+
+    def __copy__(self):
+        return HexBoard(self.__gameField.fieldValue)
+
+    def __eq__(self, other):
+        return self.compareTo(other)
+
+    def __hash__(self) -> int:
+        return hash(self.__gameField.fieldValue)
+
+
+@XStrDec.alias(name='board')
+class Board(IBoard, HexBoard):
+    """
+    Class which represents a game board. Consisting of a two-dimensional array of fields.
+    """
+
+    def __init__(self, fields: HexBoard):
+        self.fields = fields
+
+    def setPenguin(self, position: Coordinates, team: Team) -> int:
+        """
+        Sets the penguin at the given position and removes the fish from the field.
+        :param position: The position of the penguin.
+        :param team: The team of the penguin.
+        :raise IndexError: If the position is not valid.
+        :return: The number of fish that were removed from the field.
+        """
+        if self.fields.isValid(position):
+            field = self.fields.getField(position)
+            if field.isOccupied():
+                raise Exception("Field is already occupied")
+            else:
+                field.penguin = team
+                return field.fish
+        else:
+            raise IndexError("Index out of range")
+
+    def possibleMovesFrom(self, position: Coordinates) -> list[Move]:
+        """
+        Returns a list of all possible moves from the given position.
+        :param position: The position to start from.
+        :return: A list of all possible moves from the given position.
+        """
+        if self.fields.isValid(position):
+            neighbours = position.getNeighbours()
+            moves = []
+            for neighborVector in neighbours:
+                neighborCoordinate = position.addVector(neighborVector)
+                if self.fields.isValid(neighborCoordinate):
+                    move = Move(position, neighborCoordinate)
+                    if not self.fields.getField(neighborCoordinate).isOccupied():
+                        moves.append(move)
+                else:
+                    raise IndexError("Index out of range")
+            return moves
+        else:
+            raise IndexError("Index out of range")
+
+    def getPenguins(self) -> list[Field]:
+        """
+        Searches the board for all penguins.
+        :return: A list of all fields that are occupied by a penguin.
+        """
+        return [field for field in self.fields.getAllFields() if field.isOccupied()]
+
+    def __eq__(self, other):
+        return self.fields == other.fields

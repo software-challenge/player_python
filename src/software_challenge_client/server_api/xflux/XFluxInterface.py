@@ -28,7 +28,7 @@ class ImplicitArray(IXObject):
     caller: Any
     fieldName: str
     fieldValue: list[Any]
-    itemFieldName: str
+    itemFieldName: str = None
 
     def setXmlSpecifics(self, element: Element):
         """

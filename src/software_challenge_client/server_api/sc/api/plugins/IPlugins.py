@@ -59,3 +59,15 @@ class IGameState(RoomMessage):
 
     def getPossibleMoves(self) -> list[IMove]:
         ...
+
+
+class IField(list):
+    def isEmpty(self) -> bool:
+        ...
+
+    def isOccupied(self) -> bool:
+        ...
+
+
+class IBoard:
+    ...
