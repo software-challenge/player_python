@@ -3,14 +3,27 @@ from typing import Any
 from xml.etree.ElementTree import Element
 
 
-class IXObject:
+class IXmlObject:
 
     def setXmlSpecifics(self, element: Element):
         ...
 
 
 @dataclass
-class Attribute(IXObject):
+class Traverse(IXmlObject):
+    """
+    Traverses a object until it finds an Attribute or ImplicitArray.
+    """
+    caller: Any
+    fieldValue: Any
+
+    def setXmlSpecifics(self, element: Element):
+        for attr, value in self.fieldValue.__dict__.items():
+            value.setXmlSpecifics(element)
+
+
+@dataclass
+class Attribute(IXmlObject):
     caller: Any
     fieldName: str
     fieldValue: Any
@@ -21,7 +34,7 @@ class Attribute(IXObject):
 
 
 @dataclass
-class ImplicitArray(IXObject):
+class ImplicitArray(IXmlObject):
     """
     This class is used to define the class attribute as an implicit xml array.
     """

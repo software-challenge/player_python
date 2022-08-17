@@ -4,11 +4,13 @@ from typing import Any
 
 from src.software_challenge_client.server_api.networking.NetworkInterface import NetworkInterface
 from src.software_challenge_client.server_api.protocol import *
+from src.software_challenge_client.server_api.protocol.CloseConnection import CloseConnection
+from src.software_challenge_client.server_api.xflux.XFluxInterface import IXmlObject
 
 protocol: dict[Any, Any] = protocolClasses
 
 
-class _XTranspose:
+class _XFlux:
     """
     Serialize and deserialize objects to and from XML.
     """
@@ -27,7 +29,8 @@ class _XTranspose:
         root = ET.Element(obj.__class__.__name__)
 
         for attr, value in obj.__dict__.items():
-            value.setXmlSpecifics(root)
+            if value is IXmlObject:
+                value.setXmlSpecifics(root)
 
         return ET.tostring(root)
 
@@ -46,17 +49,18 @@ class _XTranspose:
         return cls(**args)
 
 
-class XFlux:
+class XFluxClient:
     """
     Streams data from and to the server.
     """
 
-    def __init__(self, networkInterface: NetworkInterface):
+    def __init__(self, host: str, port: int):
         """
-        :param networkInterface: The network interface to use.
+        :param host: Host of the server.
+        :param port: Port of the server.
         """
-        self.networkInterface = networkInterface
-        self.transposer = _XTranspose()
+        self.networkInterface = NetworkInterface(host, port)
+        self.transposer = _XFlux()
 
     def inStream(self) -> ProtocolPacket:
         """
@@ -74,3 +78,17 @@ class XFlux:
         shipment = self.transposer.serialize(obj)
         shipment = "<protocol>".encode("utf-8") + shipment
         self.networkInterface.send(shipment)
+
+    def connectToServer(self):
+        """
+        Creates a TCP connection with the server.
+        """
+        self.networkInterface.connect()
+
+    def closeConnection(self):
+        """
+        Sends a closing xml to the server and closes the connection afterwards.
+        """
+        closeXml = self.transposer.serialize(CloseConnection())
+        self.networkInterface.send(closeXml)
+        self.networkInterface.close()

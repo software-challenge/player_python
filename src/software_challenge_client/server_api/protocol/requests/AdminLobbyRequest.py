@@ -1,6 +1,6 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
 from src.software_challenge_client.server_api.Shared import SlotDescriptor
-from src.software_challenge_client.server_api.protocol.IProtocolPacket import AdminLobbyRequest
+from src.software_challenge_client.server_api.protocol.ProtocolPacket import AdminLobbyRequest
 from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute, ImplicitArray
 
 

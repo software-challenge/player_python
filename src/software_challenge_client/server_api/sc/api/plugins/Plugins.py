@@ -1,6 +1,6 @@
 import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
 from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove, IBoard, IField, ITeam, IGameState
-from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray, Attribute
+from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray, Attribute, Traverse
 
 
 class Vector:
@@ -382,7 +382,11 @@ class Board(IBoard, HexBoard):
     """
 
     def __init__(self, fields: HexBoard):
-        self.fields = fields
+        self.__fields = Traverse(self, fields)
+
+    @property
+    def fields(self) -> HexBoard:
+        return self.__fields.fieldValue
 
     def setPenguin(self, position: Coordinates, team: Team) -> int:
         """
@@ -464,11 +468,15 @@ class TwoPlayerGameState(IGameState):
 class GameState(TwoPlayerGameState):
     def __init__(self, board: Board, turn: int = 0, lastMove: Move = None, fishes: list = None):
         super().__init__(Team(0))
-        self.board: Board = board
+        self.__board = Traverse(self, board)
         self.__turn = Attribute(caller=self, fieldName="turn", fieldValue=turn)
         self.lastMove = lastMove
         self.fishes = fishes
         self.currentPieces = self.board.getTeamsPenguins(self.currentTeam)
+
+    @property
+    def board(self) -> Board:
+        return self.__board.fieldValue
 
     def getPossibleMoves(self) -> list[Move]:
         moves = []
