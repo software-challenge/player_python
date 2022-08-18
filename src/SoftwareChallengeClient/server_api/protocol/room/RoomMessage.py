@@ -1,9 +1,9 @@
 from typing import Any
 
-import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute
-from src.software_challenge_client.server_api.protocol.room.IRoomMessage import ObservableRoomMessage, RoomMessage
-from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IGameState
+import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute, Traverse
+from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import ObservableRoomMessage, RoomMessage
+from src.SoftwareChallengeClient.server_api.sc.api.plugins.IPlugins import IGameState
 
 
 @XStrDec.alias(name='paused')
@@ -27,7 +27,7 @@ class MementoMessage(ObservableRoomMessage):
     """
 
     def __init__(self, state: IGameState = None, perspective: Any = None):
-        self.__state = state
+        self.__state = Traverse(self, state)
         self.__perspective = perspective
 
     @property
@@ -45,5 +45,4 @@ class MoveRequest(RoomMessage):
     Request a Player to send a Move.
     """
 
-    def __init__(self):
-        ...
+    def __init__(self): ...

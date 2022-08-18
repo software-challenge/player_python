@@ -1,9 +1,9 @@
-import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute
-from src.software_challenge_client.server_api.protocol import ProtocolPacket
-from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomOrchestrationMessage, \
+import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute
+from src.SoftwareChallengeClient.server_api.protocol import ProtocolPacket
+from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import RoomOrchestrationMessage, \
     ObservableRoomMessage
-from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import ITeam
+from src.SoftwareChallengeClient.server_api.sc.api.plugins.IPlugins import ITeam
 
 
 @XStrDec.alias(name='slotDescriptor')
@@ -30,3 +30,13 @@ class GameResult(RoomOrchestrationMessage, ObservableRoomMessage):
         self.definition = definition
         self.scores = scores
         self.winner = winner
+
+
+@XStrDec.alias(name='left')
+class RemovedFromGame(RoomOrchestrationMessage, ObservableRoomMessage):
+    def __init__(self, roomId: str = None):
+        self.__roomId = Attribute(caller=self, fieldName="roomId", fieldValue=roomId)
+
+    @property
+    def roomId(self):
+        return self.__roomId.fieldValue

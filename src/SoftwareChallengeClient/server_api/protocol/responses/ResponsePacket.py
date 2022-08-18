@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute, ImplicitArray
-from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket
+import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute, ImplicitArray
+from src.SoftwareChallengeClient.server_api.protocol.ProtocolPacket import ResponsePacket
 
 
 @XStrDec.alias(name="prepared")
@@ -64,9 +64,8 @@ class ObservationResponse(ResponsePacket):
 
 
 @XStrDec.alias(name="joinedGameRoom")
-class RoomJoinedResponse(ResponsePacket):
+class RoomWasJoinedEvent(ResponsePacket):
     """
-    Originally named **RoomWasJoinedEvent**! \n
     Sent to all administrative clients after a player joined a GameRoom via a JoinRoomRequest.
     """
 

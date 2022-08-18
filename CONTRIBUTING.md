@@ -23,7 +23,6 @@ All types of contributions are encouraged and valued. See the [Table of Contents
   - [Improving The Documentation](#improving-the-documentation)
 - [Styleguides](#styleguides)
   - [Commit Messages](#commit-messages)
-- [Join The Project Team](#join-the-project-team)
 
 
 ## Code of Conduct
@@ -146,12 +145,16 @@ Updating, improving and correcting the documentation
 -->
 
 ## Styleguides
+
 ### Commit Messages
-<!-- TODO
 
--->
+The commit messages should adhere to the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), version
+1.0.0. Among other things,
+[commitlint](https://github.com/conventional-changelog/commitlint/tree/master/%40commitlint/config-conventional)
+and [Angular's Contributing Guidelines](https://github.com/angular/angular/blob/22b96b9/CONTRIBUTING.md#-commit-message-guidelines)
+should be followed to achieve a unified style and to generate an automatic changelog.
 
-## Join The Project Team
-<!-- TODO -->
+#### Versioning
 
-<!-- omit in toc -->
+The versioning strictly adheres to the
+[Semantic Versioning Specification (SemVer)](https://semver.org/).

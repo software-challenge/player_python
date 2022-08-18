@@ -2,11 +2,11 @@ import logging
 import xml.etree.ElementTree as ET
 from typing import Any
 
-from src.software_challenge_client.server_api.networking.IClient import IClient
-from src.software_challenge_client.server_api.networking.NetworkInterface import NetworkInterface
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import IXmlObject
-from src.software_challenge_client.server_api.protocol import *
-from src.software_challenge_client.server_api.protocol.CloseConnection import CloseConnection
+from src.SoftwareChallengeClient.server_api.networking.IClient import IClient
+from src.SoftwareChallengeClient.server_api.networking.NetworkInterface import NetworkInterface
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import IXmlObject
+from src.SoftwareChallengeClient.server_api.protocol import *
+from src.SoftwareChallengeClient.server_api.protocol.CloseConnection import CloseConnection
 
 protocol: dict[Any, Any] = protocolClasses
 
@@ -62,12 +62,14 @@ class XFluxClient(IClient):
         """
         self.networkInterface = NetworkInterface(host, port)
         self.transposer = _XFlux()
+        self.running = False
 
     def start(self):
+        self.running = True
         self.clientLoop()
 
     def clientLoop(self):
-        while self.networkInterface.connected:
+        while self.running:
             response = self.receive()
 
             if response is ProtocolPacket:
@@ -114,3 +116,8 @@ class XFluxClient(IClient):
 
     def onObject(self, message):
         ...
+
+    def stop(self):
+        if self.networkInterface.connected:
+            self.closeConnection()
+        self.running = False

@@ -1,4 +1,4 @@
-from src.software_challenge_client.server_api.protocol import protocolClasses
+from src.SoftwareChallengeClient.server_api.protocol import protocolClasses
 
 protocol = protocolClasses
 

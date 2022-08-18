@@ -1,7 +1,7 @@
-import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute, Traverse
-from src.software_challenge_client.server_api.protocol import ProtocolPacket
-from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomMessage
+import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute, Traverse
+from src.SoftwareChallengeClient.server_api.protocol import ProtocolPacket
+from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import RoomMessage
 
 
 @XStrDec.alias(name='room')

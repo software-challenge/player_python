@@ -1,4 +1,4 @@
-from src.software_challenge_client.server_api.protocol import ProtocolPacket
+from src.SoftwareChallengeClient.server_api.protocol import ProtocolPacket
 
 
 class IClient:

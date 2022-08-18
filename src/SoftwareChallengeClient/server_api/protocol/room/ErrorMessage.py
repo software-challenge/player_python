@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute
-from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomMessage, RoomOrchestrationMessage, \
+import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute
+from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import RoomMessage, RoomOrchestrationMessage, \
     ObservableRoomMessage
 
 

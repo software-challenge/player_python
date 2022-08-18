@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomMessage
+from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import RoomMessage
 
 
 class IMove(RoomMessage):
