@@ -15,6 +15,7 @@ class NetworkInterface:
         """
         self.host = host
         self.port = port
+        self.connected: bool = False
         self.logger = logging.getLogger(__name__)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(timeout)
@@ -24,6 +25,7 @@ class NetworkInterface:
         Connects the socket to the server and will be ready to listen for and send data.
         """
         self.socket.connect((self.host, self.port))
+        self.connected = True
         self.logger.info("Connected to server")
 
     def close(self):
@@ -31,6 +33,7 @@ class NetworkInterface:
         Closes the connection to the server.
         """
         self.socket.close()
+        self.connected = False
         self.logger.info("Closed connection")
 
     def send(self, data: bytes):

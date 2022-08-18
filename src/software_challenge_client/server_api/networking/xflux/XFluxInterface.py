@@ -36,7 +36,7 @@ class Attribute(IXmlObject):
 @dataclass
 class ImplicitArray(IXmlObject):
     """
-    This class is used to define the class attribute as an implicit xml array.
+    Used to define the class attribute as an implicit xml array.
     """
     caller: Any
     fieldName: str
@@ -45,7 +45,7 @@ class ImplicitArray(IXmlObject):
 
     def setXmlSpecifics(self, element: Element):
         """
-        This method is to append the implicit array to the XML element. 
+        Appends the implicit array to the XML element.
 
         :param element: The element from the element tree that is being built.
         """

@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
+import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute, ImplicitArray
 from src.software_challenge_client.server_api.protocol.ProtocolPacket import ResponsePacket
-from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute, ImplicitArray
 
 
 @XStrDec.alias(name="prepared")

@@ -1,6 +1,9 @@
-import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
+import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute
 from src.software_challenge_client.server_api.protocol import ProtocolPacket
-from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute
+from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomOrchestrationMessage, \
+    ObservableRoomMessage
+from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import ITeam
 
 
 @XStrDec.alias(name='slotDescriptor')
@@ -19,3 +22,11 @@ class SlotDescriptor(ProtocolPacket):
 
     def getReserved(self):
         return self.__reserved.fieldValue
+
+
+@XStrDec.alias(name='result')
+class GameResult(RoomOrchestrationMessage, ObservableRoomMessage):
+    def __init__(self, definition, scores: dict, winner: ITeam = None):
+        self.definition = definition
+        self.scores = scores
+        self.winner = winner

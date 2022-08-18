@@ -1,6 +1,6 @@
-import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
+import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import ImplicitArray, Attribute, Traverse
 from src.software_challenge_client.server_api.sc.api.plugins.IPlugins import IMove, IBoard, IField, ITeam, IGameState
-from src.software_challenge_client.server_api.xflux.XFluxInterface import ImplicitArray, Attribute, Traverse
 
 
 class Vector:

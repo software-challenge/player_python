@@ -2,10 +2,11 @@ import logging
 import xml.etree.ElementTree as ET
 from typing import Any
 
+from src.software_challenge_client.server_api.networking.IClient import IClient
 from src.software_challenge_client.server_api.networking.NetworkInterface import NetworkInterface
+from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import IXmlObject
 from src.software_challenge_client.server_api.protocol import *
 from src.software_challenge_client.server_api.protocol.CloseConnection import CloseConnection
-from src.software_challenge_client.server_api.xflux.XFluxInterface import IXmlObject
 
 protocol: dict[Any, Any] = protocolClasses
 
@@ -49,7 +50,7 @@ class _XFlux:
         return cls(**args)
 
 
-class XFluxClient:
+class XFluxClient(IClient):
     """
     Streams data from and to the server.
     """
@@ -62,7 +63,22 @@ class XFluxClient:
         self.networkInterface = NetworkInterface(host, port)
         self.transposer = _XFlux()
 
-    def inStream(self) -> ProtocolPacket:
+    def start(self):
+        self.clientLoop()
+
+    def clientLoop(self):
+        while self.networkInterface.connected:
+            response = self.receive()
+
+            if response is ProtocolPacket:
+                if response is CloseConnection:
+                    self.handleDisconnect()
+                else:
+                    self.onObject(response)
+            else:
+                raise NotImplementedError("Received object of unknown class.")
+
+    def receive(self) -> ProtocolPacket:
         """
         Gets a receiving byte stream from the server.
         :return: The next object in the stream.
@@ -70,7 +86,7 @@ class XFluxClient:
         receiving = self.networkInterface.receive()
         return self.transposer.deserialize(receiving)
 
-    def outStream(self, obj: ProtocolPacket):
+    def send(self, obj: ProtocolPacket):
         """
         Sends an object to the server.
         :param obj: The object to send.
@@ -92,3 +108,9 @@ class XFluxClient:
         closeXml = self.transposer.serialize(CloseConnection())
         self.networkInterface.send(closeXml)
         self.networkInterface.close()
+
+    def handleDisconnect(self):
+        ...
+
+    def onObject(self, message):
+        ...

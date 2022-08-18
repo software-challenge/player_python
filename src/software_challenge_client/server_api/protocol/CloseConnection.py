@@ -1,4 +1,4 @@
-import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
+import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
 from src.software_challenge_client.server_api.protocol import ProtocolPacket
 
 

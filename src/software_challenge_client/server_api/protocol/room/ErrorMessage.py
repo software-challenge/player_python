@@ -1,7 +1,7 @@
-import src.software_challenge_client.server_api.xflux.XFluxDecorator as XStrDec
+import src.software_challenge_client.server_api.networking.xflux.XFluxDecorator as XStrDec
+from src.software_challenge_client.server_api.networking.xflux.XFluxInterface import Attribute
 from src.software_challenge_client.server_api.protocol.room.IRoomMessage import RoomMessage, RoomOrchestrationMessage, \
     ObservableRoomMessage
-from src.software_challenge_client.server_api.xflux.XFluxInterface import Attribute
 
 
 @XStrDec.alias(name='error')
