@@ -1,13 +1,3 @@
-"""
-{
-    XmlAlias: class,
-    ...
-}
-"""
-protocolClasses: dict = {}
-attributeReference: dict = {}
-
-
 class ProtocolPacket:
     ...
 

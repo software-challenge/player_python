@@ -1,6 +1,6 @@
 from typing import Any
 
-from src.SoftwareChallengeClient.api.protocol import protocolClasses, attributeReference
+from src.SoftwareChallengeClient.api.Shared import protocolClasses, attributeReference
 
 
 def alias(name: str):

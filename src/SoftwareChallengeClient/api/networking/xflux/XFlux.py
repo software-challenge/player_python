@@ -1,14 +1,12 @@
 import logging
 import xml.etree.ElementTree as ET
-from typing import Any
 
+from src.SoftwareChallengeClient.api.Shared import protocolClasses, attributeReference
 from src.SoftwareChallengeClient.api.networking.NetworkInterface import NetworkInterface
 from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import IXmlObject
 from src.SoftwareChallengeClient.api.protocol import *
 from src.SoftwareChallengeClient.api.protocol.CloseConnection import CloseConnection
 from src.SoftwareChallengeClient.api.sc.Plugin2023 import HexBoard, Fishes, Board
-
-protocol: dict[Any, Any] = protocolClasses
 
 
 class _XFlux:
@@ -17,7 +15,6 @@ class _XFlux:
     """
 
     def __init__(self):
-        global protocol
         self.logger = logging.getLogger(__name__)
 
     def serialize(self, obj: ProtocolPacket) -> bytes:
@@ -27,7 +24,7 @@ class _XFlux:
         :return: The serialized object as xml bytes.
         """
         self.logger.info("Converting object to XML")
-        root = ET.Element(protocol[obj.__class__])
+        root = ET.Element(protocolClasses[obj.__class__])
 
         for attr, value in obj.__dict__.items():
             if isinstance(value, IXmlObject):
@@ -44,7 +41,7 @@ class _XFlux:
         self.logger.info("Converting XML to object")
         xmlString = data.decode("utf-8").removeprefix("<protocol>\n  ")
         root = ET.fromstring(xmlString)
-        cls = protocol[root.attrib["class"] if root.tag == "data" else root.tag]
+        cls = protocolClasses[root.attrib["class"] if root.tag == "data" else root.tag]
         # print("Root-Tag:{}, Class:{}".format(root, cls))
         argsList = list(root.attrib.items())
         args = {}

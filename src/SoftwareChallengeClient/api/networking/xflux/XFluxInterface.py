@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Any
 from xml.etree.ElementTree import Element
 
-from src.SoftwareChallengeClient.api.protocol import protocolClasses
+from src.SoftwareChallengeClient.api.Shared import protocolClasses
 
 
 class IXmlObject:

@@ -5,8 +5,6 @@ from src.SoftwareChallengeClient.api.protocol.responses.ErrorPacket import *
 from src.SoftwareChallengeClient.api.protocol.responses.ResponsePacket import *
 
 __all__ = [
-    'attributeReference',
-    'protocolClasses',
     'SlotDescriptor',
     'ProtocolPacket',
     'ResponsePacket',
