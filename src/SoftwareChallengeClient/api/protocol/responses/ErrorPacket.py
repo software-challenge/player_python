@@ -1,6 +1,6 @@
-import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute
-from src.SoftwareChallengeClient.server_api.protocol.ProtocolPacket import ResponsePacket, ProtocolPacket
+import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import Attribute
+from src.SoftwareChallengeClient.api.protocol.ProtocolPacket import ResponsePacket, ProtocolPacket
 
 
 @XStrDec.alias(name="errorpacket")

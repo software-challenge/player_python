@@ -1,9 +1,9 @@
-import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import Attribute
-from src.SoftwareChallengeClient.server_api.protocol import ProtocolPacket
-from src.SoftwareChallengeClient.server_api.protocol.room.IRoomMessage import RoomOrchestrationMessage, \
+import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import Attribute
+from src.SoftwareChallengeClient.api.protocol import ProtocolPacket
+from src.SoftwareChallengeClient.api.protocol.room.IRoomMessage import RoomOrchestrationMessage, \
     ObservableRoomMessage
-from src.SoftwareChallengeClient.server_api.sc.api.plugins.IPlugins import ITeam
+from src.SoftwareChallengeClient.api.sc.Plugin2023 import Team
 
 
 @XStrDec.alias(name='slotDescriptor')
@@ -26,7 +26,7 @@ class SlotDescriptor(ProtocolPacket):
 
 @XStrDec.alias(name='result')
 class GameResult(RoomOrchestrationMessage, ObservableRoomMessage):
-    def __init__(self, definition, scores: dict, winner: ITeam = None):
+    def __init__(self, definition, scores: dict, winner: Team = None):
         self.definition = definition
         self.scores = scores
         self.winner = winner

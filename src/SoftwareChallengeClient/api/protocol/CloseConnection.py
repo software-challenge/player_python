@@ -1,5 +1,5 @@
-import src.SoftwareChallengeClient.server_api.networking.xflux.XFluxDecorator as XStrDec
-from src.SoftwareChallengeClient.server_api.protocol import ProtocolPacket
+import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
+from src.SoftwareChallengeClient.api.protocol import ProtocolPacket
 
 
 @XStrDec.alias(name='close')

@@ -5,6 +5,7 @@
 }
 """
 protocolClasses: dict = {}
+attributeReference: dict = {}
 
 
 class ProtocolPacket:

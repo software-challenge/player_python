@@ -8,10 +8,26 @@ Dieses Jahr ist es das Spiel **Hey, danke für den Fisch!**.
 
 ### Installation
 
-Das Package kann ganz einfach mit `pip` installiert werden:
-
-`````commandline
-pip install software-challenge-client
-`````
-
 ...
+
+### How To Use It
+
+````python
+from src.SoftwareChallengeClient.player.Starter import Starter
+from src.SoftwareChallengeClient.api.networking.clients.PlayerClient import IClientHandler
+from src.SoftwareChallengeClient.api.sc.Plugin2023 import GameState, Move
+
+
+class Logic(IClientHandler):
+    gameState: GameState
+
+    def calculateMove(self) -> Move:
+        ...
+
+    def onUpdate(self, state: GameState):
+        self.gameState = state
+
+
+if __name__ == "__main__":
+    Starter("Localhost", 13050, Logic())
+````

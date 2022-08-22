@@ -1,5 +1,7 @@
 import logging
 import socket
+import xml.etree.ElementTree as ET
+from queue import Queue
 
 
 class NetworkInterface:
@@ -7,7 +9,7 @@ class NetworkInterface:
     This interface handels all package transfers. It'll send and receive data from a given connection.
     """
 
-    def __init__(self, host="localhost", port=13050, timeout=10):
+    def __init__(self, host="localhost", port=13050, timeout=5):
         """
         :param host: Host of the server. Default is localhost.
         :param port: Port of the server. Default is 13050.
@@ -19,6 +21,9 @@ class NetworkInterface:
         self.logger = logging.getLogger(__name__)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(timeout)
+
+        self.queue = Queue()
+        self.buffer: bytes = b""
 
     def connect(self):
         """
@@ -45,10 +50,29 @@ class NetworkInterface:
         self.socket.sendall(data)
         self.logger.info("Sent data: ", data)
 
+    def receiveSocketData(self) -> bytes | None:
+        # Receive data from the server in a non-blocking manner.
+        try:
+            data = self.socket.recv(8192)
+            self.logger.info("Received data: ", data)
+            return data
+        except socket.timeout:
+            return None
+
     def receive(self) -> bytes:
-        """
-        Receives the data from the server.
-        :return: Data that is being received as string.
-        """
-        receiving = self.socket.recv(4096)
+        while not self.isXML(self.buffer.decode("utf-8")):
+            data = self.receiveSocketData()
+            if data:
+                self.buffer += data.removeprefix(b"<protocol>\n  ")
+
+        receiving = self.buffer
+        self.buffer = b""
         return receiving
+
+    @staticmethod
+    def isXML(string: str) -> bool:
+        try:
+            ET.fromstring(string)
+        except Exception:
+            return False
+        return True

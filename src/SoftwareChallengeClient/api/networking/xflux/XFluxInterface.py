@@ -2,11 +2,34 @@ from dataclasses import dataclass
 from typing import Any
 from xml.etree.ElementTree import Element
 
+from src.SoftwareChallengeClient.api.protocol import protocolClasses
+
 
 class IXmlObject:
 
     def setXmlSpecifics(self, element: Element):
         ...
+
+
+@dataclass
+class ChildAttribute(IXmlObject):
+    """
+    Maps a Field to a XML Tag, for that this protocol is special. :)
+    """
+    caller: Any
+    children: dict
+    fieldValues: [Any]
+
+    def setXmlSpecifics(self, element: Element):
+        parent = Element("data")
+        parent.set("class", protocolClasses[type(self.caller)])
+        for childName, values in self.children.items():
+            if childName:
+                subElement = Element(childName)
+                for attr, childValues in values.items():
+                    subElement.set(attr, str(childValues))
+                parent.append(subElement)
+        element.append(parent)
 
 
 @dataclass

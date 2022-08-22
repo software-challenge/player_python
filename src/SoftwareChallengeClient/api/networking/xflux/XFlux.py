@@ -2,11 +2,11 @@ import logging
 import xml.etree.ElementTree as ET
 from typing import Any
 
-from src.SoftwareChallengeClient.server_api.networking.IClient import IClient
-from src.SoftwareChallengeClient.server_api.networking.NetworkInterface import NetworkInterface
-from src.SoftwareChallengeClient.server_api.networking.xflux.XFluxInterface import IXmlObject
-from src.SoftwareChallengeClient.server_api.protocol import *
-from src.SoftwareChallengeClient.server_api.protocol.CloseConnection import CloseConnection
+from src.SoftwareChallengeClient.api.networking.NetworkInterface import NetworkInterface
+from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import IXmlObject
+from src.SoftwareChallengeClient.api.protocol import *
+from src.SoftwareChallengeClient.api.protocol.CloseConnection import CloseConnection
+from src.SoftwareChallengeClient.api.sc.Plugin2023 import HexBoard, Fishes, Board
 
 protocol: dict[Any, Any] = protocolClasses
 
@@ -27,15 +27,15 @@ class _XFlux:
         :return: The serialized object as xml bytes.
         """
         self.logger.info("Converting object to XML")
-        root = ET.Element(obj.__class__.__name__)
+        root = ET.Element(protocol[obj.__class__])
 
         for attr, value in obj.__dict__.items():
-            if value is IXmlObject:
+            if isinstance(value, IXmlObject):
                 value.setXmlSpecifics(root)
 
         return ET.tostring(root)
 
-    def deserialize(self, data: bytes) -> ProtocolPacket:
+    def deserialize(self, data: bytes):
         """
         Deserialize xml bytes to an object.
         :param data: The xml bytes to deserialize.
@@ -44,13 +44,44 @@ class _XFlux:
         self.logger.info("Converting XML to object")
         xmlString = data.decode("utf-8").removeprefix("<protocol>\n  ")
         root = ET.fromstring(xmlString)
-        cls = protocol[root.tag]
-        args = dict(root.attrib.items())
+        cls = protocol[root.attrib["class"] if root.tag == "data" else root.tag]
+        # print("Root-Tag:{}, Class:{}".format(root, cls))
+        argsList = list(root.attrib.items())
+        args = {}
+        for key, value in argsList:
+            if not key == "class":
+                args[key] = value
 
-        return cls(**args)
+        if root.text and root.text.isalnum():
+            # print("Class:'{}', Value:'{}'".format(cls, root.text))
+            return cls(root.text)
+        elif cls == Fishes:
+            # Get the children of the root element and add them as arguments to the Fishes class.
+            children = []
+            for child in root:
+                children.append(child.text)
+            return cls(children[0], children[1])
+        elif cls == Board:
+            hexBoard = []
+            for child in root:
+                fields = []
+                for children in child:
+                    fields.append(self.deserialize(ET.tostring(children)))
+                hexBoard.append(fields)
+            # Invert the hexBoard to get the correct order.
+            hexBoard = [list(x) for x in zip(*hexBoard)]
+            return cls(HexBoard(hexBoard))
+        else:
+            for child in root:
+                # Check if the child tag is in the protocol dictionary.
+                if child.tag in attributeReference:
+                    args[attributeReference[child.tag]] = self.deserialize(ET.tostring(child))
+                else:
+                    args[child.tag] = self.deserialize(ET.tostring(child))
+            return cls(**args)
 
 
-class XFluxClient(IClient):
+class XFluxClient:
     """
     Streams data from and to the server.
     """
@@ -61,8 +92,10 @@ class XFluxClient(IClient):
         :param port: Port of the server.
         """
         self.networkInterface = NetworkInterface(host, port)
+        self.connectToServer()
         self.transposer = _XFlux()
         self.running = False
+        self.firstTime = True
 
     def start(self):
         self.running = True
@@ -72,8 +105,8 @@ class XFluxClient(IClient):
         while self.running:
             response = self.receive()
 
-            if response is ProtocolPacket:
-                if response is CloseConnection:
+            if isinstance(response, ProtocolPacket):
+                if isinstance(response, CloseConnection):
                     self.handleDisconnect()
                 else:
                     self.onObject(response)
@@ -86,7 +119,9 @@ class XFluxClient(IClient):
         :return: The next object in the stream.
         """
         receiving = self.networkInterface.receive()
-        return self.transposer.deserialize(receiving)
+        print(receiving.decode("utf-8"))
+        cls = self.transposer.deserialize(receiving)
+        return cls
 
     def send(self, obj: ProtocolPacket):
         """
@@ -94,7 +129,10 @@ class XFluxClient(IClient):
         :param obj: The object to send.
         """
         shipment = self.transposer.serialize(obj)
-        shipment = "<protocol>".encode("utf-8") + shipment
+        if self.firstTime:
+            shipment = "<protocol>".encode("utf-8") + shipment
+            self.firstTime = False
+        print(shipment.decode("utf-8"))
         self.networkInterface.send(shipment)
 
     def connectToServer(self):
