@@ -9,6 +9,7 @@ class Logic(IClientHandler):
     gameState: GameState
 
     def calculateMove(self) -> Move:
+        print(self.gameState.currentTeam)
         possibleMoves = self.gameState.getPossibleMoves()
         return possibleMoves[random.randint(0, len(possibleMoves) - 1)]
 

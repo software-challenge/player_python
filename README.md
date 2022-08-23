@@ -1,10 +1,11 @@
-## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a> Python Client der Software-Challenge Germany 2023!
+## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a> Python Client of the Software-Challenge Germany 2023
 
-In diesem Repository befindet sich das Python Package der [Software-Challenge](https://www.software-challenge.de), ein
-Programmierwettbewerb für Schüler. Dabei wird für ein jährlich wechselndes Spiel eine künstliche Intelligenz entwickelt,
-die sich dann in Duellen gegen andere durchsetzen muss.
+This repository contains the Python package for the
+[Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
+have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
 
-Dieses Jahr ist es das Spiel **Hey, danke für den Fisch!**.
+> This year it is the game
+> **[Hey, danke für den Fisch!](https://docs.software-challenge.de/spiele/penguins)**.
 
 ### Installation
 
