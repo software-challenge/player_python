@@ -50,7 +50,6 @@ class PlayerClient(XFluxClient):
         super().send(JoinPreparedRoomRequest(reservation))
 
     def sendMessageToRoom(self, roomId: str, message):
-        # print(roomId, message)
         super().send(RoomPacket(roomId, message))
 
     def onObject(self, message):

@@ -42,7 +42,6 @@ class _XFlux:
         xmlString = data.decode("utf-8").removeprefix("<protocol>\n  ")
         root = ET.fromstring(xmlString)
         cls = protocolClasses[root.attrib["class"] if root.tag == "data" else root.tag]
-        # print("Root-Tag:{}, Class:{}".format(root, cls))
         argsList = list(root.attrib.items())
         args = {}
         for key, value in argsList:
@@ -50,10 +49,8 @@ class _XFlux:
                 args[key] = value
 
         if root.text and root.text.isalnum():
-            # print("Class:'{}', Value:'{}'".format(cls, root.text))
             return cls(root.text)
         elif cls == Fishes:
-            # Get the children of the root element and add them as arguments to the Fishes class.
             children = []
             for child in root:
                 children.append(child.text)
@@ -65,12 +62,10 @@ class _XFlux:
                 for children in child:
                     fields.append(self.deserialize(ET.tostring(children)))
                 hexBoard.append(fields)
-            # Invert the hexBoard to get the correct order.
             hexBoard = [list(x) for x in zip(*hexBoard)]
             return cls(HexBoard(hexBoard))
         else:
             for child in root:
-                # Check if the child tag is in the protocol dictionary.
                 if child.tag in attributeReference:
                     args[attributeReference[child.tag]] = self.deserialize(ET.tostring(child))
                 else:
@@ -116,7 +111,6 @@ class XFluxClient:
         :return: The next object in the stream.
         """
         receiving = self.networkInterface.receive()
-        # ("Received: ", receiving.decode("utf-8"))
         cls = self.transposer.deserialize(receiving)
         return cls
 

@@ -1,3 +1,5 @@
+import random
+
 from src.SoftwareChallengeClient.api.networking.clients.PlayerClient import IClientHandler
 from src.SoftwareChallengeClient.api.sc.Plugin2023 import GameState, Move
 from src.SoftwareChallengeClient.player.Starter import Starter
@@ -7,7 +9,8 @@ class Logic(IClientHandler):
     gameState: GameState
 
     def calculateMove(self) -> Move:
-        return self.gameState.getPossibleMoves()[0]
+        possibleMoves = self.gameState.getPossibleMoves()
+        return possibleMoves[random.randint(0, len(possibleMoves) - 1)]
 
     def onUpdate(self, state: GameState):
         self.gameState = state

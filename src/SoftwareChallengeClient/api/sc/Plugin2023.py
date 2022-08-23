@@ -1,3 +1,5 @@
+import math
+
 import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
 from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import ImplicitArray, Attribute, Traverse, \
     ChildAttribute
@@ -152,33 +154,33 @@ class Coordinates:
         """
         ...
 
-    def arrayToDoubleHex(self) -> 'Coordinates':
+    def __arrayToDoubleHex(self) -> 'Coordinates':
         """
         Converts the coordinate to double hex coordinates.
         :return: The double hex coordinates.
         """
         return Coordinates(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
 
-    def doubleHexToArray(self) -> 'Coordinates':
+    def __doubleHexToArray(self) -> 'Coordinates':
         """
         Converts the double hex coordinates to coordinate.
         :return: The coordinate.
         """
-        return Coordinates(int(self.x / 2 - (1 if self.y % 2 == 1 else 0)), self.y, False)
+        return Coordinates(math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), self.y, False)
 
     def getArray(self) -> 'Coordinates':
         """
         Checks if the coordinate is an array or double hex coordinate.
-        :return: Self if the coordinate is an array, doubleHexToArray if the coordinate is a double hex coordinate.
+        :return: Self if the coordinate is an array, __doubleHexToArray if the coordinate is a double hex coordinate.
         """
-        return self if not self.isDouble else self.doubleHexToArray()
+        return self if not self.isDouble else self.__doubleHexToArray()
 
     def getDoubleHex(self) -> 'Coordinates':
         """
         Checks if the coordinate is a double hex coordinate.
-        :return: Self if the coordinate is a double hex coordinate, doubleHexToArray if the coordinate is an array.
+        :return: Self if the coordinate is a double hex coordinate, __doubleHexToArray if the coordinate is an array.
         """
-        return self if self.isDouble else self.arrayToDoubleHex()
+        return self if self.isDouble else self.__arrayToDoubleHex()
 
     def __str__(self) -> str:
         return "Coordinates[{}, {}], Double: {}".format(self.x, self.y, self.isDouble)
@@ -245,7 +247,7 @@ class Move:
         return self.fromCoo.compareTo(other.fromCoo) and self.toCoo.compareTo(other.toCoo)
 
     def __str__(self) -> str:
-        return "Move from {} to {}".format(self.fromCoo, self.toCoo)
+        return "Move from {} to {}.".format(self.fromCoo, self.toCoo)
 
     @staticmethod
     def move(origin: Coordinates, delta: Vector) -> 'Move':
@@ -321,15 +323,18 @@ class Field:
     def getFish(self) -> None | int:
         return None if self.isOccupied() else self.field
 
-    def getPenguin(self) -> Team | None:
+    def getTeam(self) -> Team | None:
         return self.field if isinstance(self.field, Team) else None
+
+    def __eq__(self, __o: object) -> bool:
+        return isinstance(__o, Field) and self.field == __o.field
 
     def __copy__(self):
         return Field(self.field)
 
     def __str__(self):
         return ("This Field is occupied by {}".format(self.field)) + (
-            " fish(es)" if isinstance(self.field, int) else "")
+            " fish(es)." if isinstance(self.field, int) else ".")
 
 
 @XStrDec.alias(name='list')
@@ -349,12 +354,11 @@ class HexBoard:
         return True
 
     def isOccupied(self, coordinates: Coordinates) -> bool:
-        arrayCoordinates = coordinates.getArray()
-        return self.getField(arrayCoordinates).isOccupied()
+        return self.getField(coordinates).isOccupied()
 
     def isValid(self, coordinates: Coordinates) -> bool:
         arrayCoordinates = coordinates.getArray()
-        return 0 <= arrayCoordinates.x < len(self.gameField) and 0 <= arrayCoordinates.y < len(self.gameField[0])
+        return 0 <= arrayCoordinates.x < self.width() and 0 <= arrayCoordinates.y < self.height()
 
     def width(self) -> int:
         return len(self.gameField)
@@ -473,19 +477,18 @@ class Board:
         return self.__fields.fieldValue
 
     def getMovesInDirection(self, origin: Coordinates, direction: Vector) -> list[Move]:
-        # Get all hexFields in all directions to infinity or until a field is not valid and add them to a list of moves.
         moves = []
         for i in range(1, self.hexFields.width()):
-            try:
-                moves.append(Move(fromCoo=origin, toCoo=origin.getDoubleHex().addVector(direction.times(i))))
-            except IndexError:
+            destination = origin.getDoubleHex().addVector(direction.times(i))
+            if self.__isDestinationValid(destination):
+                moves.append(Move(fromCoo=origin, toCoo=destination))
+            else:
                 break
         return moves
 
-    def __isDirectionValid(self, field: Coordinates) -> bool:
-        arrayCoordinate = field.getArray()
-        return self.hexFields.isValid(arrayCoordinate) and not self.hexFields.isOccupied(arrayCoordinate) and not \
-            self.hexFields.getField(arrayCoordinate).isEmpty()
+    def __isDestinationValid(self, field: Coordinates) -> bool:
+        return self.hexFields.isValid(field) and not self.hexFields.isOccupied(field) and not \
+            self.hexFields.getField(field).isEmpty()
 
     def possibleMovesFrom(self, position: Coordinates) -> list[Move]:
         """
@@ -509,14 +512,12 @@ class Board:
         return [field for field in self.hexFields.getAllFields() if field.isOccupied()]
 
     def getTeamsPenguins(self, team: Team) -> list[Coordinates]:
-        # Loop over the hexFields 2d array:
         teamsPenguins = []
         for x in range(self.hexFields.width()):
             for y in range(self.hexFields.height()):
                 currentField = self.hexFields.getField(Coordinates(x, y, False))
-                if currentField.isOccupied() and currentField.getPenguin().team() == team:
+                if currentField.isOccupied() and currentField.getTeam().team() == team:
                     coordinates = Coordinates(x, y, False).getDoubleHex()
-                    print("Piece: ", currentField)
                     teamsPenguins.append(coordinates)
         return teamsPenguins
 
@@ -607,7 +608,6 @@ class GameState:
                         moves.append(Move(fromCoo=None, toCoo=Coordinates(x, y, False).getDoubleHex()))
         else:
             for piece in self.currentPieces:
-                print(piece)
                 moves.extend(self.board.possibleMovesFrom(piece))
         return moves
 

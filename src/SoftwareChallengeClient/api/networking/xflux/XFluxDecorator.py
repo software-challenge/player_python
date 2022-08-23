@@ -11,7 +11,6 @@ def alias(name: str):
     """
 
     def setName(obj):
-        # obj.__name__ = name
         protocolClasses[name] = obj
         protocolClasses[obj] = name
         return obj

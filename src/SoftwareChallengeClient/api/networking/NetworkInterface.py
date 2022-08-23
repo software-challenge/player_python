@@ -51,7 +51,6 @@ class NetworkInterface:
         self.logger.info("Sent data: ", data)
 
     def receiveSocketData(self) -> bytes | None:
-        # Receive data from the server in a non-blocking manner.
         try:
             data = self.socket.recv(8192)
             self.logger.info("Received data: ", data)
