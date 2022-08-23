@@ -1,4 +1,6 @@
+import logging
 import random
+import time
 
 from src.SoftwareChallengeClient.api.networking.clients.PlayerClient import IClientHandler
 from src.SoftwareChallengeClient.api.sc.Plugin2023 import GameState, Move
@@ -9,9 +11,11 @@ class Logic(IClientHandler):
     gameState: GameState
 
     def calculateMove(self) -> Move:
-        print(self.gameState.currentTeam)
+        startTime = time.time()
         possibleMoves = self.gameState.getPossibleMoves()
-        return possibleMoves[random.randint(0, len(possibleMoves) - 1)]
+        move = possibleMoves[random.randint(0, len(possibleMoves) - 1)]
+        logging.info("Sent {} after {} seconds.".format(move, time.time() - startTime))
+        return move
 
     def onUpdate(self, state: GameState):
         self.gameState = state

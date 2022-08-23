@@ -1,4 +1,3 @@
-import logging
 import xml.etree.ElementTree as ET
 
 from src.SoftwareChallengeClient.api.Shared import protocolClasses, attributeReference
@@ -14,16 +13,13 @@ class _XFlux:
     Serialize and deserialize objects to and from XML.
     """
 
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-
-    def serialize(self, obj: ProtocolPacket) -> bytes:
+    @staticmethod
+    def serialize(obj: ProtocolPacket) -> bytes:
         """
         Serialize an object to XML.
         :param obj: The object to serialize.
         :return: The serialized object as xml bytes.
         """
-        self.logger.info("Converting object to XML")
         root = ET.Element(protocolClasses[obj.__class__])
 
         for attr, value in obj.__dict__.items():
@@ -38,7 +34,6 @@ class _XFlux:
         :param data: The xml bytes to deserialize.
         :return: The deserialized object.
         """
-        self.logger.info("Converting XML to object")
         xmlString = data.decode("utf-8").removeprefix("<protocol>\n  ")
         root = ET.fromstring(xmlString)
         cls = protocolClasses[root.attrib["class"] if root.tag == "data" else root.tag]
@@ -123,7 +118,6 @@ class XFluxClient:
         if self.firstTime:
             shipment = "<protocol>".encode("utf-8") + shipment
             self.firstTime = False
-        print("Sending: ", shipment.decode("utf-8"))
         self.networkInterface.send(shipment)
 
     def connectToServer(self):

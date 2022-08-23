@@ -18,7 +18,6 @@ class NetworkInterface:
         self.host = host
         self.port = port
         self.connected: bool = False
-        self.logger = logging.getLogger(__name__)
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(timeout)
 
@@ -31,7 +30,7 @@ class NetworkInterface:
         """
         self.socket.connect((self.host, self.port))
         self.connected = True
-        self.logger.info("Connected to server")
+        logging.info("Connected to server")
 
     def close(self):
         """
@@ -39,7 +38,7 @@ class NetworkInterface:
         """
         self.socket.close()
         self.connected = False
-        self.logger.info("Closed connection")
+        logging.info("Closed connection")
 
     def send(self, data: bytes):
         """
@@ -48,12 +47,11 @@ class NetworkInterface:
         :param data: The data that is being sent as string.
         """
         self.socket.sendall(data)
-        self.logger.info("Sent data: ", data)
+        logging.debug("Sent data: %s", data.decode("utf-8"))
 
     def receiveSocketData(self) -> bytes | None:
         try:
             data = self.socket.recv(8192)
-            self.logger.info("Received data: ", data)
             return data
         except socket.timeout:
             return None

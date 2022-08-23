@@ -80,12 +80,12 @@ class Vector:
         """
         return abs(self.dx) == abs(self.dy) or (self.dx % 2 == 0 and self.dy == 0)
 
-    def toCoordinates(self) -> 'Coordinates':
+    def toCoordinates(self) -> 'Coordinate':
         """
         Converts the vector to coordinate object.
         :return:    The coordinate object.
         """
-        return Coordinates(self.dx, self.dy, isDouble=True)
+        return Coordinate(self.dx, self.dy, isDouble=True)
 
     def __str__(self) -> str:
         """
@@ -98,7 +98,7 @@ class Vector:
 @XStrDec.alias(name='coordinates')
 @XStrDec.alias(name='to')
 @XStrDec.alias(name='from')
-class Coordinates:
+class Coordinate:
     """
     Representation of a coordination system in the hexagonal grid.
     """
@@ -114,7 +114,7 @@ class Coordinates:
         self.y = y
         self.isDouble = isDouble
 
-    def addVector(self, vector: Vector) -> 'Coordinates':
+    def addVector(self, vector: Vector) -> 'Coordinate':
         """
         Adds a vector to the coordinate.
         :param vector: The vector to add.
@@ -124,7 +124,7 @@ class Coordinates:
         return self.getVector().plus(vector).toCoordinates() if self.isDouble else \
             self.getDoubleHex().getVector().plus(vector).toCoordinates().getArray()
 
-    def minusVector(self, vector: Vector) -> 'Coordinates':
+    def minusVector(self, vector: Vector) -> 'Coordinate':
         """
         Subtracts a vector from the coordinate.
         :param vector: The vector to subtract.
@@ -132,7 +132,7 @@ class Coordinates:
         """
         return self.getVector().minus(vector).toCoordinates()
 
-    def getDistance(self, other: 'Coordinates') -> 'Coordinates':
+    def getDistance(self, other: 'Coordinate') -> 'Coordinate':
         """
         Calculates the distance between two coordinates.
         :param other: The other coordinate to calculate the distance to.
@@ -154,28 +154,28 @@ class Coordinates:
         """
         ...
 
-    def __arrayToDoubleHex(self) -> 'Coordinates':
+    def __arrayToDoubleHex(self) -> 'Coordinate':
         """
         Converts the coordinate to double hex coordinates.
         :return: The double hex coordinates.
         """
-        return Coordinates(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
+        return Coordinate(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
 
-    def __doubleHexToArray(self) -> 'Coordinates':
+    def __doubleHexToArray(self) -> 'Coordinate':
         """
         Converts the double hex coordinates to coordinate.
         :return: The coordinate.
         """
-        return Coordinates(math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), self.y, False)
+        return Coordinate(math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), self.y, False)
 
-    def getArray(self) -> 'Coordinates':
+    def getArray(self) -> 'Coordinate':
         """
         Checks if the coordinate is an array or double hex coordinate.
         :return: Self if the coordinate is an array, __doubleHexToArray if the coordinate is a double hex coordinate.
         """
         return self if not self.isDouble else self.__doubleHexToArray()
 
-    def getDoubleHex(self) -> 'Coordinates':
+    def getDoubleHex(self) -> 'Coordinate':
         """
         Checks if the coordinate is a double hex coordinate.
         :return: Self if the coordinate is a double hex coordinate, __doubleHexToArray if the coordinate is an array.
@@ -183,7 +183,7 @@ class Coordinates:
         return self if self.isDouble else self.__arrayToDoubleHex()
 
     def __str__(self) -> str:
-        return "Coordinates[{}, {}], Double: {}".format(self.x, self.y, self.isDouble)
+        return "Coordinate[{}, {}]".format(self.x, self.y)
 
 
 @XStrDec.alias(name='move')
@@ -195,7 +195,7 @@ class Move:
     Represents a move in the game. 
     """
 
-    def __init__(self, toCoo: Coordinates, fromCoo: Coordinates = None):
+    def __init__(self, toCoo: Coordinate, fromCoo: Coordinate = None):
         """
         :param toCoo: The destination of the move.
         :param fromCoo: The origin of the move.
@@ -221,7 +221,7 @@ class Move:
         return self.__from__to.fieldValues[1]
 
     @toCoo.setter
-    def toCoo(self, value: Coordinates):
+    def toCoo(self, value: Coordinate):
         self.__from__to.fieldValues[1] = value
 
     def getDelta(self):
@@ -247,10 +247,10 @@ class Move:
         return self.fromCoo.compareTo(other.fromCoo) and self.toCoo.compareTo(other.toCoo)
 
     def __str__(self) -> str:
-        return "Move from {} to {}.".format(self.fromCoo, self.toCoo)
+        return "Move(from = {}, to = {})".format(self.fromCoo, self.toCoo)
 
     @staticmethod
-    def move(origin: Coordinates, delta: Vector) -> 'Move':
+    def move(origin: Coordinate, delta: Vector) -> 'Move':
         """
         Executes the move to the destination.
         :param origin: The origin of the move.
@@ -353,10 +353,10 @@ class HexBoard:
                     return False
         return True
 
-    def isOccupied(self, coordinates: Coordinates) -> bool:
+    def isOccupied(self, coordinates: Coordinate) -> bool:
         return self.getField(coordinates).isOccupied()
 
-    def isValid(self, coordinates: Coordinates) -> bool:
+    def isValid(self, coordinates: Coordinate) -> bool:
         arrayCoordinates = coordinates.getArray()
         return 0 <= arrayCoordinates.x < self.width() and 0 <= arrayCoordinates.y < self.height()
 
@@ -377,7 +377,7 @@ class HexBoard:
         """
         return self.gameField[x][y]
 
-    def getField(self, position: Coordinates) -> Field:
+    def getField(self, position: Coordinate) -> Field:
         """
         Gets the field at the given position.
         :param position: The position of the field.
@@ -390,7 +390,7 @@ class HexBoard:
         else:
             raise IndexError("Index out of range: [x={}, y={}]".format(arrayCoordinates.x, arrayCoordinates.y))
 
-    def getFieldOrNone(self, position: Coordinates) -> Field | None:
+    def getFieldOrNone(self, position: Coordinate) -> Field | None:
         """
         Gets the field at the given position no matter if it is valid or not.
         :param position: The position of the field.
@@ -416,7 +416,7 @@ class HexBoard:
         """
         x = index // self.width()
         y = index % self.width()
-        return self.getField(Coordinates(x, y, False))
+        return self.getField(Coordinate(x, y, False))
 
     def getAllFields(self) -> list[Field]:
         """
@@ -476,7 +476,7 @@ class Board:
     def hexFields(self) -> HexBoard:
         return self.__fields.fieldValue
 
-    def getMovesInDirection(self, origin: Coordinates, direction: Vector) -> list[Move]:
+    def getMovesInDirection(self, origin: Coordinate, direction: Vector) -> list[Move]:
         moves = []
         for i in range(1, self.hexFields.width()):
             destination = origin.getDoubleHex().addVector(direction.times(i))
@@ -486,11 +486,11 @@ class Board:
                 break
         return moves
 
-    def __isDestinationValid(self, field: Coordinates) -> bool:
+    def __isDestinationValid(self, field: Coordinate) -> bool:
         return self.hexFields.isValid(field) and not self.hexFields.isOccupied(field) and not \
             self.hexFields.getField(field).isEmpty()
 
-    def possibleMovesFrom(self, position: Coordinates) -> list[Move]:
+    def possibleMovesFrom(self, position: Coordinate) -> list[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
         :param position: The position to start from.
@@ -511,13 +511,13 @@ class Board:
         """
         return [field for field in self.hexFields.getAllFields() if field.isOccupied()]
 
-    def getTeamsPenguins(self, team: Team) -> list[Coordinates]:
+    def getTeamsPenguins(self, team: Team) -> list[Coordinate]:
         teamsPenguins = []
         for x in range(self.hexFields.width()):
             for y in range(self.hexFields.height()):
-                currentField = self.hexFields.getField(Coordinates(x, y, False))
+                currentField = self.hexFields.getField(Coordinate(x, y, False))
                 if currentField.isOccupied() and currentField.getTeam().team() == team:
-                    coordinates = Coordinates(x, y, False).getDoubleHex()
+                    coordinates = Coordinate(x, y, False).getDoubleHex()
                     teamsPenguins.append(coordinates)
         return teamsPenguins
 
@@ -538,6 +538,9 @@ class Fishes:
     @property
     def fishesTwo(self):
         return self.__fishesTwo
+
+    def getFishByTeam(self, team: Team):
+        return self.fishesOne if team == Team.ONE else self.fishesTwo
 
 
 @XStrDec.alias(name='state')
@@ -592,22 +595,23 @@ class GameState:
     def turn(self):
         return int(self.__turn.fieldValue)
 
-    def getPossibleMoves(self) -> list[Move]:
+    def getPossibleMoves(self, currentTeam: Team = None) -> list[Move]:
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all hexFields that are not occupied by a penguin from that team.
         :return: A list of all possible moves from the current player's turn.
         """
+        currentTeam = currentTeam or self.currentTeam
         moves = []
-        if len(self.currentPieces) < 4:
+        if len(self.board.getTeamsPenguins(currentTeam)) < 4:
             hexBoard = self.board.hexFields
             for x in range(hexBoard.width() - 1):
                 for y in range(hexBoard.height() - 1):
-                    field = hexBoard.getField(Coordinates(x, y, False))
+                    field = hexBoard.getField(Coordinate(x, y, False))
                     if not field.isOccupied() and field.getFish() == 1:
-                        moves.append(Move(fromCoo=None, toCoo=Coordinates(x, y, False).getDoubleHex()))
+                        moves.append(Move(fromCoo=None, toCoo=Coordinate(x, y, False).getDoubleHex()))
         else:
-            for piece in self.currentPieces:
+            for piece in self.board.getTeamsPenguins(currentTeam):
                 moves.extend(self.board.possibleMovesFrom(piece))
         return moves
 
@@ -616,4 +620,7 @@ class GameState:
         Calculates the current team from the turn number.
         :return: The team that has the current turn.
         """
-        return self.startTeam if self.turn % 2 == 0 else self.startTeam.opponent()
+        currentTeamByTurn = self.startTeam if self.turn % 2 == 0 else self.startTeam.opponent()
+        if not self.getPossibleMoves(currentTeamByTurn):
+            return currentTeamByTurn.opponent()
+        return currentTeamByTurn
