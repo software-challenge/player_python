@@ -1,7 +1,7 @@
 import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
 from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import Attribute, ImplicitArray
 from src.SoftwareChallengeClient.api.protocol.ProtocolPacket import AdminLobbyRequest
-from src.SoftwareChallengeClient.api.protocol.Shared import SlotDescriptor
+from src.SoftwareChallengeClient.api.protocol.SharedProtocols import SlotDescriptor
 
 
 @XStrDec.alias(name='authenticate')

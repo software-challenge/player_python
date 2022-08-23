@@ -116,7 +116,7 @@ class XFluxClient:
         :return: The next object in the stream.
         """
         receiving = self.networkInterface.receive()
-        print(receiving.decode("utf-8"))
+        # ("Received: ", receiving.decode("utf-8"))
         cls = self.transposer.deserialize(receiving)
         return cls
 
@@ -129,7 +129,7 @@ class XFluxClient:
         if self.firstTime:
             shipment = "<protocol>".encode("utf-8") + shipment
             self.firstTime = False
-        print(shipment.decode("utf-8"))
+        print("Sending: ", shipment.decode("utf-8"))
         self.networkInterface.send(shipment)
 
     def connectToServer(self):

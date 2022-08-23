@@ -3,7 +3,7 @@ from src.SoftwareChallengeClient.api.protocol import JoinGameRequest, JoinRoomRe
     JoinPreparedRoomRequest, GamePreparedResponse, JoinedRoomResponse, ObservationResponse, ErrorPacket, \
     RoomWasJoinedEvent
 from src.SoftwareChallengeClient.api.protocol.RoomPacket import RoomPacket
-from src.SoftwareChallengeClient.api.protocol.Shared import RemovedFromGame, GameResult
+from src.SoftwareChallengeClient.api.protocol.SharedProtocols import RemovedFromGame, GameResult
 from src.SoftwareChallengeClient.api.protocol.room.ErrorMessage import ErrorMessage
 from src.SoftwareChallengeClient.api.protocol.room.IRoomMessage import RoomMessage, ObservableRoomMessage
 from src.SoftwareChallengeClient.api.protocol.room.RoomMessage import MementoMessage, MoveRequest

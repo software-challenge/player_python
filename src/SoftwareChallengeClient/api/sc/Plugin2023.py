@@ -8,7 +8,7 @@ class Vector:
     Represents a vector in the hexagonal grid. It can calculate various vector operations.
     """
 
-    def __init__(self, dx: int, dy: int):
+    def __init__(self, dx: int = 0, dy: int = 0):
         """
         Constructor for the Vector class.
         :param dx: The x-coordinate of the vector.
@@ -56,12 +56,13 @@ class Vector:
         """
         return self.dx == other.dx and self.dy == other.dy
 
-    def getHexNeighbors(self):
+    @property
+    def DIRECTIONS(self) -> list['Vector']:
         """
         Gets the six neighbors of the vector.
         :return: A list of the six neighbors of the vector.
         """
-        possibleNeighbors = [
+        return [
             Vector(1, -1),  # UP RIGHT
             Vector(-2, 0),  # LEFT
             Vector(1, 1),  # DOWN RIGHT
@@ -69,12 +70,6 @@ class Vector:
             Vector(2, 0),  # Right
             Vector(-1, -1)  # UP LEFT
         ]
-        realNeighbors = []
-        for neighbor in possibleNeighbors:
-            vector = self.plus(neighbor)
-            if vector.dx >= 0 and vector.dy >= 0:
-                realNeighbors.append(vector)
-        return realNeighbors
 
     def isOneHexMove(self):
         """
@@ -90,6 +85,13 @@ class Vector:
         """
         return Coordinates(self.dx, self.dy, isDouble=True)
 
+    def __str__(self) -> str:
+        """
+        Returns the string representation of the vector.
+        :return: The string representation of the vector.
+        """
+        return "Vector({}, {})".format(self.dx, self.dy)
+
 
 @XStrDec.alias(name='coordinates')
 @XStrDec.alias(name='to')
@@ -99,19 +101,16 @@ class Coordinates:
     Representation of a coordination system in the hexagonal grid.
     """
 
-    def __init__(self, x: int, y: int, isDouble: bool = False):
+    def __init__(self, x: int, y: int, isDouble: bool = True):
         """
         Constructor for the Coordinates class.
         :param x: The x-coordinate of the coordination system.
         :param y: The y-coordinate of the coordination system.
-        :param isDouble: Determines if the coordinate is in double hex format. Default is False.
+        :param isDouble: Determines if the coordinate is in double hex format. Default is True.
         """
         self.x = x
         self.y = y
         self.isDouble = isDouble
-
-    def __str__(self) -> str:
-        return "[{}, {}]".format(self.x, self.y)
 
     def addVector(self, vector: Vector) -> 'Coordinates':
         """
@@ -121,7 +120,7 @@ class Coordinates:
         """
 
         return self.getVector().plus(vector).toCoordinates() if self.isDouble else \
-            self.getVector().plus(vector).toCoordinates().isArray()
+            self.getDoubleHex().getVector().plus(vector).toCoordinates().getArray()
 
     def minusVector(self, vector: Vector) -> 'Coordinates':
         """
@@ -151,37 +150,38 @@ class Coordinates:
         Gets the six neighbors of the coordinate.
         :return: A list of the six neighbors of the coordinate.
         """
-        return self.getVector().getHexNeighbors()
+        ...
 
     def arrayToDoubleHex(self) -> 'Coordinates':
         """
         Converts the coordinate to double hex coordinates.
         :return: The double hex coordinates.
         """
-        self.isDouble = True
-        return Coordinates(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y)
+        return Coordinates(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
 
     def doubleHexToArray(self) -> 'Coordinates':
         """
         Converts the double hex coordinates to coordinate.
         :return: The coordinate.
         """
-        self.isDouble = False
-        return Coordinates(int(self.x / 2 - (1 if self.y % 2 == 1 else 0)), self.y)
+        return Coordinates(int(self.x / 2 - (1 if self.y % 2 == 1 else 0)), self.y, False)
 
-    def isArray(self) -> 'Coordinates':
+    def getArray(self) -> 'Coordinates':
         """
         Checks if the coordinate is an array or double hex coordinate.
         :return: Self if the coordinate is an array, doubleHexToArray if the coordinate is a double hex coordinate.
         """
         return self if not self.isDouble else self.doubleHexToArray()
 
-    def isDoubleHex(self) -> 'Coordinates':
+    def getDoubleHex(self) -> 'Coordinates':
         """
         Checks if the coordinate is a double hex coordinate.
         :return: Self if the coordinate is a double hex coordinate, doubleHexToArray if the coordinate is an array.
         """
         return self if self.isDouble else self.arrayToDoubleHex()
+
+    def __str__(self) -> str:
+        return "Coordinates[{}, {}], Double: {}".format(self.x, self.y, self.isDouble)
 
 
 @XStrDec.alias(name='move')
@@ -245,7 +245,7 @@ class Move:
         return self.fromCoo.compareTo(other.fromCoo) and self.toCoo.compareTo(other.toCoo)
 
     def __str__(self) -> str:
-        return "Move from {} to {}".format(self.fromCoo, self.__to)
+        return "Move from {} to {}".format(self.fromCoo, self.toCoo)
 
     @staticmethod
     def move(origin: Coordinates, delta: Vector) -> 'Move':
@@ -256,19 +256,6 @@ class Move:
         :return: The new move.
         """
         return Move(origin.addVector(delta), origin)
-
-    def setDestination(self, destination: Coordinates):
-        """
-        Sets the new destination of the move.
-        :param destination: The new destination of the move.
-        """
-        self.toCoo = destination
-
-
-"""
-=====================================================================================================================
-=====================================================================================================================
-"""
 
 
 @XStrDec.alias(name='team')
@@ -308,11 +295,13 @@ class Team:
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Team) and self.teamEnum['name'] == __o.teamEnum['name']
 
+    def __str__(self) -> str:
+        return "Team {}.".format(self.teamEnum['name'])
+
 
 @XStrDec.alias(name='field')
 class Field:
     def __init__(self, field: int | str | Team = None):
-        super().__init__()
         self.field: int | str | Team
         if not field or isinstance(field, Team):
             self.field = field
@@ -324,20 +313,23 @@ class Field:
             raise TypeError("The field's input is wrong: {}".format(field))
 
     def isEmpty(self) -> bool:
-        return self.field is None
+        return self.field == 0
 
     def isOccupied(self) -> bool:
         return isinstance(self.field, Team)
 
-    def getFish(self):
-        return 0 if self.isOccupied() else self.field
+    def getFish(self) -> None | int:
+        return None if self.isOccupied() else self.field
+
+    def getPenguin(self) -> Team | None:
+        return self.field if isinstance(self.field, Team) else None
 
     def __copy__(self):
         return Field(self.field)
 
     def __str__(self):
-        return ("This Field is occupied by {}".format(self.field)) + (" fish(es)" if isinstance(self.field, int) else
-                                                                      " Team")
+        return ("This Field is occupied by {}".format(self.field)) + (
+            " fish(es)" if isinstance(self.field, int) else "")
 
 
 @XStrDec.alias(name='list')
@@ -357,12 +349,12 @@ class HexBoard:
         return True
 
     def isOccupied(self, coordinates: Coordinates) -> bool:
-        coordinates = coordinates.isArray()
-        return self.gameField[coordinates.x][coordinates.y].isOccupied()
+        arrayCoordinates = coordinates.getArray()
+        return self.getField(arrayCoordinates).isOccupied()
 
     def isValid(self, coordinates: Coordinates) -> bool:
-        coordinates = coordinates.isArray()
-        return 0 <= coordinates.x < len(self.gameField) and 0 <= coordinates.y < len(self.gameField[0])
+        arrayCoordinates = coordinates.getArray()
+        return 0 <= arrayCoordinates.x < len(self.gameField) and 0 <= arrayCoordinates.y < len(self.gameField[0])
 
     def width(self) -> int:
         return len(self.gameField)
@@ -388,11 +380,11 @@ class HexBoard:
         :return: The field at the given position.
         :raise IndexError: If the position is not valid.
         """
-        position = position.isArray()
-        if self.isValid(position):
-            return self.__getField(position.x, position.y)
+        arrayCoordinates = position.getArray()
+        if self.isValid(arrayCoordinates):
+            return self.__getField(arrayCoordinates.x, arrayCoordinates.y)
         else:
-            raise IndexError("Index out of range")
+            raise IndexError("Index out of range: [x={}, y={}]".format(arrayCoordinates.x, arrayCoordinates.y))
 
     def getFieldOrNone(self, position: Coordinates) -> Field | None:
         """
@@ -400,7 +392,7 @@ class HexBoard:
         :param position: The position of the field.
         :return: The field at the given position,or None if the position is not valid.
         """
-        position = position.isArray()
+        position = position.getArray()
         if self.isValid(position):
             return self.__getField(position.x, position.y)
         else:
@@ -420,20 +412,20 @@ class HexBoard:
         """
         x = index // self.width()
         y = index % self.width()
-        return self.getField(Coordinates(x, y))
+        return self.getField(Coordinates(x, y, False))
 
     def getAllFields(self) -> list[Field]:
         """
-        Gets all fields of the board.
-        :return: All fields of the board.
+        Gets all hexFields of the board.
+        :return: All hexFields of the board.
         """
         return [self.getFieldByIndex(i) for i in range(self.width() * self.height())]
 
     def compareTo(self, other: 'HexBoard') -> list[Field]:
         """
-        Compares two boards and returns a list of the fields that are different.
+        Compares two boards and returns a list of the hexFields that are different.
         :param other: The other board to compare to.
-        :return: A list of fields that are different or a empty list if the boards are equal.
+        :return: A list of hexFields that are different or a empty list if the boards are equal.
         """
         fields = []
         for x in range(len(self.gameField)):
@@ -470,24 +462,30 @@ class HexBoard:
 @XStrDec.alias(name='board')
 class Board:
     """
-    Class which represents a game board. Consisting of a two-dimensional array of fields.
+    Class which represents a game board. Consisting of a two-dimensional array of hexFields.
     """
 
     def __init__(self, hexBoard: HexBoard):
         self.__fields = Traverse(self, hexBoard)
 
     @property
-    def fields(self) -> HexBoard:
+    def hexFields(self) -> HexBoard:
         return self.__fields.fieldValue
 
     def getMovesInDirection(self, origin: Coordinates, direction: Vector) -> list[Move]:
-        origin = origin.isArray()
+        # Get all hexFields in all directions to infinity or until a field is not valid and add them to a list of moves.
         moves = []
-        while self.fields.isValid(origin.addVector(direction)) and \
-                not self.fields.isOccupied(origin.addVector(direction)):
-            moves.append(Move(fromCoo=origin.isDoubleHex(), toCoo=direction.toCoordinates()))
-            direction = direction.plus(direction)
+        for i in range(1, self.hexFields.width()):
+            try:
+                moves.append(Move(fromCoo=origin, toCoo=origin.getDoubleHex().addVector(direction.times(i))))
+            except IndexError:
+                break
         return moves
+
+    def __isDirectionValid(self, field: Coordinates) -> bool:
+        arrayCoordinate = field.getArray()
+        return self.hexFields.isValid(arrayCoordinate) and not self.hexFields.isOccupied(arrayCoordinate) and not \
+            self.hexFields.getField(arrayCoordinate).isEmpty()
 
     def possibleMovesFrom(self, position: Coordinates) -> list[Move]:
         """
@@ -496,40 +494,34 @@ class Board:
         :return: A list of all possible moves from the given position.
         :raise: IndexError if the position is not valid.
         """
-        # position = position.isDoubleHex()
-        vector = position.isDoubleHex().getVector()
+        if not self.hexFields.isValid(position):
+            raise IndexError("Index out of range: [x={}, y={}]".format(position.x, position.y))
         moves = []
-        if self.fields.isValid(position):
-            for direction in vector.getHexNeighbors():
-                moves.extend(self.getMovesInDirection(position, direction))
-            return moves
-        else:
-            raise IndexError("Index out of range: x: {}, y: {}".format(position.x, position.y))
+        for direction in Vector().DIRECTIONS:
+            moves.extend(self.getMovesInDirection(position, direction))
+        return moves
 
     def getPenguins(self) -> list[Field]:
         """
         Searches the board for all penguins.
-        :return: A list of all fields that are occupied by a penguin.
+        :return: A list of all hexFields that are occupied by a penguin.
         """
-        return [field for field in self.fields.getAllFields() if field.isOccupied()]
+        return [field for field in self.hexFields.getAllFields() if field.isOccupied()]
 
     def getTeamsPenguins(self, team: Team) -> list[Coordinates]:
-        """
-        Searches the board for all penguins of the given team.
-        :param team: The team to search for.
-        :return: A list of all fields that are occupied by a penguin of the given team.
-        """
+        # Loop over the hexFields 2d array:
         teamsPenguins = []
-        for y in range(self.fields.width() - 1):
-            for x in range(self.fields.height() - 1):
-                coordinates = Coordinates(x, y)
-                field = self.fields.getField(coordinates)
-                if field.isOccupied() and field.field.team() == team.team():
+        for x in range(self.hexFields.width()):
+            for y in range(self.hexFields.height()):
+                currentField = self.hexFields.getField(Coordinates(x, y, False))
+                if currentField.isOccupied() and currentField.getPenguin().team() == team:
+                    coordinates = Coordinates(x, y, False).getDoubleHex()
+                    print("Piece: ", currentField)
                     teamsPenguins.append(coordinates)
         return teamsPenguins
 
     def __eq__(self, other):
-        return self.fields == other.fields
+        return self.hexFields == other.hexFields
 
 
 @XStrDec.alias(name='fishes')
@@ -602,19 +594,20 @@ class GameState:
     def getPossibleMoves(self) -> list[Move]:
         """
         Gets all possible moves for the current team.
-        That includes all possible moves from all fields that are not occupied by a penguin from that team.
+        That includes all possible moves from all hexFields that are not occupied by a penguin from that team.
         :return: A list of all possible moves from the current player's turn.
         """
         moves = []
         if len(self.currentPieces) < 4:
-            hexBoard = self.board.fields
+            hexBoard = self.board.hexFields
             for x in range(hexBoard.width() - 1):
                 for y in range(hexBoard.height() - 1):
-                    field = hexBoard.getField(Coordinates(x, y))
+                    field = hexBoard.getField(Coordinates(x, y, False))
                     if not field.isOccupied() and field.getFish() == 1:
-                        moves.append(Move(fromCoo=None, toCoo=Coordinates(x, y).arrayToDoubleHex()))
+                        moves.append(Move(fromCoo=None, toCoo=Coordinates(x, y, False).getDoubleHex()))
         else:
             for piece in self.currentPieces:
+                print(piece)
                 moves.extend(self.board.possibleMovesFrom(piece))
         return moves
 
