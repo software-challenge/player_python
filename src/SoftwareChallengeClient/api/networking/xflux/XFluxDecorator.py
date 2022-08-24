@@ -47,3 +47,17 @@ def attrDict(attr: str, name: str):
         return obj
 
     return setAttrDict
+
+
+def setClassName(name: str):
+    """
+    Registers the alias name of a xString object representation.
+    :param name: Name of the alias.
+    :return:
+    """
+
+    def setName(obj):
+        obj.__name__ = name
+        return obj
+
+    return setName

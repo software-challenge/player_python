@@ -188,40 +188,40 @@ class Coordinate:
 
 @XStrDec.alias(name='move')
 @XStrDec.alias(name='lastMove')
-@XStrDec.attrDict(attr="toCoo", name="to")
-@XStrDec.attrDict(attr="fromCoo", name="from")
+@XStrDec.attrDict(attr="to", name="to")
+@XStrDec.attrDict(attr="from_value", name="from")
 class Move:
     """
     Represents a move in the game. 
     """
 
-    def __init__(self, toCoo: Coordinate, fromCoo: Coordinate = None):
+    def __init__(self, to: Coordinate, from_value: Coordinate = None):
         """
-        :param toCoo: The destination of the move.
-        :param fromCoo: The origin of the move.
+        :param to: The destination of the move.
+        :param from_value: The origin of the move.
         """
         coordinates = {
-            None if fromCoo is None else "from": None if fromCoo is None else {
-                "x": fromCoo.x,
-                "y": fromCoo.y
+            None if from_value is None else "from": None if from_value is None else {
+                "x": from_value.x,
+                "y": from_value.y
             },
             "to": {
-                "x": toCoo.x,
-                "y": toCoo.y
+                "x": to.x,
+                "y": to.y
             }
         }
-        self.__from__to = ChildAttribute(self, children=coordinates, fieldValues=[fromCoo, toCoo])
+        self.__from__to = ChildAttribute(self, children=coordinates, fieldValues=[from_value, to])
 
     @property
-    def fromCoo(self):
+    def from_value(self):
         return self.__from__to.fieldValues[0]
 
     @property
-    def toCoo(self):
+    def to(self):
         return self.__from__to.fieldValues[1]
 
-    @toCoo.setter
-    def toCoo(self, value: Coordinate):
+    @to.setter
+    def to(self, value: Coordinate):
         self.__from__to.fieldValues[1] = value
 
     def getDelta(self):
@@ -229,14 +229,14 @@ class Move:
         Gets the distance between the origin and the destination.
         :return: The delta of the move as a Vector object.
         """
-        return self.toCoo.getDistance(self.fromCoo)
+        return self.to.getDistance(self.from_value)
 
     def reversed(self):
         """
         Reverses the move.
         :return: The reversed move.
         """
-        return Move(self.fromCoo, self.toCoo)
+        return Move(self.from_value, self.to)
 
     def compareTo(self, other: 'Move'):
         """
@@ -244,10 +244,10 @@ class Move:
         :param other: The other move to compare to.
         :return: True if the moves are equal, false otherwise.
         """
-        return self.fromCoo.compareTo(other.fromCoo) and self.toCoo.compareTo(other.toCoo)
+        return self.from_value.compareTo(other.from_value) and self.to.compareTo(other.to)
 
     def __str__(self) -> str:
-        return "Move(from = {}, to = {})".format(self.fromCoo, self.toCoo)
+        return "Move(from = {}, to = {})".format(self.from_value, self.to)
 
     @staticmethod
     def move(origin: Coordinate, delta: Vector) -> 'Move':
@@ -481,7 +481,7 @@ class Board:
         for i in range(1, self.hexFields.width()):
             destination = origin.getDoubleHex().addVector(direction.times(i))
             if self.__isDestinationValid(destination):
-                moves.append(Move(fromCoo=origin, toCoo=destination))
+                moves.append(Move(from_value=origin, to=destination))
             else:
                 break
         return moves
@@ -609,7 +609,7 @@ class GameState:
                 for y in range(hexBoard.height() - 1):
                     field = hexBoard.getField(Coordinate(x, y, False))
                     if not field.isOccupied() and field.getFish() == 1:
-                        moves.append(Move(fromCoo=None, toCoo=Coordinate(x, y, False).getDoubleHex()))
+                        moves.append(Move(from_value=None, to=Coordinate(x, y, False).getDoubleHex()))
         else:
             for piece in self.board.getTeamsPenguins(currentTeam):
                 moves.extend(self.board.possibleMovesFrom(piece))
