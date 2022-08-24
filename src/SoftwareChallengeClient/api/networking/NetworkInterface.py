@@ -3,12 +3,10 @@ import socket
 import xml.etree.ElementTree as ET
 from queue import Queue
 
-from src.SoftwareChallengeClient.api.networking.xmlBindingTest import deserializeObject
-
 
 class NetworkInterface:
     """
-    This interface handels all package transfers. It'll send and receive data from a given connection.
+    This interface handels all package transfers. It'll send and _receive data from a given connection.
     """
 
     def __init__(self, host="localhost", port=13050, timeout=5):
@@ -48,7 +46,6 @@ class NetworkInterface:
         and send it.
         :param data: The data that is being sent as string.
         """
-        deserializeObject(data.decode("utf-8").removeprefix("<protocol>").encode("utf-8"))
         self.socket.sendall(data)
         logging.debug("Sent data: %s", data.decode("utf-8"))
 
@@ -66,7 +63,6 @@ class NetworkInterface:
                 self.buffer += data.removeprefix(b"<protocol>\n  ")
 
         receiving = self.buffer
-        deserializeObject(receiving)
         self.buffer = b""
         return receiving
 

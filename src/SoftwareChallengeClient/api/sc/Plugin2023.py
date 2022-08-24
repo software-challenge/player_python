@@ -1,9 +1,5 @@
 import math
 
-import src.SoftwareChallengeClient.api.networking.xflux.XFluxDecorator as XStrDec
-from src.SoftwareChallengeClient.api.networking.xflux.XFluxInterface import ImplicitArray, Attribute, Traverse, \
-    ChildAttribute
-
 
 class Vector:
     """
@@ -95,9 +91,6 @@ class Vector:
         return "Vector({}, {})".format(self.dx, self.dy)
 
 
-@XStrDec.alias(name='coordinates')
-@XStrDec.alias(name='to')
-@XStrDec.alias(name='from')
 class Coordinate:
     """
     Representation of a coordination system in the hexagonal grid.
@@ -186,10 +179,6 @@ class Coordinate:
         return "Coordinate[{}, {}]".format(self.x, self.y)
 
 
-@XStrDec.alias(name='move')
-@XStrDec.alias(name='lastMove')
-@XStrDec.attrDict(attr="to", name="to")
-@XStrDec.attrDict(attr="from_value", name="from")
 class Move:
     """
     Represents a move in the game. 
@@ -200,29 +189,8 @@ class Move:
         :param to: The destination of the move.
         :param from_value: The origin of the move.
         """
-        coordinates = {
-            None if from_value is None else "from": None if from_value is None else {
-                "x": from_value.x,
-                "y": from_value.y
-            },
-            "to": {
-                "x": to.x,
-                "y": to.y
-            }
-        }
-        self.__from__to = ChildAttribute(self, children=coordinates, fieldValues=[from_value, to])
-
-    @property
-    def from_value(self):
-        return self.__from__to.fieldValues[0]
-
-    @property
-    def to(self):
-        return self.__from__to.fieldValues[1]
-
-    @to.setter
-    def to(self, value: Coordinate):
-        self.__from__to.fieldValues[1] = value
+        self.from_value = from_value
+        self.to = to
 
     def getDelta(self):
         """
@@ -244,7 +212,7 @@ class Move:
         :param other: The other move to compare to.
         :return: True if the moves are equal, false otherwise.
         """
-        return self.from_value.compareTo(other.from_value) and self.to.compareTo(other.to)
+        return self.from_value == other.from_value and self.to == other.to
 
     def __str__(self) -> str:
         return "Move(from = {}, to = {})".format(self.from_value, self.to)
@@ -260,8 +228,6 @@ class Move:
         return Move(origin.addVector(delta), origin)
 
 
-@XStrDec.alias(name='team')
-@XStrDec.alias(name='startTeam')
 class Team:
 
     def __init__(self, color: str):
@@ -301,14 +267,11 @@ class Team:
         return "Team {}.".format(self.teamEnum['name'])
 
 
-@XStrDec.alias(name='field')
 class Field:
     def __init__(self, field: int | str | Team = None):
         self.field: int | str | Team
-        if not field or isinstance(field, Team):
+        if isinstance(field, int):
             self.field = field
-        elif field.isnumeric():
-            self.field = int(field)
         elif field.isalpha():
             self.field = Team(field)
         else:
@@ -337,14 +300,9 @@ class Field:
             " fish(es)." if isinstance(self.field, int) else ".")
 
 
-@XStrDec.alias(name='list')
 class HexBoard:
     def __init__(self, gameField: list[list[Field]] = None):
-        self.__gameField = ImplicitArray(caller=self, fieldName="gameField", fieldValue=gameField)
-
-    @property
-    def gameField(self):
-        return self.__gameField.fieldValue
+        self.gameField = gameField
 
     def areFieldsEmpty(self) -> bool:
         for row in self.gameField:
@@ -463,18 +421,13 @@ class HexBoard:
         return hash(self.gameField)
 
 
-@XStrDec.alias(name='board')
 class Board:
     """
     Class which represents a game board. Consisting of a two-dimensional array of hexFields.
     """
 
     def __init__(self, hexBoard: HexBoard):
-        self.__fields = Traverse(self, hexBoard)
-
-    @property
-    def hexFields(self) -> HexBoard:
-        return self.__fields.fieldValue
+        self.hexFields = hexBoard
 
     def getMovesInDirection(self, origin: Coordinate, direction: Vector) -> list[Move]:
         moves = []
@@ -521,30 +474,22 @@ class Board:
                     teamsPenguins.append(coordinates)
         return teamsPenguins
 
+    def getFieldsWithMostFish(self):
+        ...
+
     def __eq__(self, other):
         return self.hexFields == other.hexFields
 
 
-@XStrDec.alias(name='fishes')
 class Fishes:
     def __init__(self, fishesOne: int, fishesTwo: int):
-        self.__fishesOne = fishesOne
-        self.__fishesTwo = fishesTwo
-
-    @property
-    def fishesOne(self):
-        return self.__fishesOne
-
-    @property
-    def fishesTwo(self):
-        return self.__fishesTwo
+        self.fishesOne = fishesOne
+        self.fishesTwo = fishesTwo
 
     def getFishByTeam(self, team: Team):
-        return self.fishesOne if team == Team.ONE else self.fishesTwo
+        return self.fishesOne if team.teamEnum == Team("ONE").teamEnum else self.fishesTwo
 
 
-@XStrDec.alias(name='state')
-@XStrDec.childAttribute(name="startTeam", mappedClass=Team)
 class GameState:
     """
        A `GameState` contains all information, that describes the game state at a given time, that is, between two game
@@ -578,22 +523,14 @@ class GameState:
         :param lastMove: The last move made.
         """
         self.startTeam = startTeam
-        self.__board = Traverse(self, board)
-        self.__turn = Attribute(caller=self, fieldName="turn", fieldValue=turn)
+        self.board = board
+        self.turn = turn
         self.round = int((self.turn + 1) / 2)
         self.currentTeam = self.currentTeamFromTurn()
         self.otherTeam = self.currentTeamFromTurn().opponent()
         self.lastMove = lastMove
         self.fishes = fishes
         self.currentPieces = self.board.getTeamsPenguins(self.currentTeam)
-
-    @property
-    def board(self) -> Board:
-        return self.__board.fieldValue
-
-    @property
-    def turn(self):
-        return int(self.__turn.fieldValue)
 
     def getPossibleMoves(self, currentTeam: Team = None) -> list[Move]:
         """

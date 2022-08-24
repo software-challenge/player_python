@@ -2,8 +2,30 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
 from src.SoftwareChallengeClient.api.protocol import AdminLobbyRequest, ResponsePacket, ProtocolPacket, LobbyRequest
-from src.SoftwareChallengeClient.api.protocol.room.IRoomMessage import RoomOrchestrationMessage
+from src.SoftwareChallengeClient.api.protocol.IRoomMessage import RoomOrchestrationMessage, RoomMessage, \
+    ObservableRoomMessage
 from src.SoftwareChallengeClient.api.sc.Plugin2023 import Team
+
+
+@dataclass
+class Left(ProtocolPacket):
+    class Meta:
+        name = "left"
+
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "roomId",
+            "type": "Attribute",
+        }
+    )
+
+
+@dataclass
+class MoveRequest(RoomMessage):
+    """
+    Request a Player to send a Move.
+    """
 
 
 @dataclass
@@ -374,6 +396,26 @@ class To:
 
 
 @dataclass
+class OriginalMessage:
+    class Meta:
+        name = "originalMessage"
+
+    class_value: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "class",
+            "type": "Attribute",
+        }
+    )
+    to: Optional[To] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
 class Winner:
     class Meta:
         name = "winner"
@@ -466,7 +508,7 @@ class Scores:
 
 
 @dataclass
-class State:
+class State(ObservableRoomMessage):
     class Meta:
         name = "state"
 
@@ -594,6 +636,13 @@ class Data:
         default=None,
         metadata={
             "type": "Attribute",
+        }
+    )
+    original_message: Optional[OriginalMessage] = field(
+        default=None,
+        metadata={
+            "name": "originalMessage",
+            "type": "Element",
         }
     )
 
