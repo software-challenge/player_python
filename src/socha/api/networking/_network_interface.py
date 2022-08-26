@@ -4,7 +4,6 @@ Handels the tcp connection to the server.
 import logging
 import re
 import socket
-from queue import Queue
 
 
 class _NetworkInterface:
@@ -24,7 +23,6 @@ class _NetworkInterface:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.settimeout(timeout)
 
-        self.queue = Queue()
         self.buffer: bytes = b""
 
     def connect(self):

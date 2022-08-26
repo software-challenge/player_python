@@ -4,10 +4,10 @@ This module handels the communication with the api and the students logic.
 import logging
 import time
 
-from src.socha.api.networking._xflux import _XFluxClient
-from src.socha.api.plugin import penguins
-from src.socha.api.plugin.penguins import Field, GameState, Move, Coordinate
-from src.socha.api.protocol.protocol import *
+from socha.api.networking._xflux import _XFluxClient
+from socha.api.plugin import penguins
+from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
+from socha.api.protocol.protocol import *
 
 
 def _convertBoard(protocolBoard: Board) -> penguins.Board:

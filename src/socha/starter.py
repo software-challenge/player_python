@@ -4,7 +4,7 @@ This is the main entry point for the SoCha application.
 import datetime
 import logging
 
-from src.socha.api.networking.player_client import _PlayerClient, IClientHandler
+from socha.api.networking.player_client import _PlayerClient, IClientHandler
 
 
 class Starter:
