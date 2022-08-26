@@ -34,7 +34,7 @@ If you want to install the package manually, then you have to download the relea
 and then run `setup.py` with Python.
 
 ```commandline
-python --user setup.py install
+python setup.py install --user
 ```
 
 This should satisfy the dependencies and you can start right away.
@@ -49,8 +49,8 @@ If you want to start with the Software-Challenge Python client, you have to impo
 - To make your player start when the script is executed, you have to import the `Starter` and call it later.
 
 ````python
-from socha import Starter
 from socha.api.networking.player_client import IClientHandler
+from socha import Starter
 from socha import *
 ````
 
