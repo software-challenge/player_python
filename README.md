@@ -50,8 +50,8 @@ If you want to start with the Software-Challenge Python client, you have to impo
 
 ````python
 from socha.api.networking.player_client import IClientHandler
-from socha import Starter
-from socha import *
+from socha.api.plugin.penguins import *
+from socha.starter import Starter
 ````
 
 If you now want to develop and implement your logic, then the structure of the class should look like this.
