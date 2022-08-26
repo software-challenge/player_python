@@ -1,0 +1,24 @@
+[build-system]
+requires = [
+    "hatchling",
+    "xsdata ~= 22.8"
+]
+build-backend = "hatchling.build"
+
+[project]
+name = "socha"
+version = "0.9.0"
+authors = [
+    { name = "FalconsSky", email = "stu222782@mail.uni-kiel.de" },
+]
+description = "This is the package for the Software-Challenge Germany 2023. This Season the game will be 'Hey, danke für den Fisch' a.k.a. 'Penguins' in short."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
+    "Operating System :: OS Independent",
+]
+[project.urls]
+"Homepage" = "https://github.com/FalconsSky/Software-Challenge-Python-Client"
+"Bug Tracker" = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
