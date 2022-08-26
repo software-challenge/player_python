@@ -1,6 +1,6 @@
 import unittest
 
-from src.socha.api.plugin.penguins import *
+from socha.api.plugin.penguins import *
 
 
 class VectorTest(unittest.TestCase):

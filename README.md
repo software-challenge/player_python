@@ -49,9 +49,9 @@ If you want to start with the Software-Challenge Python client, you have to impo
 - To make your player start when the script is executed, you have to import the `Starter` and call it later.
 
 ````python
-from socha.starter import Starter
+from socha import Starter
 from socha.api.networking.player_client import IClientHandler
-from socha.api.plugin.penguins import *
+from socha import *
 ````
 
 If you now want to develop and implement your logic, then the structure of the class should look like this.

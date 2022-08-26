@@ -1,8 +1,8 @@
 import random
 
-from src.socha.starter import Starter
-from src.socha.api.networking.player_client import IClientHandler
-from src.socha.api.plugin.penguins import GameState, Move
+from socha import Starter
+from socha.api.networking.player_client import IClientHandler
+from socha import GameState, Move
 
 
 class Logic(IClientHandler):
