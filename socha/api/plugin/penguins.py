@@ -1,7 +1,26 @@
 """
 This is the plugin for this year's game `Penguins`.
 """
+import logging
 import math
+
+
+hexagonTemplate=[
+    "  _______  \xA0",
+    " /       \ \xA0",
+    "/XXXXXXXXX\\\xA0",
+    "\YYYYYYYYY/\xA0",
+    " \_______/ \xA0"
+]
+
+emptyHexagonPlaceholder= "\xA0\xA0\xA0\xA0\xA0\xA0"
+
+def _fillUpString(placeholder: str, string: str) -> str:
+    len_placeholder = len(placeholder)
+    len_string = len(string)
+    difference = len_placeholder - len_string
+    rest = difference - int(difference / 2) * 2
+    return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
 
 
 class Vector:
@@ -210,7 +229,7 @@ class Coordinate:
         return self if self.is_double else self.__array_to_double_hex()
 
     def __str__(self) -> str:
-        return f"Coordinate[{self.x}, {self.y}]"
+        return f"[{self.x}, {self.y}]"
 
 
 class Move:
@@ -300,7 +319,7 @@ class Team:
         return isinstance(__o, Team) and self.team_enum['name'] == __o.team_enum['name']
 
     def __str__(self) -> str:
-        return f"Team {self.team_enum['name']}."
+        return self.team_enum['name']
 
 
 class Field:
@@ -608,6 +627,25 @@ class Board:
                 if move.to_value == field.coordinate:
                     intersection.append(move)
         return intersection
+
+    def pretty_print(self):
+        """
+        Prints the board in a pretty way.
+        """
+        result = ""
+        for i, list in enumerate(self.game_field):
+            for row in hexagonTemplate:
+                result += emptyHexagonPlaceholder if i % 2 != 0 else ""
+                for field in list:
+                    if field.is_empty():
+                        hexagon = " " * len(row)
+                    elif "XXXXXXXXX" in row:
+                        hexagon =  row.replace("XXXXXXXXX", _fillUpString("XXXXXXXXX", str(field.coordinate)))
+                    else:
+                        hexagon = row.replace("YYYYYYYYY", _fillUpString("YYYYYYYYY", str(field.field)))
+                    result += hexagon
+                result += "\n"
+        print(result)
 
     def __eq__(self, __o: 'Board'):
         return self.game_field == __o.game_field

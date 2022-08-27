@@ -1,8 +1,10 @@
-name: Deploy Package
+name: deploy
 
 on:
   release:
     types: [published]
+    branches:
+      - master
 
 jobs:
   deploy:
