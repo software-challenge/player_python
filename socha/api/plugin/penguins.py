@@ -4,8 +4,7 @@ This is the plugin for this year's game `Penguins`.
 import logging
 import math
 
-
-hexagonTemplate=[
+_hexagonTemplate = [
     "  _______  \xA0",
     " /       \ \xA0",
     "/XXXXXXXXX\\\xA0",
@@ -13,14 +12,7 @@ hexagonTemplate=[
     " \_______/ \xA0"
 ]
 
-emptyHexagonPlaceholder= "\xA0\xA0\xA0\xA0\xA0\xA0"
-
-def _fillUpString(placeholder: str, string: str) -> str:
-    len_placeholder = len(placeholder)
-    len_string = len(string)
-    difference = len_placeholder - len_string
-    rest = difference - int(difference / 2) * 2
-    return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
+_emptyHexagonPlaceholder = "\xA0\xA0\xA0\xA0\xA0\xA0"
 
 
 class Vector:
@@ -231,6 +223,9 @@ class Coordinate:
     def __str__(self) -> str:
         return f"[{self.x}, {self.y}]"
 
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Coordinate) and self.x == other.x and self.y == other.y
+
 
 class Move:
     """
@@ -259,16 +254,12 @@ class Move:
         """
         return Move(from_value=self.to_value, to_value=self.from_value)
 
-    def compare_to(self, other: 'Move'):
-        """
-        Compares two moves.
-        :param other: The other move to compare to.
-        :return: True if the moves are equal, false otherwise.
-        """
-        return self.from_value == other.from_value and self.to_value == other.to_value
-
     def __str__(self) -> str:
         return "Move(from = {}, to = {})".format(self.from_value, self.to_value)
+
+    def __eq__(self, __o: object) -> bool:
+        return isinstance(__o, Move) and self.to_value == __o.to_value and \
+               (self.from_value is None or self.from_value == __o.from_value)
 
 
 class Team:
@@ -375,14 +366,14 @@ class Board:
     """
 
     def __init__(self, game_field: list[list[Field]]):
-        self.game_field = game_field
+        self._game_field = game_field
 
     def get_empty_fields(self) -> list[Field]:
         """
         :return: A list of all empty fields.
         """
         fields: list[Field] = []
-        for row in self.game_field:
+        for row in self._game_field:
             for field in row:
                 if field.is_empty():
                     fields.append(field)
@@ -408,13 +399,13 @@ class Board:
         """
         :return: The width of the board.
         """
-        return len(self.game_field)
+        return len(self._game_field)
 
     def height(self) -> int:
         """
         :return: The height of the board.
         """
-        return len(self.game_field[0])
+        return len(self._game_field[0])
 
     def _get_field(self, x: int, y: int) -> Field:
         """
@@ -425,7 +416,7 @@ class Board:
         :param y: The y-coordinate of the field.
         :return: The field at the given coordinates.
         """
-        return self.game_field[y][x]
+        return self._game_field[y][x]
 
     def get_field(self, position: Coordinate) -> Field:
         """
@@ -481,19 +472,19 @@ class Board:
         :return: A list of hexFields that are different or a empty list if the boards are equal.
         """
         fields = []
-        for x in range(len(self.game_field)):
-            for y in range(len(self.game_field[0])):
-                if self.game_field[x][y] != other.game_field[x][y]:
-                    fields.append(self.game_field[x][y])
+        for x in range(len(self._game_field)):
+            for y in range(len(self._game_field[0])):
+                if self._game_field[x][y] != other._game_field[x][y]:
+                    fields.append(self._game_field[x][y])
         return fields
 
     def contains(self, field: Field) -> bool:
         """
         Checks if the board contains the given field.
         :param field: The field to check for.
-        :return: True if the board contains the field, Flase otherwise.
+        :return: True if the board contains the field, False otherwise.
         """
-        for row in self.game_field:
+        for row in self._game_field:
             if field in row:
                 return True
         return False
@@ -514,7 +505,7 @@ class Board:
         Gets all moves in the given direction from the given origin.
         :param origin: The origin of the move.
         :param direction: The direction of the move.
-        :return: A list with all moves that fullfill the criteria.
+        :return: A list with all moves that fulfill the criteria.
         """
         moves = []
         for i in range(1, self.width()):
@@ -593,62 +584,48 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field in other]
 
-    @staticmethod
-    def get_field_intersection(first: list[Field], second: list[Field]) -> list[Field]:
+    def _move(self, move: Move) -> 'Board':
         """
-        Returns a list of all fields that are in both list of Fields.
-        :param first: The first list of Fields to compare to.
-        :param second: The second list of Fields to compare to.
-        :return: A list of Fields.
+        Moves the penguin from the origin to the destination.
+        :param move: The move to execute.
+        :return: The new board with the moved penguin.
         """
-        return [field for field in first if field in second]
+        new_board = Board(self._game_field)
+        to_field = new_board.get_field(move.to_value)
+        new_board._game_field[move.to_value.x][move.to_value.y] = Field(coordinate=move.to_value, field=to_field.field)
+        if move.from_value:
+            new_board._game_field[move.from_value.x][move.from_value.y] = Field(coordinate=move.from_value, field=0)
+        return new_board
 
     @staticmethod
-    def get_move_intersection(first: list[Move], second: list[Move]) -> list[Move]:
-        """
-        Returns a list of all moves that are in both list of Fields.
-        :param first: The first list of moves to compare to.
-        :param second: The second list of moves to compare to.
-        :return: A list of moves.
-        """
-        return [move for move in first if move in second]
-
-    @staticmethod
-    def get_move_field_intersection(moves: list[Move], fields: list[Field]) -> list[Move]:
-        """
-        Returns a list of all moves that to-coordinates are the coordinates of a field in the list of fields.
-        :param moves: The list of moves that coordinates to compare to.
-        :param fields: The list of fields that coordinates to compare to.
-        :return: A list of moves.
-        """
-        intersection = []
-        for move in moves:
-            for field in fields:
-                if move.to_value == field.coordinate:
-                    intersection.append(move)
-        return intersection
+    def _fillUpString(placeholder: str, string: str) -> str:
+        len_placeholder = len(placeholder)
+        len_string = len(string)
+        difference = len_placeholder - len_string
+        rest = difference - int(difference / 2) * 2
+        return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
 
     def pretty_print(self):
         """
         Prints the board in a pretty way.
         """
         result = ""
-        for i, list in enumerate(self.game_field):
-            for row in hexagonTemplate:
-                result += emptyHexagonPlaceholder if i % 2 != 0 else ""
+        for i, list in enumerate(self._game_field):
+            for row in _hexagonTemplate:
+                result += _emptyHexagonPlaceholder if i % 2 != 0 else ""
                 for field in list:
                     if field.is_empty():
                         hexagon = " " * len(row)
                     elif "XXXXXXXXX" in row:
-                        hexagon =  row.replace("XXXXXXXXX", _fillUpString("XXXXXXXXX", str(field.coordinate)))
+                        hexagon = row.replace("XXXXXXXXX", self._fillUpString("XXXXXXXXX", str(field.coordinate)))
                     else:
-                        hexagon = row.replace("YYYYYYYYY", _fillUpString("YYYYYYYYY", str(field.field)))
+                        hexagon = row.replace("YYYYYYYYY", self._fillUpString("YYYYYYYYY", str(field.field)))
                     result += hexagon
                 result += "\n"
         print(result)
 
     def __eq__(self, __o: 'Board'):
-        return self.game_field == __o.game_field
+        return self._game_field == __o._game_field
 
 
 class Fishes:
@@ -710,8 +687,9 @@ class GameState:
         self.last_move = last_move
         self.fishes = fishes
         self.current_pieces = self.board.get_teams_penguins(self.current_team)
+        self.possible_moves = self._get_possible_moves(self.current_team)
 
-    def get_possible_moves(self, current_team: Team = None) -> list[Move]:
+    def _get_possible_moves(self, current_team: Team = None) -> list[Move]:
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all hexFields that are not occupied by a penguin from that team.
@@ -720,8 +698,8 @@ class GameState:
         current_team = current_team or self.current_team
         moves = []
         if len(self.board.get_teams_penguins(current_team)) < 4:
-            for x in range(self.board.width() - 1):
-                for y in range(self.board.height() - 1):
+            for x in range(self.board.width()):
+                for y in range(self.board.height()):
                     field = self.board.get_field(Coordinate(x, y, False))
                     if not field.is_occupied() and field.get_fish() == 1:
                         moves.append(Move(from_value=None, to_value=Coordinate(x, y, False).get_double_hex()))
@@ -735,7 +713,7 @@ class GameState:
         Returns a list of all Moves that will get the most fish from possible moves.
         :return: A list of Moves.
         """
-        moves = self.get_possible_moves()
+        moves = self.possible_moves
         moves.sort(key=lambda move: self.board.get_field(move.to_value).get_fish(), reverse=True)
         for i, move in enumerate(moves):
             first_fish = self.board.get_field(moves[0].to_value).get_fish()
@@ -752,6 +730,34 @@ class GameState:
         :return: The team that has the current turn.
         """
         current_team_by_turn = self.start_team if self.turn % 2 == 0 else self.start_team.opponent()
-        if not self.get_possible_moves(current_team_by_turn):
+        if not self._get_possible_moves(current_team_by_turn):
             return current_team_by_turn.opponent()
         return current_team_by_turn
+
+    def perform_move(self, move: Move) -> 'GameState':
+        """
+        Performs the given move on the current game state.
+        :param move: The move to perform.
+        :return: The new game state after the move has been performed.
+        """
+        if self.is_valid_move(move):
+            new_board = self.board._move(move)
+            adding_fish = new_board.get_field(move.to_value).get_fish()
+            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else 0
+            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else 0
+            new_fishes = Fishes(new_fishes_one, new_fishes_two)
+            return GameState(board=new_board, turn=self.turn + 1, start_team=self.start_team, fishes=new_fishes,
+                             last_move=move)
+        logging.error(f"Performed invalid move while simulating: {move}")
+        raise Exception(f"Invalid move: {move}")
+
+    def is_valid_move(self, move: Move) -> bool:
+        """
+        Checks if the given move is valid.
+        :param move: The move to check.
+        :return: True if the move is valid, False otherwise.
+        """
+        for possible_move in self.possible_moves:
+            if possible_move == move:
+                return True
+        return False
