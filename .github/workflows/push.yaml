@@ -1,4 +1,4 @@
-name: test
+name: static and unit tests
 
 on: [push, pull_request]
 
