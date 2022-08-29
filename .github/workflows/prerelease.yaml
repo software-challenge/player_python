@@ -1,14 +1,16 @@
-name: deploy
+---
+name: release
 
 on:
-  release:
-    types: [published]
+  push:
     branches:
-      - master
+      - "master"
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  tagged-release:
+    name: "Release"
+    runs-on: "ubuntu-latest"
+
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python
@@ -21,8 +23,9 @@ jobs:
           pip install build
       - name: Build
         run: python -m build
-      - name: Publish package
-        uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+      - uses: "marvinpinto/action-automatic-releases@latest"
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            dist/socha*
