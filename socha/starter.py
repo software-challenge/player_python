@@ -101,7 +101,7 @@ class Starter:
               "  --port <port>                  The port of the host. The default is 13050.\n"
               "  --reservation <reservation>    Reservation code for a prepared game.\n"
               "  --room <room id>               Room Id the client will try to connect.\n"
-              "  --keep_alive                   If True the client will keep running, even if the connection to"
+              "  --keep_alive                   If present the client will keep running, even if the connection to"
               " the server is terminated.\n"
-              "  --write_log                    If True the client will write a log file to the current "
+              "  --write_log                    If present the client will write a log file to the current "
               "directory.\n")
