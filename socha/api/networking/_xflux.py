@@ -36,7 +36,8 @@ def customClassFactory(clazz, params: dict):
                                    winner=params.get("winner"))
             return clazz(class_binding=result_object, **params)
         elif params.get("class_value") == "error":
-            raise TypeError("Error Class not found!")
+            error_object = Error(message=params.get("message"), originalMessage=params.get("original_message"))
+            return clazz(class_binding=error_object, **params)
 
     return clazz(**params)
 
