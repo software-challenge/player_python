@@ -53,7 +53,7 @@ class IClientHandler:
 
     def on_game_prepared(self, message): ...
 
-    def on_game_joined(self, message): ...
+    def on_game_joined(self, room_id): ...
 
     def on_game_observed(self, message): ...
 
@@ -110,12 +110,13 @@ class _PlayerClient(_XFluxClient):
                     self.game_handler.on_update(game_state)
                 elif isinstance(data, Result):
                     self.game_handler.on_game_over(data)
-                elif isinstance(data, object):
+                elif isinstance(data, Error):
                     # TODO Logger
-                    self.game_handler.on_error(str(message))
+                    self.game_handler.on_error(data.message)
+            if isinstance(data, Error):
+                logging.error(data.message)
+                self.game_handler.on_error(data.message)
             else:
                 self.game_handler.on_room_message(data)
-        elif isinstance(message, JoinedGameRoom):
-            self.game_handler.on_game_joined(message)
-        elif isinstance(message, object):
-            self.game_handler.on_error(str(message))
+        elif isinstance(message, Joined):
+            self.game_handler.on_game_joined(room_id=message.room_id)

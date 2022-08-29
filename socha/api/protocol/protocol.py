@@ -501,7 +501,7 @@ class Definition:
     """
     The definition of a result of a game.
     If for instance one player made an error move, the game is over and the other player wins,
-    the definition will tell that the other player wins, becaues of the error.
+    the definition will tell that the other player wins, because of the error.
     """
 
     class Meta:
@@ -725,6 +725,12 @@ class Data:
             "type": "Attribute",
         }
     )
+    message: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+        }
+    )
     original_message: Optional[OriginalMessage] = field(
         default=None,
         metadata={
@@ -781,11 +787,20 @@ class Result:
 
 
 @dataclass
+class Error:
+    """
+    This sends the server when the client sent a erroneous message.
+    """
+    message: str
+    originalMessage: OriginalMessage
+
+
+@dataclass
 class Protocol:
     """
     This is the root element of the protocol.
     Even it's in here it will never be called,
-    because the children of this root elment have to be handeld separately.
+    because the children of this root element have to be handelt separately.
     """
 
     class Meta:
