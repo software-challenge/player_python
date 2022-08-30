@@ -1,0 +1,4 @@
+sphinx==5.1.1
+sphinx-autodoc-typehints==1.19.2
+furo==2022.6.21
+xsdata==22.8

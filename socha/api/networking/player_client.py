@@ -7,7 +7,11 @@ import time
 from socha.api.networking._xflux import _XFluxClient
 from socha.api.plugin import penguins
 from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
-from socha.api.protocol.protocol import *
+from socha.api.protocol.protocol import Slot, State, AdminLobbyRequest, Authenticate, Board, Cancel, Close, Data, \
+    Definition, Entry, Error, Fishes, Fragment, From, Join, Joined, JoinedGameRoom, JoinPrepared, JoinRoom, LastMove, \
+    Left, ListType, LobbyRequest, Winner, WelcomeMessage, Union, To, Team, Step, Scores, Score, \
+    RoomOrchestrationMessage, RoomMessage, Room, Result, ResponsePacket, ProtocolPacket, Protocol, Prepare, Player, \
+    Pause, OriginalMessage, Optional, Observe, MoveRequest, ObservableRoomMessage
 
 
 def _convertBoard(protocolBoard: Board) -> penguins.Board:

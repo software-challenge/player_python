@@ -23,6 +23,7 @@ class Vector:
     def __init__(self, d_x: int = 0, d_y: int = 0):
         """
         Constructor for the Vector class.
+
         :param d_x: The x-coordinate of the vector.
         :param d_y: The y-coordinate of the vector.
         """
@@ -32,6 +33,7 @@ class Vector:
     def magnitude(self) -> float:
         """
         Calculates the length of the vector.
+
         :return: The length of the vector.
         """
         return (self.d_x ** 2 + self.d_y ** 2) ** 0.5
@@ -39,6 +41,7 @@ class Vector:
     def dot_product(self, other: 'Vector'):
         """
         Calculates the dot product of two vectors.
+
         :param other: The other vector to calculate the dot product with.
         :return: The dot product of the two vectors.
         """
@@ -47,6 +50,7 @@ class Vector:
     def cross_product(self, other: 'Vector'):
         """
         Calculates the cross product of two vectors.
+
         :param other: The other vector to calculate the cross product with.
         :return: The cross product of the two vectors.
         """
@@ -55,6 +59,7 @@ class Vector:
     def scalar_product(self, scalar: int):
         """
         Extends the vector by a scalar.
+
         :param scalar: The scalar to extend the vector by.
         :return: The extended vector.
         """
@@ -63,6 +68,7 @@ class Vector:
     def addition(self, other: 'Vector'):
         """
         Adds two vectors.
+
         :param other: The other vector to add.
         :return: The sum of the two vectors as a new vector object.
         """
@@ -71,6 +77,7 @@ class Vector:
     def subtraction(self, other: 'Vector'):
         """
         Subtracts two vectors.
+
         :param other: The other vector to subtract.
         :return: The difference of the two vectors as a new vector object.
         """
@@ -79,6 +86,7 @@ class Vector:
     def get_arc_tangent(self) -> float:
         """
         Calculates the arc tangent of the vector.
+
         :return: A radiant in float.
         """
         return math.degrees(math.atan2(self.d_y, self.d_x))
@@ -86,6 +94,7 @@ class Vector:
     def are_identically(self, other: 'Vector'):
         """
         Compares two vectors.
+
         :param other: The other vector to compare to.
         :return: True if the vectors are equal, false otherwise.
         """
@@ -94,6 +103,7 @@ class Vector:
     def are_equal(self, other: 'Vector'):
         """
         Checks if two vectors have the same magnitude and direction.
+
         :param other: The other vector to compare to.
         :return: True if the vectors are equal, false otherwise.
         """
@@ -103,6 +113,7 @@ class Vector:
     def directions(self) -> list['Vector']:
         """
         Gets the six neighbors of the vector.
+
         :return: A list of the six neighbors of the vector.
         """
         return [
@@ -117,6 +128,7 @@ class Vector:
     def is_one_hex_move(self):
         """
         Checks if the vector is a one hex move.
+
         :return: True if the vector is a one hex move, false otherwise.
         """
         return abs(self.d_x) == abs(self.d_y) or (self.d_x % 2 == 0 and self.d_y == 0)
@@ -124,6 +136,7 @@ class Vector:
     def to_coordinates(self) -> 'Coordinate':
         """
         Converts the vector to coordinate object.
+
         :return:    The coordinate object.
         """
         return Coordinate(self.d_x, self.d_y, is_double=True)
@@ -131,6 +144,7 @@ class Vector:
     def __str__(self) -> str:
         """
         Returns the string representation of the vector.
+
         :return: The string representation of the vector.
         """
         return f"Vector({self.d_x}, {self.d_x})"
@@ -144,6 +158,7 @@ class Coordinate:
     def __init__(self, x: int, y: int, is_double: bool = True):
         """
         Constructor for the Coordinates class.
+
         :param x: The x-coordinate of the coordination system.
         :param y: The y-coordinate of the coordination system.
         :param is_double: Determines if the coordinate is in double hex format. Default is True.
@@ -155,6 +170,7 @@ class Coordinate:
     def add_vector(self, vector: Vector) -> 'Coordinate':
         """
         Adds a vector to the coordinate.
+
         :param vector: The vector to add.
         :return: The new coordinate.
         """
@@ -165,6 +181,7 @@ class Coordinate:
     def subtract_vector(self, vector: Vector) -> 'Coordinate':
         """
         Subtracts a vector from the coordinate.
+
         :param vector: The vector to subtract.
         :return: The new coordinate.
         """
@@ -173,6 +190,7 @@ class Coordinate:
     def get_distance(self, other: 'Coordinate') -> float:
         """
         Calculates the distance between two coordinates.
+
         :param other: The other coordinate to calculate the distance to.
         :return: The distance between the two coordinates as Vector object.
         """
@@ -181,6 +199,7 @@ class Coordinate:
     def get_vector(self) -> Vector:
         """
         Gets the vector from the coordinate to the origin.
+
         :return: The vector from the coordinate to the origin.
         """
         return Vector(self.x, self.y)
@@ -188,20 +207,23 @@ class Coordinate:
     def get_hex_neighbors(self) -> list[Vector]:
         """
         Gets the six neighbors of the coordinate.
+
         :return: A list of the six neighbors of the coordinate.
         """
         ...
 
-    def __array_to_double_hex(self) -> 'Coordinate':
+    def _array_to_double_hex(self) -> 'Coordinate':
         """
         Converts the coordinate to double hex coordinates.
+
         :return: The double hex coordinates.
         """
         return Coordinate(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
 
-    def __double_hex_to_array(self) -> 'Coordinate':
+    def _double_hex_to_array(self) -> 'Coordinate':
         """
         Converts the double hex coordinates to coordinate.
+
         :return: The coordinate.
         """
         return Coordinate(math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), self.y, False)
@@ -209,16 +231,18 @@ class Coordinate:
     def get_array(self) -> 'Coordinate':
         """
         Checks if the coordinate is an array or double hex coordinate.
-        :return: Self if the coordinate is an array, __double_hex_to_array if the coordinate is a double hex coordinate.
+
+        :return: Self if the coordinate is an array, _double_hex_to_array if the coordinate is a double hex coordinate.
         """
-        return self if not self.is_double else self.__double_hex_to_array()
+        return self if not self.is_double else self._double_hex_to_array()
 
     def get_double_hex(self) -> 'Coordinate':
         """
         Checks if the coordinate is a double hex coordinate.
-        :return: Self if the coordinate is a double hex coordinate, __double_hex_to_array if the coordinate is an array.
+
+        :return: Self if the coordinate is a double hex coordinate, _double_hex_to_array if the coordinate is an array.
         """
-        return self if self.is_double else self.__array_to_double_hex()
+        return self if self.is_double else self._array_to_double_hex()
 
     def __str__(self) -> str:
         return f"[{self.x}, {self.y}]"
@@ -243,6 +267,7 @@ class Move:
     def get_delta(self):
         """
         Gets the distance between the origin and the destination.
+
         :return: The delta of the move as a Vector object.
         """
         return self.to_value.get_distance(self.from_value)
@@ -250,6 +275,7 @@ class Move:
     def reversed(self):
         """
         Reverses the move.
+
         :return: The reversed move.
         """
         return Move(from_value=self.to_value, to_value=self.from_value)
@@ -268,6 +294,11 @@ class Team:
     """
 
     def __init__(self, color: str):
+        """
+        A Team can be either yourself or your opponent.
+        
+        :param color: The color of the team. Can be either 'ONE' or 'TWO'.
+        """
         self.one = {
             'opponent': 'TWO',
             'name': 'ONE',
@@ -319,6 +350,13 @@ class Field:
     """
 
     def __init__(self, coordinate: Coordinate, field: int | str | Team):
+        """
+        The Field represents a field on the game board.
+        It says what state itself it has and where it is on the board.
+
+        :param coordinate: The coordinate of the field.
+        :param field: The state of the field. Can be either the number of fishes, or a Team.
+        """
         self.coordinate = coordinate
         self.field: int | str | Team
         if isinstance(field, int):
@@ -366,6 +404,11 @@ class Board:
     """
 
     def __init__(self, game_field: list[list[Field]]):
+        """
+        The Board shows the state where each field is, how many fish and which team is on each field.
+
+        :param game_field: The game field as a two-dimensional array of fields.
+        """
         self._game_field = game_field
 
     def get_empty_fields(self) -> list[Field]:
@@ -389,6 +432,7 @@ class Board:
     def is_valid(self, coordinates: Coordinate) -> bool:
         """
         Checks if the coordinates are in the boundaries of the board.
+
         :param coordinates: The coordinates of the field.
         :return: True if the field is valid, false otherwise.
         """
@@ -421,6 +465,7 @@ class Board:
     def get_field(self, position: Coordinate) -> Field:
         """
         Gets the field at the given position.
+
         :param position: The position of the field.
         :return: The field at the given position.
         :raise IndexError: If the position is not valid.
@@ -434,8 +479,9 @@ class Board:
     def get_field_or_none(self, position: Coordinate) -> Field | None:
         """
         Gets the field at the given position no matter if it is valid or not.
+
         :param position: The position of the field.
-        :return: The field at the given position,or None if the position is not valid.
+        :return: The field at the given position, or None if the position is not valid.
         """
         position = position.get_array()
         if self.is_valid(position):
@@ -461,6 +507,7 @@ class Board:
     def get_all_fields(self) -> list[Field]:
         """
         Gets all hexFields of the board.
+
         :return: All hexFields of the board.
         """
         return [self.get_field_by_index(i) for i in range(self.width() * self.height())]
@@ -468,6 +515,7 @@ class Board:
     def compare_to(self, other: 'Board') -> list[Field]:
         """
         Compares two boards and returns a list of the hexFields that are different.
+
         :param other: The other board to compare to.
         :return: A list of hexFields that are different or a empty list if the boards are equal.
         """
@@ -481,6 +529,7 @@ class Board:
     def contains(self, field: Field) -> bool:
         """
         Checks if the board contains the given field.
+
         :param field: The field to check for.
         :return: True if the board contains the field, False otherwise.
         """
@@ -492,6 +541,7 @@ class Board:
     def contains_all(self, fields: list[Field]) -> bool:
         """
         Checks if the board contains all the given fields.
+
         :param fields: The fields to check for.
         :return: True if the board contains all the given fields, False otherwise.
         """
@@ -503,6 +553,7 @@ class Board:
     def get_moves_in_direction(self, origin: Coordinate, direction: Vector) -> list[Move]:
         """
         Gets all moves in the given direction from the given origin.
+
         :param origin: The origin of the move.
         :param direction: The direction of the move.
         :return: A list with all moves that fulfill the criteria.
@@ -523,6 +574,7 @@ class Board:
     def possible_moves_from(self, position: Coordinate) -> list[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
+
         :param position: The position to start from.
         :return: A list of all possible moves from the given position.
         :raise: IndexError if the position is not valid.
@@ -537,6 +589,7 @@ class Board:
     def get_penguins(self) -> list[Field]:
         """
         Searches the board for all penguins.
+
         :return: A list of all hexFields that are occupied by a penguin.
         """
         return [field for field in self.get_all_fields() if field.is_occupied()]
@@ -544,6 +597,7 @@ class Board:
     def get_teams_penguins(self, team: Team) -> list[Coordinate]:
         """
         Searches the board for all penguins of the given team.
+
         :param team: The team to search for.
         :return: A list of all coordinates that are occupied by a penguin of the given team.
         """
@@ -559,6 +613,7 @@ class Board:
     def get_most_fish(self) -> list[Field]:
         """
         Returns a list of all fields with the most fish.
+
         :return: A list of Fields.
         """
         fields = self.get_all_fields()
@@ -571,6 +626,7 @@ class Board:
     def get_board_intersection(self, other: 'Board') -> list[Field]:
         """
         Returns a list of all fields that are in both boards.
+
         :param other: The other board to compare to.
         :return: A list of Fields.
         """
@@ -579,6 +635,7 @@ class Board:
     def get_fields_intersection(self, other: list[Field]) -> list[Field]:
         """
         Returns a list of all fields that are in both list of Fields.
+
         :param other: The other list of Fields to compare to.
         :return: A list of Fields.
         """
@@ -587,6 +644,7 @@ class Board:
     def _move(self, move: Move) -> 'Board':
         """
         Moves the penguin from the origin to the destination.
+
         :param move: The move to execute.
         :return: The new board with the moved penguin.
         """
@@ -640,6 +698,7 @@ class Fishes:
     def get_fish_by_team(self, team: Team):
         """
         Looks up the amount of fish a team has.
+
         :param team: A team object, that represents the team to get the fish amount of.
         :return: The amount of fish of the given team.
         """
@@ -672,6 +731,7 @@ class GameState:
     def __init__(self, board: Board, turn: int, start_team: Team, fishes: Fishes, last_move: Move = None):
         """
         Creates a new `GameState` with the given parameters.
+
         :param board: The board of the game.
         :param turn: The turn number of the game.
         :param start_team: The team that has the first turn.
@@ -693,6 +753,8 @@ class GameState:
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all hexFields that are not occupied by a penguin from that team.
+
+        :param current_team: The team to get the possible moves for.
         :return: A list of all possible moves from the current player's turn.
         """
         current_team = current_team or self.current_team
@@ -711,6 +773,7 @@ class GameState:
     def get_most_fish_moves(self) -> list[Move]:
         """
         Returns a list of all Moves that will get the most fish from possible moves.
+
         :return: A list of Moves.
         """
         moves = self.possible_moves
@@ -727,6 +790,7 @@ class GameState:
     def current_team_from_turn(self) -> Team:
         """
         Calculates the current team from the turn number.
+
         :return: The team that has the current turn.
         """
         current_team_by_turn = self.start_team if self.turn % 2 == 0 else self.start_team.opponent()
@@ -737,6 +801,7 @@ class GameState:
     def perform_move(self, move: Move) -> 'GameState':
         """
         Performs the given move on the current game state.
+
         :param move: The move to perform.
         :return: The new game state after the move has been performed.
         """
@@ -754,6 +819,7 @@ class GameState:
     def is_valid_move(self, move: Move) -> bool:
         """
         Checks if the given move is valid.
+        
         :param move: The move to check.
         :return: True if the move is valid, False otherwise.
         """

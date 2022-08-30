@@ -1,19 +1,13 @@
 ## <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
 # Python Client for the Software-Challenge Germany 2023
-
-> Please note that this is a very early version, which may still contain some bugs.
-> However, the client is able to play a game from start to end.
->
-> If you have any questions about this package, you can write a issue
-> or for faster answer write a message on our [Discord](https://discord.gg/ARZamDptG5) server.
->
-> If you find bugs,
-> or have suggestions for improvements,
-> please post an issue,
-> or contribute to the project yourself.
->
-> Thanks a lot!
+[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/FalconsSky/Software-Challenge-Python-Client/static%20and%20unit%20tests?label=Test)](https://github.com/FalconsSky/Software-Challenge-Python-Client)
+[![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/master)
+[![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
+[![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
+[![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
+[![Website](https://img.shields.io/badge/Software--Challenge-Website-%23D9994F)](https://software-challenge.de/)
+> Please note that this is a very early version, which may still contain some bugs. However, the client is able to play a game from start to end.
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
@@ -41,7 +35,7 @@ This should satisfy the dependencies and you can start right away.
 
 ## Getting Started
 
-If you want to start with the Software-Challenge Python client, you have to import some dependencies first.
+If you want to start with the Software-Challenge Python Client, you have to import some dependencies first.
 
 The import is kept very simple,
 since herewith all needed dependencies are imported,
@@ -60,7 +54,7 @@ class Logic(IClientHandler):
     gameState: GameState
 
     def calculate_move(self) -> Move:
-        possibleMoves = self.gameState.get_possible_moves()
+        possibleMoves = self.gameState.possible_moves
         return possibleMoves[0]
 
     def on_update(self, state: GameState):
@@ -89,8 +83,8 @@ you can of course pass start arguments.
 The following arguments are available:
 
 - ``--help``                         Print the help message.
-- ``--host <host>``                  The host to connect to. The default is 'localhost'
-- ``--port <port>``                  The port of the host. The default is 13050.
+- ``--host <host>``                  The host to connect to. The default is *localhost*.
+- ``--port <port>``                  The port of the host. The default is *13050*.
 - ``--reservation <reservation>``    Reservation code for a prepared game.
 - ``--room <room id>``               Room Id the client will try to connect.
 - ``--keep_alive``                   If present the client will keep running,
