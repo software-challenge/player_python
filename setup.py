@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='socha',
-    version='0.9.2',
+    version='0.9.3',
     packages=['socha', 'socha.api', 'socha.api.plugin', 'socha.api.protocol',
               'socha.api.networking'],
     url='https://github.com/FalconsSky/Software-Challenge-Python-Client',
