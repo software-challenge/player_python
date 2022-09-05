@@ -650,9 +650,11 @@ class Board:
         """
         new_board = Board(self._game_field)
         to_field = new_board.get_field(move.to_value)
-        new_board._game_field[move.to_value.x][move.to_value.y] = Field(coordinate=move.to_value, field=to_field.field)
+        to_field_coo = move.to_value.get_array()
+        new_board._game_field[to_field_coo.x][to_field_coo.y] = Field(coordinate=move.to_value, field=to_field.field)
         if move.from_value:
-            new_board._game_field[move.from_value.x][move.from_value.y] = Field(coordinate=move.from_value, field=0)
+            from_field_coo = move.from_value.get_array()
+            new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
         return new_board
 
     @staticmethod

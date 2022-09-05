@@ -14,7 +14,7 @@ competition for students. The students have to develop an artificial
 intelligence that plays and competes against other opponents in an
 annually changing game.
 
-   This year it is the game `Hey, danke fuer den
+   This year it is the game `Hey, danke für den
    Fisch! <https://docs.software-challenge.de/spiele/penguins>`__.
 
 Installation
@@ -22,7 +22,7 @@ Installation
 
 The installation is quite simple with pip.
 
-.. code:: shell
+.. code:: commandline
 
    pip install socha
 
@@ -30,7 +30,7 @@ If you want to install the package manually, then you have to download
 the release of your choice, unpack the package and then run ``setup.py``
 with Python.
 
-.. code:: shell
+.. code:: commandline
 
    python setup.py install --user
 
@@ -113,18 +113,3 @@ The following arguments are available:
    :target: https://docs.software-challenge.de/
 .. |Website| image:: https://img.shields.io/badge/Software--Challenge-Website-%23D9994F
    :target: https://software-challenge.de/
-
-
-.. toctree::
-   :maxdepth: 5
-   :caption: Contents:
-
-   socha
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
