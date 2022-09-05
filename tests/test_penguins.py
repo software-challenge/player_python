@@ -90,7 +90,7 @@ class FieldTest(unittest.TestCase):
 
 
 class GameStateTest(unittest.TestCase):
-    b = Board(game_field=[[Field(coordinate=Coordinate(j, i), field=1) for i in range(7)] for j in range(7)])
+    b = Board(game_field=[[Field(coordinate=Coordinate(j, i), field=1) for i in range(8)] for j in range(8)])
     g = GameState(board=b, turn=0, start_team=Team(color="ONE"), fishes=Fishes(fishes_one=0, fishes_two=5),
                   last_move=Move(from_value=Coordinate(0, 0), to_value=Coordinate(7, 7)))
 
@@ -100,13 +100,21 @@ class GameStateTest(unittest.TestCase):
         self.assertEqual(self.g.fishes.fishes_one, Fishes(fishes_one=0, fishes_two=5).fishes_one)
         self.assertEqual(self.g.fishes.fishes_two, Fishes(fishes_one=0, fishes_two=5).fishes_two)
 
-    def test_perform_move(self):
+    def test_perform_low_index_move(self):
         new_state = self.g.perform_move(Move(to_value=Coordinate(1, 1)))
         self.assertEqual(new_state.turn, 1)
         self.assertEqual(new_state.fishes.fishes_one, 1)
         self.assertEqual(new_state.fishes.fishes_two, 0)
         self.assertEqual(new_state.last_move.to_value.x, 1)
         self.assertEqual(new_state.last_move.to_value.y, 1)
+
+    def test_perform_high_index_move(self):
+        new_state = self.g.perform_move(Move(to_value=Coordinate(15, 7)))
+        self.assertEqual(new_state.turn, 1)
+        self.assertEqual(new_state.fishes.fishes_one, 1)
+        self.assertEqual(new_state.fishes.fishes_two, 0)
+        self.assertEqual(new_state.last_move.to_value.x, 15)
+        self.assertEqual(new_state.last_move.to_value.y, 7)
 
     def test_perform_error_move(self):
         self.g.board._game_field[0][0].field = 0
