@@ -17,18 +17,66 @@ have to develop an artificial intelligence that plays and competes against other
 > **[Hey, danke für den Fisch!](https://docs.software-challenge.de/spiele/penguins)**.
 
 ## Installation
+Two methods are presented here to install the `socha` client. 
+The first one is the fastest to get started right away. 
+However, 
+this method will not make it possible to run your player in the competition system, 
+since there is no Internet connection that allows you to download packages.
+Therefore, 
+the possibility of a virtual environment is presented, 
+which installs the packages inside the folder.
+
+> Pleas make sure that you have at least **Python 3.10** installed.
+> Check with `$ python -V` or `$ python3 -V`.
+> - *Windows: `> winget install -e --id Python.Python.3.10`*
+> - *Debian: `$ sudo apt install python3.10`*
+> - *Arch: `$ sudo pacman -S python`*
+### Globally
 
 The installation is quite simple with pip.
 
-```commandline
-pip install socha
+```shell
+$ pip install socha
 ```
 
 If you want to install the package manually, then you have to download the release of your choice, unpack the package
 and then run `setup.py` with Python.
 
-```commandline
-python setup.py install --user
+```shell
+$ python setup.py install --user
+```
+
+This should satisfy the dependencies and you can start right away.
+
+### Virtual Environment
+
+To create a virtual environment, 
+you should first create a directory in which you want to develop your player 
+and than enter that directory.
+
+```shell
+$ mkdir my_player
+$ cd my_player
+```
+Now you can create the virtual environment (venv).
+```shell
+$ python -m venv venv/
+```
+This takes a moment. After the *venv* is created, you can open it.
+
+On Linux:
+```shell
+$ source venv/bin/activate
+```
+On Windows:
+```bash
+> Set-ExecutionPolicy Unrestricted -Scope Process
+> .\venv\Scripts\activate
+```
+It should open the *venv* and you can now install packages and run your scripts here.
+To develop your player you just have to install the package socha with `pip`.
+```shell
+(venv) $ pip install socha
 ```
 
 This should satisfy the dependencies and you can start right away.
@@ -59,9 +107,6 @@ class Logic(IClientHandler):
 
     def on_update(self, state: GameState):
         self.gameState = state
-
-    def on_error(self, logMessage: str):
-        ...
 ````
 
 The above example is the simplest working Logic you can build. As you can see the Logic must inherit from
@@ -75,18 +120,49 @@ if __name__ == "__main__":
     Starter(Logic())
 ````
 
+### Start arguments
 If you want to run your logic from the console,
 you can of course pass start arguments.
 > Note that any arguments passed as startup parameters will override those in the code,
 > including the ones you set yourself.
 
-The following arguments are available:
+| argument                                                | description                                                                                  |
+|---------------------------------------------------------|----------------------------------------------------------------------------------------------|
+| `` --help ``                                            | Prints a help message.                                                                       |
+| `` -h HOST `` ,  `` --host HOST ``                      | The host to connect to. The default is 'localhost'.                                          |
+| `` -p PORT `` ,  `` --port PORT ``                      | The port of the host. The default is 13050.                                                  |
+| `` -r RESERVATION `` ,  `` --reservation RESERVATION `` | Reservation code for a prepared game.                                                        |
+| `` -R ROOM `` ,  `` --room ROOM ``                      | Room Id the client will try to connect.                                                      |
+| `` -s `` ,  `` --survive ``                             | If present the client will keep running, even if the connection to the server is terminated. |
+| `` -l `` ,  `` --log ``                                 | If present the client will write a log file to the current directory.                        |
 
-- ``--help``                         Print the help message.
-- ``--host <host>``                  The host to connect to. The default is *localhost*.
-- ``--port <port>``                  The port of the host. The default is *13050*.
-- ``--reservation <reservation>``    Reservation code for a prepared game.
-- ``--room <room id>``               Room Id the client will try to connect.
-- ``--keep_alive``                   If present the client will keep running,
-  even if the connection to the server is terminated.
-- ``--write_log``                    If present the client will write a log file to the current directory.
+## Make your player ready to hand in
+
+To make your player usable for the competition system, 
+you need to create a virtual environment, 
+as described [above](#virtual-environment).
+
+Once you have done this, 
+you still need to create a shell script 
+that uses the contest system as the entry point for your player.
+It **must** be named `start.sh` because otherwise it cannot be found.
+There you must enter the following and place it in the root of your directory.
+```shell
+#!/bin/sh
+chmod +x logic.py
+. venv/bin/activate
+python ./logic.py "$@"
+```
+
+When you have done this, 
+you should have a directory structure that looks something like this:
+````
+my_player/
+├─ venv/
+├─ logic.py
+├─ start.sh
+````
+The `my_player` directory, 
+or whatever you named yours, 
+then just needs to be packaged as a ZIP archive 
+and your player is ready to be uploaded. 🥳🎉
