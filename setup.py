@@ -1,5 +1,8 @@
 from setuptools import setup
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
     name='socha',
     version='0.9.3',
@@ -10,5 +13,6 @@ setup(
     author='FalconsSky',
     author_email='stu222782@mail.uni-kiel.de',
     description='This is the package for the Software-Challenge Germany 2023. This Season the game will be \'Hey, '
-                'danke für den Fisch\' a.k.a. \'Penguins\' in short. '
+                'danke für den Fisch\' a.k.a. \'Penguins\' in short. ',
+    install_requires=required
 )
