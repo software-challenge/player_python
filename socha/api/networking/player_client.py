@@ -7,11 +7,8 @@ import time
 from socha.api.networking._xflux import _XFluxClient
 from socha.api.plugin import penguins
 from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
-from socha.api.protocol.protocol import Slot, State, AdminLobbyRequest, Authenticate, Board, Cancel, Close, Data, \
-    Definition, Entry, Error, Fishes, Fragment, From, Join, Joined, JoinedGameRoom, JoinPrepared, JoinRoom, LastMove, \
-    Left, ListType, LobbyRequest, Winner, WelcomeMessage, Union, To, Team, Step, Scores, Score, \
-    RoomOrchestrationMessage, RoomMessage, Room, Result, ResponsePacket, ProtocolPacket, Protocol, Prepare, Player, \
-    Pause, OriginalMessage, Optional, Observe, MoveRequest, ObservableRoomMessage
+from socha.api.protocol.protocol import State, Board, Data, \
+    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, ObservableRoomMessage
 
 
 def _convertBoard(protocolBoard: Board) -> penguins.Board:
@@ -30,6 +27,8 @@ def _convertBoard(protocolBoard: Board) -> penguins.Board:
 
 
 class IClientHandler:
+    history: list[GameState | Error | Result] = []
+
     def calculate_move(self) -> Move:
         """
         Calculates a move that the logic wants the server to perform in the game room.
@@ -41,7 +40,13 @@ class IClientHandler:
         :param state: The current state that server sent.
         """
 
-    def on_game_over(self, roomMessage: Result): ...
+    def on_game_over(self, roomMessage: Result):
+        """
+        If the game has ended the server will send a result message.
+        This method will called if this happens.
+
+        :param roomMessage: The Result the server has sent.
+        """
 
     def on_error(self, logMessage: str):
         """
@@ -53,13 +58,34 @@ class IClientHandler:
         :param logMessage: The message, that server sent.
         """
 
-    def on_room_message(self, data): ...
+    def on_room_message(self, data):
+        """
+        If the server sends a message that cannot be handelt by anny other method,
+        this will be called.
 
-    def on_game_prepared(self, message): ...
+        :param data: The data the Server sent.
+        """
 
-    def on_game_joined(self, room_id): ...
+    def on_game_prepared(self, message):
+        """
+        If the game has been prepared by the server this method will be called.
 
-    def on_game_observed(self, message): ...
+        :param message: The message that server sends with the response.
+        """
+
+    def on_game_joined(self, room_id):
+        """
+        If the client has successfully joined a game room this method will be called.
+
+        :param room_id: The room id the client has joined.
+        """
+
+    def on_game_observed(self, message):
+        """
+        If the client successfully joined as observer this method will be called.
+
+        :param message: The message that server sends with the response.
+        """
 
 
 class _PlayerClient(_XFluxClient):
@@ -111,14 +137,14 @@ class _PlayerClient(_XFluxClient):
                     game_state = GameState(turn=data.turn, start_team=Team(data.start_team),
                                            board=_convertBoard(data.board), last_move=data.last_move,
                                            fishes=penguins.Fishes(data.fishes.int_value[0], data.fishes.int_value[1]))
+                    self.game_handler.history.append(game_state)
                     self.game_handler.on_update(game_state)
                 elif isinstance(data, Result):
+                    self.game_handler.history.append(data)
                     self.game_handler.on_game_over(data)
-                elif isinstance(data, Error):
-                    # TODO Logger
-                    self.game_handler.on_error(data.message)
             if isinstance(data, Error):
                 logging.error(data.message)
+                self.game_handler.history.append(data)
                 self.game_handler.on_error(data.message)
             else:
                 self.game_handler.on_room_message(data)

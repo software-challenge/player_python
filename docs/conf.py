@@ -5,7 +5,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'Software-Challenge-Python-Client'
+project = 'socha player template'
 copyright = '2022, Falcon'
 author = 'Falcon'
 
@@ -33,4 +33,3 @@ html_theme = 'furo'
 todo_include_todos = True
 
 autoclass_content = 'both'
-

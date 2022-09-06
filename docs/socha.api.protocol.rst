@@ -32,7 +32,6 @@ Module contents
 ---------------
 
 .. automodule:: socha.api.protocol
-   :ignore-module-all:
    :members:
    :undoc-members:
    :show-inheritance:

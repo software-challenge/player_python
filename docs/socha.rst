@@ -19,3 +19,11 @@ socha.starter module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: socha
+   :members:
+   :undoc-members:
+   :show-inheritance:

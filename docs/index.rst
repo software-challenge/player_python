@@ -30,9 +30,9 @@ presented, which installs the packages inside the folder.
    Pleas make sure that you have at least **Python 3.10** installed.
    Check with ``$ python -V`` or ``$ python3 -V``.
 
-   -  *Windows: ``> winget install -e --id Python.Python.3.10``*
-   -  *Debian: ``$ sudo apt install python3.10``*
-   -  *Arch: ``$ sudo pacman -S python``*
+   -  Windows: ``> winget install -e --id Python.Python.3.10``
+   -  Debian: ``$ sudo apt install python3.10``
+   -  Arch: ``$ sudo pacman -S python``
 
 Globally
 ~~~~~~~~
@@ -148,20 +148,31 @@ start arguments.
    Note that any arguments passed as startup parameters will override
    those in the code, including the ones you set yourself.
 
-==================================================
-============================================================================================
-argument                                           description
-==================================================
-============================================================================================
-``--help``                                         Prints a help message.
-``-h HOST`` , ``--host HOST``                      The host to connect to. The default is 'localhost'.
-``-p PORT`` , ``--port PORT``                      The port of the host. The default is 13050.
-``-r RESERVATION`` , ``--reservation RESERVATION`` Reservation code for a prepared game.
-``-R ROOM`` , ``--room ROOM``                      Room Id the client will try to connect.
-``-s`` , ``--survive``                             If present the client will keep running, even if the connection to the server is terminated.
-``-l`` , ``--log``                                 If present the client will write a log file to the current directory.
-==================================================
-============================================================================================
++----------------------------------+----------------------------------+
+| argument                         | description                      |
++==================================+==================================+
+| ``--help``                       | Prints a help message.           |
++----------------------------------+----------------------------------+
+| ``-h HOST`` , ``--host HOST``    | The host to connect to. The      |
+|                                  | default is 'localhost'.          |
++----------------------------------+----------------------------------+
+| ``-p PORT``, ``--port PORT``     | The port of the host. The        |
+|                                  | default is 13050.                |
++----------------------------------+----------------------------------+
+| ``-r RESERVATION``,              | Reservation code for a prepared  |
+| ``--reservation RESERVATION``    | game.                            |
++----------------------------------+----------------------------------+
+| ``-R ROOM``, ``--room ROOM``     | Room Id the client will try to   |
+|                                  | connect.                         |
++----------------------------------+----------------------------------+
+| ``-s``, ``--survive``            | If present the client will keep  |
+|                                  | running, even if the connection  |
+|                                  | to the server is terminated.     |
++----------------------------------+----------------------------------+
+| ``-l``, ``--log``                | If present the client will write |
+|                                  | a log file to the current        |
+|                                  | directory.                       |
++----------------------------------+----------------------------------+
 
 Make your player ready to hand in
 ---------------------------------
@@ -188,9 +199,9 @@ looks something like this:
 ::
 
    my_player/
-   ├─ venv/
-   ├─ logic.py
-   ├─ start.sh
+   |- venv/
+   |- logic.py
+   |- start.sh
 
 The ``my_player`` directory, or whatever you named yours, then just
 needs to be packaged as a ZIP archive and your player is ready to be
@@ -208,3 +219,18 @@ uploaded. 🥳🎉
    :target: https://docs.software-challenge.de/
 .. |Website| image:: https://img.shields.io/badge/Software--Challenge-Website-%23D9994F
    :target: https://software-challenge.de/
+
+
+Indices and tables
+==================
+
+.. toctree::
+   :maxdepth: 5
+   :caption: Contents:
+
+   socha
+
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
