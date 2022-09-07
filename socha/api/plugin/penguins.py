@@ -127,7 +127,7 @@ class Vector:
 
     def is_one_hex_move(self):
         """
-        Checks if the vector is a one hex move.
+        Checks if the vector points to a hexagonal field that is a direct neighbor.
 
         :return: True if the vector is a one hex move, false otherwise.
         """
@@ -152,7 +152,10 @@ class Vector:
 
 class Coordinate:
     """
-    Representation of a coordination system in the hexagonal grid.
+    Represents a coordinate both in the normal two-dimensional array and on a hexagonal board.
+        *Note that the board is stored in a normal array,
+        only to represent relations in a hexagonal grid the indices of the normal array are converted,
+        so that one can work with it better in this hexagonal grid.*
     """
 
     def __init__(self, x: int, y: int, is_double: bool = True):
@@ -506,18 +509,18 @@ class Board:
 
     def get_all_fields(self) -> list[Field]:
         """
-        Gets all hexFields of the board.
+        Gets all Fields of the board.
 
-        :return: All hexFields of the board.
+        :return: All Fields of the board.
         """
         return [self.get_field_by_index(i) for i in range(self.width() * self.height())]
 
     def compare_to(self, other: 'Board') -> list[Field]:
         """
-        Compares two boards and returns a list of the hexFields that are different.
+        Compares two boards and returns a list of the Fields that are different.
 
         :param other: The other board to compare to.
-        :return: A list of hexFields that are different or a empty list if the boards are equal.
+        :return: A list of Fields that are different or a empty list if the boards are equal.
         """
         fields = []
         for x in range(len(self._game_field)):
@@ -590,7 +593,7 @@ class Board:
         """
         Searches the board for all penguins.
 
-        :return: A list of all hexFields that are occupied by a penguin.
+        :return: A list of all Fields that are occupied by a penguin.
         """
         return [field for field in self.get_all_fields() if field.is_occupied()]
 
@@ -713,21 +716,21 @@ class GameState:
        moves.
 
        This includes:
-         - a consecutive turn number (round & turn) and who's turn it is
-         - the board
-         - the last move made
+            - the board
+            - a consecutive turn number (round & turn) and who's turn it is
+            - the team that has started the game
+            - the number of fishes each player has
+            - the last move made
 
        The `GameState` is thus the central object through which all essential information of the current game can be
        accessed.
 
        Therefore, for easier handling, it offers further aids, such as:
-         - a method to calculate available moves and to execute moves
+            - a method to calculate available moves
+            - a method to perform a move for simulating future game states
 
        The game server sends a new copy of the `GameState` to both participating players after each completed move,
-       describing the then current state. Information about the course of the game can only be obtained from the
-       `GameState` to a limited extent and must therefore be recorded by a game client itself if necessary.
-
-       In addition to the actual information certain partial information can be queried.
+       describing the then current state.
        """
 
     def __init__(self, board: Board, turn: int, start_team: Team, fishes: Fishes, last_move: Move = None):
@@ -754,7 +757,7 @@ class GameState:
     def _get_possible_moves(self, current_team: Team = None) -> list[Move]:
         """
         Gets all possible moves for the current team.
-        That includes all possible moves from all hexFields that are not occupied by a penguin from that team.
+        That includes all possible moves from all Fields that are not occupied by a penguin from that team.
 
         :param current_team: The team to get the possible moves for.
         :return: A list of all possible moves from the current player's turn.
