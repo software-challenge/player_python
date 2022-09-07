@@ -712,7 +712,7 @@ class Fishes:
 
 class GameState:
     """
-        A `GameState` contains all information, that describes the game state at a given time, that is, between two game
+       A `GameState` contains all information, that describes the game state at a given time, that is, between two game
        moves.
 
        This includes:
