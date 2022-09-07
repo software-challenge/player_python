@@ -658,7 +658,7 @@ class Board:
         if move.from_value:
             from_field_coo = move.from_value.get_array()
             new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
-            return new_board
+        return new_board
 
     @staticmethod
     def _fillUpString(placeholder: str, string: str) -> str:
