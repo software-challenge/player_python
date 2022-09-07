@@ -110,7 +110,7 @@ class Vector:
         return self.magnitude() == other.magnitude() and self.get_arc_tangent() == other.get_arc_tangent()
 
     @property
-    def directions(self) -> list['Vector']:
+    def directions(self):
         """
         Gets the six neighbors of the vector.
 
@@ -207,7 +207,7 @@ class Coordinate:
         """
         return Vector(self.x, self.y)
 
-    def get_hex_neighbors(self) -> list[Vector]:
+    def get_hex_neighbors(self):
         """
         Gets the six neighbors of the coordinate.
 
@@ -352,7 +352,7 @@ class Field:
     Represents a field in the game.
     """
 
-    def __init__(self, coordinate: Coordinate, field: int | str | Team):
+    def __init__(self, coordinate: Coordinate, field):
         """
         The Field represents a field on the game board.
         It says what state itself it has and where it is on the board.
@@ -381,13 +381,13 @@ class Field:
         """
         return isinstance(self.field, Team)
 
-    def get_fish(self) -> None | int:
+    def get_fish(self):
         """
         :return: The amount of fish on the field, None if the field is occupied.
         """
         return None if self.is_occupied() else self.field
 
-    def get_team(self) -> Team | None:
+    def get_team(self):
         """
         :return: The team of the field if it is occupied by penguin, None otherwise.
         """
@@ -406,7 +406,7 @@ class Board:
     Class which represents a game board. Consisting of a two-dimensional array of fields.
     """
 
-    def __init__(self, game_field: list[list[Field]]):
+    def __init__(self, game_field):
         """
         The Board shows the state where each field is, how many fish and which team is on each field.
 
@@ -414,7 +414,7 @@ class Board:
         """
         self._game_field = game_field
 
-    def get_empty_fields(self) -> list[Field]:
+    def get_empty_fields(self):
         """
         :return: A list of all empty fields.
         """
@@ -479,7 +479,7 @@ class Board:
 
         raise IndexError(f"Index out of range: [x={array_coordinates.x}, y={array_coordinates.y}]")
 
-    def get_field_or_none(self, position: Coordinate) -> Field | None:
+    def get_field_or_none(self, position: Coordinate):
         """
         Gets the field at the given position no matter if it is valid or not.
 
@@ -507,7 +507,7 @@ class Board:
         y = index % self.width()
         return self.get_field(Coordinate(x, y, False))
 
-    def get_all_fields(self) -> list[Field]:
+    def get_all_fields(self):
         """
         Gets all Fields of the board.
 
@@ -515,7 +515,7 @@ class Board:
         """
         return [self.get_field_by_index(i) for i in range(self.width() * self.height())]
 
-    def compare_to(self, other: 'Board') -> list[Field]:
+    def compare_to(self, other: 'Board'):
         """
         Compares two boards and returns a list of the Fields that are different.
 
@@ -541,7 +541,7 @@ class Board:
                 return True
         return False
 
-    def contains_all(self, fields: list[Field]) -> bool:
+    def contains_all(self, fields):
         """
         Checks if the board contains all the given fields.
 
@@ -553,7 +553,7 @@ class Board:
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: Coordinate, direction: Vector) -> list[Move]:
+    def get_moves_in_direction(self, origin: Coordinate, direction: Vector):
         """
         Gets all moves in the given direction from the given origin.
 
@@ -574,7 +574,7 @@ class Board:
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
 
-    def possible_moves_from(self, position: Coordinate) -> list[Move]:
+    def possible_moves_from(self, position: Coordinate):
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
 
@@ -589,7 +589,7 @@ class Board:
             moves.extend(self.get_moves_in_direction(position, direction))
         return moves
 
-    def get_penguins(self) -> list[Field]:
+    def get_penguins(self):
         """
         Searches the board for all penguins.
 
@@ -597,7 +597,7 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field.is_occupied()]
 
-    def get_teams_penguins(self, team: Team) -> list[Coordinate]:
+    def get_teams_penguins(self, team: Team):
         """
         Searches the board for all penguins of the given team.
 
@@ -613,7 +613,7 @@ class Board:
                     teams_penguins.append(coordinates)
         return teams_penguins
 
-    def get_most_fish(self) -> list[Field]:
+    def get_most_fish(self):
         """
         Returns a list of all fields with the most fish.
 
@@ -626,7 +626,7 @@ class Board:
                 fields = fields[:i]
         return fields
 
-    def get_board_intersection(self, other: 'Board') -> list[Field]:
+    def get_board_intersection(self, other: 'Board'):
         """
         Returns a list of all fields that are in both boards.
 
@@ -635,7 +635,7 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field in other.get_all_fields()]
 
-    def get_fields_intersection(self, other: list[Field]) -> list[Field]:
+    def get_fields_intersection(self, other):
         """
         Returns a list of all fields that are in both list of Fields.
 
@@ -658,7 +658,7 @@ class Board:
         if move.from_value:
             from_field_coo = move.from_value.get_array()
             new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
-        return new_board
+            return new_board
 
     @staticmethod
     def _fillUpString(placeholder: str, string: str) -> str:
@@ -712,7 +712,7 @@ class Fishes:
 
 class GameState:
     """
-       A `GameState` contains all information, that describes the game state at a given time, that is, between two game
+        A `GameState` contains all information, that describes the game state at a given time, that is, between two game
        moves.
 
        This includes:
@@ -754,7 +754,7 @@ class GameState:
         self.current_pieces = self.board.get_teams_penguins(self.current_team)
         self.possible_moves = self._get_possible_moves(self.current_team)
 
-    def _get_possible_moves(self, current_team: Team = None) -> list[Move]:
+    def _get_possible_moves(self, current_team: Team = None):
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all Fields that are not occupied by a penguin from that team.
@@ -775,7 +775,7 @@ class GameState:
                 moves.extend(self.board.possible_moves_from(piece))
         return moves
 
-    def get_most_fish_moves(self) -> list[Move]:
+    def get_most_fish_moves(self):
         """
         Returns a list of all Moves that will get the most fish from possible moves.
 
