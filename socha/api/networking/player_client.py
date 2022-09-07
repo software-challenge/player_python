@@ -3,6 +3,7 @@ This module handels the communication with the api and the students logic.
 """
 import logging
 import time
+from typing import List, Union
 
 from socha.api.networking._xflux import _XFluxClient
 from socha.api.plugin import penguins
@@ -16,9 +17,9 @@ def _convertBoard(protocolBoard: Board) -> penguins.Board:
     Converts a protocol Board to a usable gam board for using in the logic.
     :rtype: object
     """
-    boardList: list[list[Field]] = []
+    boardList: List[List[Field]] = []
     for y, row in enumerate(protocolBoard.list_value):
-        rowList: list[Field] = []
+        rowList: List[Field] = []
         for x, fieldsValue in enumerate(row.field_value):
             fieldCoordinate = Coordinate(x, y, is_double=False).get_double_hex()
             rowList.append(Field(coordinate=fieldCoordinate, field=fieldsValue))
@@ -27,7 +28,7 @@ def _convertBoard(protocolBoard: Board) -> penguins.Board:
 
 
 class IClientHandler:
-    history: list[GameState | Error | Result] = []
+    history: List[Union[GameState, Error, Result]] = []
 
     def calculate_move(self) -> Move:
         """

@@ -4,18 +4,22 @@ build-backend = "hatchling.build"
 
 [project]
 name = "socha"
-version = "0.9.4"
+version = "0.9.5"
 authors = [
     { name = "FalconsSky", email = "stu222782@mail.uni-kiel.de" },
 ]
 description = "This is the package for the Software-Challenge Germany 2023. This Season the game will be 'Hey, danke für den Fisch' a.k.a. 'Penguins' in short."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.6"
 dependencies = [
-    "xsdata~=22.8"
+    "xsdata==22.7"
 ]
 classifiers = [
     "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Operating System :: OS Independent",

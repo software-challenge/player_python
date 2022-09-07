@@ -106,7 +106,7 @@ class _XFluxClient:
         """
         The client loop.
         This is the main loop,
-        where the client waites for messages from the server
+        where the client waits for messages from the server
         and handles them accordingly.
         """
         while self.running:

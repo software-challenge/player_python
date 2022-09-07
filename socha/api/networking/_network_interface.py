@@ -4,6 +4,7 @@ Handels the tcp connection to the server.
 import logging
 import re
 import socket
+from typing import Union
 
 
 class _NetworkInterface:
@@ -50,7 +51,7 @@ class _NetworkInterface:
         self.socket.sendall(data)
         logging.debug("Sent data: %s", data.decode("utf-8"))
 
-    def receive_socket_data(self) -> bytes | None:
+    def receive_socket_data(self) -> Union[bytes, None]:
         """
         Receives the raw tcp socket packages.
         :return: A package in bytes, None if there where no packages.

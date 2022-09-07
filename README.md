@@ -3,11 +3,11 @@
 # Python Client for the Software-Challenge Germany 2023
 
 [![GitHub Workflow Status](https://img.shields.io/github/workflow/status/FalconsSky/Software-Challenge-Python-Client/static%20and%20unit%20tests?label=Test)](https://github.com/FalconsSky/Software-Challenge-Python-Client)
-[![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/master)
+[![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/latest/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
-[![Website](https://img.shields.io/badge/Software--Challenge-Website-%23D9994F)](https://software-challenge.de/)
 > Please note that this is a very early version, which may still contain some bugs. However, the client is able to play
 > a game from start to end.
 
@@ -29,10 +29,10 @@ Therefore,
 the possibility of a virtual environment is presented,
 which installs the packages inside the folder.
 
-> Pleas make sure that you have at least **Python 3.10** installed.
+> Pleas make sure that you have at least **Python 3.6** installed.
 > Check with `$ python -V` or `$ python3 -V`.
-> - Windows: `> winget install -e --id Python.Python.3.10`
-> - Debian: `$ sudo apt install python3.10`
+> - Windows: `> winget install -e --id Python.Python.3.6`
+> - Debian: `$ sudo apt install python3.6`
 > - Arch: `$ sudo pacman -S python`
 
 ### Globally

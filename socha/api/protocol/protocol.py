@@ -566,7 +566,7 @@ class LastMove:
 @dataclass
 class Scores:
     """
-    Then endresult of a game when its over.
+    Then result of a game when its over.
     """
 
     class Meta:
@@ -666,7 +666,7 @@ class OriginalMessage:
 class Data:
     """
     This element is sent by the server to the client to notify the client of a changing state of the game.
-    It can contain a move, gamestate, or winnig team with the reason.
+    It can contain a move, game state, or winning team with the reason.
     """
 
     class Meta:
