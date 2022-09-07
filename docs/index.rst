@@ -210,7 +210,7 @@ uploaded. 🥳🎉
 .. |GitHub Workflow Status| image:: https://img.shields.io/github/workflow/status/FalconsSky/Software-Challenge-Python-Client/static%20and%20unit%20tests?label=Test
    :target: https://github.com/FalconsSky/Software-Challenge-Python-Client
 .. |Read the Docs| image:: https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs
-   :target: https://software-challenge-python-client.readthedocs.io/en/master
+   :target: https://software-challenge-python-client.readthedocs.io/en/v0.9.4/
 .. |PyPI| image:: https://img.shields.io/pypi/v/socha?label=PyPi
    :target: https://pypi.org/project/socha/
 .. |Discord| image:: https://img.shields.io/discord/233577109363097601?color=blue&label=Discord
