@@ -1,0 +1,12 @@
+[package]
+name = "socha"
+version = "0.9.6"
+edition = "2021"
+
+[lib]
+name = "socha"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.17.1", features = ["extension-module"] }
+libm = "0.2.5"

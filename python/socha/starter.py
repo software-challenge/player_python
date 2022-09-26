@@ -5,7 +5,7 @@ import argparse
 import datetime
 import logging
 
-from socha.api.networking.player_client import _PlayerClient, IClientHandler
+from python.socha.api.networking.player_client import _PlayerClient, IClientHandler
 
 
 class Starter:

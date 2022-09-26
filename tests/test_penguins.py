@@ -1,7 +1,5 @@
 import unittest
 
-from socha.api.plugin.penguins import *
-
 
 class VectorTest(unittest.TestCase):
     def testVectorInit(self):

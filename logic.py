@@ -1,6 +1,6 @@
 import random
 
-from socha import *
+from python.socha import *
 
 
 class Logic(IClientHandler):

@@ -11,9 +11,8 @@ from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
-from socha.api.networking._network_interface import _NetworkInterface
-from socha.api.plugin.penguins import Move
-from socha.api.protocol.protocol import *
+from python.socha.api.networking._network_interface import _NetworkInterface
+from python.socha.api.plugin.penguins import Move
 
 
 def customClassFactory(clazz, params: dict):

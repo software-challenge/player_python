@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from socha.api.plugin.penguins import Team
-from socha.api.protocol.protocol_packet import AdminLobbyRequest, ResponsePacket, ProtocolPacket, LobbyRequest
-from socha.api.protocol.room_message import RoomOrchestrationMessage, RoomMessage, \
+from python.socha.api.plugin.penguins import Team
+from python.socha.api.protocol.protocol_packet import AdminLobbyRequest, ResponsePacket, ProtocolPacket, LobbyRequest
+from python.socha.api.protocol.room_message import RoomOrchestrationMessage, RoomMessage, \
     ObservableRoomMessage
 
 

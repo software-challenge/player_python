@@ -5,10 +5,10 @@ import logging
 import time
 from typing import List, Union
 
-from socha.api.networking._xflux import _XFluxClient
-from socha.api.plugin import penguins
-from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
-from socha.api.protocol.protocol import State, Board, Data, \
+from python.socha.api.networking._xflux import _XFluxClient
+from python.socha.api.plugin import penguins
+from python.socha.api.plugin.penguins import Field, GameState, Move, Coordinate
+from python.socha.api.protocol.protocol import State, Board, Data, \
     Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, ObservableRoomMessage
 
 
