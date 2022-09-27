@@ -1,26 +1,20 @@
 use pyo3::prelude::*;
 use crate::plugins::penguins::penguin::Penguin;
 
-pub struct ONE {
-    name: String,
-    opponent: Box<TWO>,
-}
+pub struct ONE {}
 
 impl ONE {
     const NAME: &'static str = "ONE";
 }
 
-pub struct TWO {
-    name: String,
-    opponent: Box<ONE>,
-}
+pub struct TWO {}
 
 impl TWO {
     const NAME: &'static str = "TWO";
 }
 
 #[pyclass]
-#[derive(PartialEq, Eq, PartialOrd, Clone,Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub enum TeamEnum {
     ONE,
     TWO,

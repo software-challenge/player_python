@@ -24,40 +24,16 @@ impl HexCoordinate {
         }
     }
 
-    pub fn to_vector(&self) -> Vector {
-        Vector {
-            x: self.x,
-            y: self.y,
-        }
-    }
-
-    pub fn add_vector(&self, vector: &Vector) -> HexCoordinate {
-        let vector: Vector = self.to_vector().add(vector);
-        HexCoordinate {
-            x: vector.x,
-            y: vector.y,
-        }
-    }
-
-    pub fn subtract_vector(&self, vector: &Vector) -> HexCoordinate {
-        let vector: Vector = self.to_vector().sub(vector);
-        HexCoordinate {
-            x: vector.x,
-            y: vector.y,
-        }
-    }
+    
 
     pub fn get_neighbours(&self) -> Vec<HexCoordinate> {
-        self.to_vector().neighbours().iter().map(|vector| HexCoordinate {
+        self.to_cartesian().to_vector().neighbours().iter().map(|vector| HexCoordinate {
             x: vector.x,
             y: vector.y,
         }).collect()
     }
 
-    pub fn distance(&self, other: &HexCoordinate) -> i32 {
-        let vector: Vector = self.to_vector().sub(&other.to_vector());
-        vector.magnitude() as i32
-    }
+    
 
     fn __repr__(&self) -> String {
         format!("HexCoordinate(x={}, y={})", self.x, self.y)
@@ -83,6 +59,34 @@ impl CartesianCoordinate {
     #[new]
     pub fn new(x: i32, y: i32) -> Self {
         CartesianCoordinate { x, y }
+    }
+
+    pub fn to_vector(&self) -> Vector {
+        Vector {
+            x: self.x,
+            y: self.y,
+        }
+    }
+
+    pub fn add_vector(&self, vector: &Vector) -> CartesianCoordinate {
+        let vector: Vector = self.to_vector().add(vector);
+        CartesianCoordinate {
+            x: vector.x,
+            y: vector.y,
+        }
+    }
+
+    pub fn subtract_vector(&self, vector: &Vector) -> CartesianCoordinate {
+        let vector: Vector = self.to_vector().sub(vector);
+        CartesianCoordinate {
+            x: vector.x,
+            y: vector.y,
+        }
+    }
+
+    pub fn distance(&self, other: &CartesianCoordinate) -> i32 {
+        let vector: Vector = self.to_vector().sub(&other.to_vector());
+        vector.magnitude() as i32
     }
 
     pub fn to_hex(&self) -> HexCoordinate {

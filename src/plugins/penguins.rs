@@ -6,3 +6,4 @@ pub mod team;
 pub mod penguin;
 pub mod field;
 pub mod board;
+pub mod bitboard;

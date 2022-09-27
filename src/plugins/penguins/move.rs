@@ -2,6 +2,8 @@ use pyo3::prelude::*;
 use crate::plugins::penguins::coordinate::HexCoordinate;
 use crate::plugins::penguins::team::Team;
 
+use super::coordinate::CartesianCoordinate;
+
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
@@ -23,8 +25,8 @@ impl Move {
 
     pub fn delta(&self) -> i32 {
         match &self.from {
-            Some(from) => from.distance(&self.to),
-            None => self.to.distance(&HexCoordinate::new(0, 0)),
+            Some(from) => from.to_cartesian().distance(&self.to.to_cartesian()),
+            None => self.to.to_cartesian().distance(&CartesianCoordinate::new(0, 0)),
         }
     }
 
