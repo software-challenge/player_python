@@ -1,21 +1,21 @@
 use pyo3::prelude::*;
 
 use crate::plugins::penguins::coordinate::HexCoordinate;
-use crate::plugins::penguins::team::Team;
+use super::team::TeamEnum;
 
 #[pyclass]
-#[derive(PartialEq, Eq, PartialOrd, Clone,Debug, Hash)]
+#[derive(PartialEq, Copy, Eq, PartialOrd, Clone,Debug, Hash)]
 pub struct Penguin {
     #[pyo3(get, set)]
     pub position: HexCoordinate,
     #[pyo3(get, set)]
-    pub team: Team,
+    pub team: TeamEnum,
 }
 
 #[pymethods]
 impl Penguin {
     #[new]
-    pub(crate) fn new(position: HexCoordinate, team: Team) -> Self {
+    pub(crate) fn new(position: HexCoordinate, team: TeamEnum) -> Self {
         Penguin { position, team }
     }
 

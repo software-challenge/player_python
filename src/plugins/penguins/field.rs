@@ -5,10 +5,10 @@ use pyo3::prelude::*;
 
 use crate::plugins::penguins::coordinate::HexCoordinate;
 use crate::plugins::penguins::penguin::Penguin;
-use crate::plugins::penguins::team::Team;
+use super::team::TeamEnum;
 
 #[pyclass]
-#[derive(Clone)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Debug, Hash)]
 pub struct Field {
     #[pyo3(get, set)]
     pub coordinate: HexCoordinate,
@@ -37,7 +37,7 @@ impl Field {
         self.penguin.is_some()
     }
 
-    pub fn get_penguin_team(&self) -> Option<Team> {
+    pub fn get_penguin_team(&self) -> Option<TeamEnum> {
         match &self.penguin {
             Some(penguin) => Some(penguin.team.clone()),
             None => None,

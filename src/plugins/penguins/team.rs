@@ -14,7 +14,7 @@ impl TWO {
 }
 
 #[pyclass]
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Copy, Eq, PartialOrd, Clone, Debug, Hash)]
 pub enum TeamEnum {
     ONE,
     TWO,
@@ -43,22 +43,12 @@ pub struct Team {
 #[pymethods]
 impl Team {
     #[new]
-    pub fn new(name: String) -> Self {
-        if name == ONE::NAME {
+    pub fn new(name: TeamEnum, penguins: Vec<Penguin>, fish: i32) -> Self {
             Team {
-                name: TeamEnum::ONE,
-                penguins: Vec::new(),
-                fish: 0,
+                name,
+                penguins,
+                fish,
             }
-        } else if name == TWO::NAME {
-            Team {
-                name: TeamEnum::TWO,
-                penguins: Vec::new(),
-                fish: 0,
-            }
-        } else {
-            panic!("ValueError");
-        }
     }
 
     pub fn opponent(&self) -> Team {

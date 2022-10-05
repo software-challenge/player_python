@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 use crate::plugins::penguins::coordinate::HexCoordinate;
-use crate::plugins::penguins::team::Team;
+use crate::TeamEnum;
 
 use super::coordinate::CartesianCoordinate;
 
@@ -9,22 +9,22 @@ use super::coordinate::CartesianCoordinate;
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub struct Move {
     #[pyo3(get, set)]
-    pub from: Option<HexCoordinate>,
+    pub _from: Option<HexCoordinate>,
     #[pyo3(get, set)]
     pub to: HexCoordinate,
     #[pyo3(get, set)]
-    pub team: Team,
+    pub team: TeamEnum,
 }
 
 #[pymethods]
 impl Move {
     #[new]
-    pub fn new(from: Option<HexCoordinate>, to: HexCoordinate, team: Team) -> Self {
-        Move { from, to, team }
+    pub fn new(_from: Option<HexCoordinate>, to: HexCoordinate, team: TeamEnum) -> Self {
+        Move { _from, to, team }
     }
 
     pub fn delta(&self) -> i32 {
-        match &self.from {
+        match &self._from {
             Some(from) => from.to_cartesian().distance(&self.to.to_cartesian()),
             None => self.to.to_cartesian().distance(&CartesianCoordinate::new(0, 0)),
         }
@@ -32,7 +32,17 @@ impl Move {
 
     pub fn reverse(&self) -> Move {
         Move::new(Some(self.to.clone()),
-                  self.from.clone().unwrap_or(HexCoordinate::new(0, 0)),
+                  self._from.clone().unwrap_or(HexCoordinate::new(0, 0)),
                   self.team.clone())
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("Move(from={:?}, to={}, team={})", self._from, self.to, self.team)
+    }
+}
+
+impl std::fmt::Display for Move {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "Move(from={:?}, to={}, team={})", self._from, self.to, self.team)
     }
 }

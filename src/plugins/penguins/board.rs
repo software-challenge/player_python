@@ -4,7 +4,7 @@ use crate::plugins::penguins::coordinate::{HexCoordinate, CartesianCoordinate};
 use crate::plugins::penguins::field::Field;
 use crate::plugins::penguins::penguin::Penguin;
 use crate::plugins::penguins::r#move::Move;
-use crate::plugins::penguins::team::{Team, TeamEnum};
+use crate::plugins::penguins::team::TeamEnum;
 use crate::plugins::penguins::vector::Vector;
 use crate::plugins::penguins::bitboard::BitBoard;
 
@@ -38,18 +38,16 @@ impl Board {
             for j in 0..7 {
                 let index = i * 5 + j;
                 let coordinate: HexCoordinate = CartesianCoordinate::new(i, j).to_hex();
-                if self.board.one & (1 << index) != 0 {
-                    let team: Team = Team::new("ONE".to_string());
-                    let penguin: Penguin = Penguin::new(coordinate, team);
+                if self.board.one >> index & 1 != 0 {
+                    let penguin: Penguin = Penguin::new(coordinate, TeamEnum::ONE);
                     let field: Field = Field::new(coordinate, Some(penguin), 0);
                     row.push(field);
-                } else if self.board.two & (1 << index) != 0 {
-                    let team = Team::new("TWO".to_string());
-                    let penguin: Penguin = Penguin::new(coordinate, team);
+                } else if self.board.two >> index & 1 != 0 {
+                    let penguin: Penguin = Penguin::new(coordinate, TeamEnum::TWO);
                     let field: Field = Field::new(coordinate, Some(penguin), 0);
                     row.push(field);
                 } else {
-                    let fish: i32 = self.board.get_fish(coordinate.to_cartesian().to_index());
+                    let fish: i32 = self.board.get_fish(coordinate.to_cartesian().to_index().unwrap());
                     let field: Field = Field::new(coordinate, None, fish);
                     row.push(field);
                 }
@@ -62,10 +60,10 @@ impl Board {
     fn get_empty_fields(&self) -> Vec<Field> {
         let mut empty_fields = Vec::new();
         let empty_bits: u64 = self.board.get_empty_bits();
-        for i in 0..63 {
-            if empty_bits & (1 << i) != 0 {
-                let coordinate: HexCoordinate = CartesianCoordinate::from_index(i).to_hex();
-                let fish: i32 = self.board.get_fish(coordinate.to_cartesian().to_index());
+        for index in 0..63 {
+            if empty_bits >> index & 1 != 0 {
+                let coordinate: HexCoordinate = CartesianCoordinate::from_index(index).to_hex();
+                let fish: i32 = self.board.get_fish(coordinate.to_cartesian().to_index().unwrap());
                 let field: Field = Field::new(coordinate, None, fish);
                 empty_fields.push(field);
             }
@@ -74,39 +72,24 @@ impl Board {
     }
 
     fn is_occupied(&self,  field: Field) -> bool {
-        self.board.is_occupied(field.coordinate.to_cartesian().to_index())
+        self.board.is_occupied(field.coordinate.to_cartesian().to_index().unwrap())
     }
 
     pub fn is_valid(&self, coordinate: HexCoordinate) -> bool {
-        self.board.is_valid(coordinate.to_cartesian().to_index())
+        self.board.is_valid(coordinate.to_cartesian().to_index().unwrap())
     }
 
     pub fn get_field(&self, coordinate: HexCoordinate) -> Field {
         if self.is_valid(coordinate) {
             panic!("Coordinate is not valid");
         } else {
-            let index: u64 = coordinate.to_cartesian().to_index();
-            let bitboard: BitBoard = self.board.get_field(index);
-            if bitboard.one != 0 {
-                let team: Team = Team::new("ONE".to_string());
-                let penguin: Penguin = Penguin::new(coordinate, team);
-                let field: Field = Field::new(coordinate, Some(penguin), 0);
-                field
-            } else if bitboard.two != 0 {
-                let team: Team = Team::new("TWO".to_string());
-                let penguin: Penguin = Penguin::new(coordinate, team);
-                let field: Field = Field::new(coordinate, Some(penguin), 0);
-                field
-            } else {
-                let fish: i32 = self.board.get_fish(index);
-                let field: Field = Field::new(coordinate, None, fish);
-                field
-            }
+            let index: u64 = coordinate.to_cartesian().to_index().unwrap();
+            return self.board.get_field(index);
         }
     }
 
     pub fn contains_field(&self, field: Field) -> bool {
-        self.board.contains_field(field.coordinate.to_cartesian().to_index())
+        self.board.contains_field(field.coordinate.to_cartesian().to_index().unwrap())
     }
 
     pub fn contains(&self, fields: Vec<Field>) -> bool {
@@ -118,66 +101,50 @@ impl Board {
         true
     }
 
-    pub fn get_directive_moves(&self, coordinate: HexCoordinate, direction: Vector, team: Team) -> Vec<Move> {
-        self.board.get_directive_moves(coordinate.to_cartesian().to_index(), direction, team)
+    pub fn get_directive_moves(&self, coordinate: HexCoordinate, direction: Vector, team: TeamEnum) -> Vec<Move> {
+        self.board.get_directive_moves(coordinate.to_cartesian().to_index().unwrap(), direction, team)
     }
 
-    pub fn get_moves_from(&self, coordinate: HexCoordinate, team: Team) -> Vec<Move> {
-        self.board.get_moves_from(coordinate.to_cartesian().to_index(), team)
+    pub fn get_moves_from(&self, coordinate: HexCoordinate, team: TeamEnum) -> Vec<Move> {
+        self.board.get_moves_from(coordinate.to_cartesian().to_index().unwrap(), team)
     }
 
-    pub fn get_penguins(&self) -> Vec<Field> {
-        let mut penguins = Vec::new();
-        for i in 0..64 {
-            if self.board.one & (1 << i) != 0 {
-                let coordinate: HexCoordinate = CartesianCoordinate::from_index(i).to_hex();
-                penguins.push(Field {
-                    coordinate: coordinate.clone(),
-                    fish: 0,
-                    penguin: Some(Penguin {
-                        position: coordinate.clone(),
-                        team: Team::new("ONE".to_string()),
-                    }),
+    pub fn get_penguins(&self) -> Vec<Penguin> {
+        let mut penguins: Vec<Penguin> = Vec::new();
+        for index in 0..64 {
+            if self.board.one >> index & 1 != 0 {
+                let coordinate: HexCoordinate = CartesianCoordinate::from_index(index).to_hex();
+                penguins.push(Penguin {
+                    position: coordinate.clone(),
+                    team: TeamEnum::ONE
                 });
             }
-            if self.board.two & (1 << i) != 0 {
-                let coordinate: HexCoordinate = CartesianCoordinate::from_index(i).to_hex();
-                penguins.push(Field {
-                    coordinate: coordinate.clone(),
-                    fish: 0,
-                    penguin: Some(Penguin {
-                        position: coordinate.clone(),
-                        team: Team::new("TWO".to_string()),
-                    }),
+            if self.board.two >> index & 1 != 0 {
+                let coordinate: HexCoordinate = CartesianCoordinate::from_index(index).to_hex();
+                penguins.push(Penguin {
+                    position: coordinate.clone(),
+                    team: TeamEnum::TWO
                 });
             }
         }
         penguins
     }
 
-    pub fn get_team_penguins(&self, team: Team) -> Vec<Field> {
-        let mut penguins = Vec::new();
-        for i in 0..64 {
-            if team.name == TeamEnum::ONE && self.board.one & (1 << i) != 0 {
-                let coordinate: HexCoordinate = CartesianCoordinate::from_index(i).to_hex();
-                penguins.push(Field {
-                    coordinate: coordinate.clone(),
-                    fish: 0,
-                    penguin: Some(Penguin {
-                        position: coordinate.clone(),
-                        team: Team::new("ONE".to_string()),
-                    }),
+    pub fn get_team_penguins(&self, team: TeamEnum) -> Vec<Penguin> {
+        let mut penguins: Vec<Penguin> = Vec::new();
+        for index in 0..64 {
+            if team == TeamEnum::ONE && self.board.one >> index & 1 != 0 {
+                let coordinate: HexCoordinate = CartesianCoordinate::from_index(index).to_hex();
+                penguins.push(Penguin {
+                    position: coordinate.clone(),
+                    team: TeamEnum::ONE
                 });
             }
-            if team.name == TeamEnum::TWO && self.board.two & (1 << i) != 0 {
-                let coordinate: HexCoordinate = CartesianCoordinate::from_index(i).to_hex();
-                penguins.push(Field {
-                    coordinate: coordinate.clone(),
-                    fish: 0,
-                    penguin: Some(Penguin {
-                        position: coordinate.clone(),
-                        team: Team::new("TWO".to_string()),
-                    }),
+            if team == TeamEnum::TWO && self.board.two >> index & 1 != 0 {
+                let coordinate: HexCoordinate = CartesianCoordinate::from_index(index).to_hex();
+                penguins.push(Penguin {
+                    position: coordinate.clone(),
+                    team: TeamEnum::TWO
                 });
             }
         }

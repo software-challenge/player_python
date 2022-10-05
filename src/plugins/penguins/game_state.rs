@@ -27,16 +27,41 @@ use crate::plugins::penguins::r#move::Move;
 use crate::plugins::penguins::team::Team;
 
 use super::coordinate::HexCoordinate;
-use super::field::Field;
 use super::team::TeamEnum;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
-pub struct Round {
+pub struct WelcomeMessage {
+    #[pyo3(get)]
+    pub team: TeamEnum,
+}
+
+#[pymethods]
+impl WelcomeMessage {
+    #[new]
+    pub fn new(team: TeamEnum) -> Self {
+        WelcomeMessage { team }
+    }
+}
+
+#[pyclass]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+pub struct Progress {
     #[pyo3(get, set)]
     pub round: i32,
     #[pyo3(get, set)]
     pub turn: i32,
+}
+
+#[pymethods]
+impl Progress {
+    #[new]
+    pub fn new(round: i32, turn: i32) -> Self {
+        Progress {
+            round,
+            turn,
+        }
+    }
 }
 
 #[pyclass]
@@ -48,28 +73,41 @@ pub struct Score {
     pub team_two: Team,
 }
 
+#[pymethods]
+impl Score {
+    #[new]
+    pub fn new(team_one: Team, team_two: Team) -> Self {
+        Score {
+            team_one,
+            team_two,
+        }
+    }
+}
+
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub struct GameState {
+    #[pyo3(get, set)]
+    pub welcome_message: WelcomeMessage,
     #[pyo3(get, set)]
     pub start_team: Team,
     #[pyo3(get, set)]
     pub board: Board,
     #[pyo3(get, set)]
-    pub round: Round,
+    pub round: Progress,
     #[pyo3(get, set)]
     pub score: Score,
     #[pyo3(get, set)]
     pub last_move: Option<Move>,
-
 }
 
 #[pymethods]
 impl GameState {
     #[new]
-    pub(crate) fn new(start_team: Team, board: Board, round: Round, score: Score,
-                      last_move: Option<Move>) -> Self {
+    pub(crate) fn new(welcome_message: WelcomeMessage, start_team: Team, board: Board,
+                      round: Progress, score: Score, last_move: Option<Move>) -> Self {
         GameState {
+            welcome_message,
             start_team,
             board,
             round,
@@ -79,10 +117,24 @@ impl GameState {
     }
 
     fn get_team(&self) -> Team {
-        match self.round.turn % 2 {
-            0 => self.start_team.clone(),
-            1 => self.start_team.opponent(),
-            _ => panic!("Invalid turn number"),
+        let team_one_moves = self.possible_moves(TeamEnum::ONE);
+        let team_two_moves = self.possible_moves(TeamEnum::TWO);
+        if team_one_moves.is_empty() && !team_two_moves.is_empty() {
+            match self.start_team.name {
+                TeamEnum::ONE => self.start_team.opponent(),
+                TeamEnum::TWO => self.start_team.clone(),
+            }
+        } else if team_two_moves.is_empty() && !team_one_moves.is_empty() {
+            match self.start_team.name {
+                TeamEnum::ONE => self.start_team.clone(),
+                TeamEnum::TWO => self.start_team.opponent(),
+            }
+        } else {
+            match self.round.turn % 2 {
+                0 => self.start_team.clone(),
+                1 => self.start_team.opponent(),
+                _ => panic!("Invalid turn number"),
+            }
         }
     }
 
@@ -90,15 +142,14 @@ impl GameState {
         self.get_team().opponent()
     }
 
-    fn get_possible_moves(&self) -> Vec<Move> {
-        let team = self.get_team();
+    fn possible_moves(&self, team: TeamEnum) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
-
-        if self.board.get_penguins().iter().filter(|f: &&Field| f.penguin.clone().unwrap().team == team).count() < 4 {
+        let penguins: u64 = if team == TeamEnum::ONE { self.board.board.one } else { self.board.board.two };
+        if penguins.count_ones() < 4 {
             let destinations: Vec<HexCoordinate> = self.board.board.get_coordinates(self.board.board.fish_1);
             moves.extend(destinations.iter().map(|c| Move::new(None, c.clone(), team.clone())));
         } else {
-            if team.name == TeamEnum::ONE {
+            if team == TeamEnum::ONE {
                 let from: Vec<HexCoordinate> = self.board.board.get_coordinates(self.board.board.one);
                 for coordinate in from {
                     for possible_moves in self.board.get_moves_from(coordinate, team.clone()) {

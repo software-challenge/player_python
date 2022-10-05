@@ -40,10 +40,11 @@ class Starter:
 
         if self.write_log:
             now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            logging.basicConfig(filename=f"log{now}", level=logging.INFO)
+            logging.basicConfig(filename=f"log{now}", level=logging.INFO,
+                                format="%(asctime)s: %(levelname)s - %(message)s")
             logging.getLogger().addHandler(logging.StreamHandler())
         else:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=logging.INFO, format="%(asctime)s: %(levelname)s - %(message)s")
         logging.info("Starting...")
 
         self.client = _PlayerClient(host=self.host, port=self.port, handler=logic, keep_alive=self.keep_alive)
