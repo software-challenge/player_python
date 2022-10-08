@@ -11,13 +11,13 @@ from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
-from python.socha.api.networking._network_interface import _NetworkInterface
-from python.socha.socha import Move
-from python.socha.socha import Team
+from socha.api.networking._network_interface import _NetworkInterface
+from socha.socha import Move
+from socha.socha import Team
 
-from python.socha.api.protocol.protocol import *
-from python.socha.api.protocol.protocol_packet import ProtocolPacket
-from python.socha.socha import TeamEnum
+from socha.api.protocol.protocol import *
+from socha.api.protocol.protocol_packet import ProtocolPacket
+from socha.socha import TeamEnum
 
 
 def customClassFactory(clazz, params: dict):
@@ -27,8 +27,8 @@ def customClassFactory(clazz, params: dict):
         except KeyError:
             ...
         if params.get("class_value") == "welcomeMessage":
-            welcome_message = WelcomeMessage(Team(name=TeamEnum.ONE if params.get("color") == "ONE" else TeamEnum.TWO,
-                                                  penguins=[], fish=0))
+            welcome_message = IWelcomeMessage(Team(name=TeamEnum.ONE if params.get("color") == "ONE" else TeamEnum.TWO,
+                                                   penguins=[], fish=0))
             return clazz(class_binding=welcome_message, **params)
         elif params.get("class_value") == "memento":
             state_object = params.get("state")

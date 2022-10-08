@@ -5,18 +5,18 @@ import logging
 import time
 from typing import List, Union
 
-from python.socha.socha import GameState, Move, Field, CartesianCoordinate, Team, Score, TeamEnum, Progress, Penguin, \
-    HexCoordinate
 
-from python.socha import socha
-from python.socha.api.networking._xflux import _XFluxClient
-from python.socha.api.protocol.protocol import State, Board, Data, \
+from socha.socha import GameState, Move, Field, CartesianCoordinate, Team, Score, TeamEnum, Progress, Penguin, \
+    HexCoordinate, Board, WelcomeMessage
+
+from socha.api.networking._xflux import _XFluxClient
+from socha.api.protocol.protocol import State, IBoard, Data, \
     Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Room, Result, MoveRequest, ObservableRoomMessage, \
-    WelcomeMessage
-from python.socha.api.protocol.room_message import RoomOrchestrationMessage
+    IWelcomeMessage
+from socha.api.protocol.room_message import RoomOrchestrationMessage
 
 
-def _convertBoard(protocolBoard: Board) -> socha.Board:
+def _convertBoard(protocolBoard: IBoard) -> Board:
     """
     Converts a protocol Board to a usable gam board for using in the logic.
     :rtype: object
@@ -33,7 +33,7 @@ def _convertBoard(protocolBoard: Board) -> socha.Board:
             else:
                 rowList.append(Field(coordinate=fieldCoordinate, penguin=None, fish=int(fieldsValue)))
         boardList.append(rowList)
-    return socha.Board(boardList)
+    return Board(boardList)
 
 
 class IClientHandler:
@@ -102,7 +102,7 @@ class _PlayerClient(_XFluxClient):
     """
     The PlayerClient handles all incoming and outgoing objects accordingly to their types.
     """
-    welcome_message: socha.WelcomeMessage
+    welcome_message: WelcomeMessage
 
     def __init__(self, host: str, port: int, handler: IClientHandler, keep_alive: bool):
         super().__init__(host, port)
@@ -132,8 +132,8 @@ class _PlayerClient(_XFluxClient):
             room_id: str = message.room_id
             data = message.data.class_binding
             if isinstance(data, RoomOrchestrationMessage):
-                if isinstance(data, WelcomeMessage):
-                    self.welcome_message = socha.WelcomeMessage(data.team.name)
+                if isinstance(data, IWelcomeMessage):
+                    self.welcome_message = WelcomeMessage(data.team.name)
             if isinstance(data, MoveRequest):
                 start_time = time.time()
                 response = self.game_handler.calculate_move()
@@ -148,8 +148,7 @@ class _PlayerClient(_XFluxClient):
             if isinstance(data, ObservableRoomMessage):
                 # TODO Set observer data
                 if isinstance(data, State):
-                    board: socha.Board = _convertBoard(data.board)
-                    logging.info(board)
+                    board: Board = _convertBoard(data.board)
                     penguins_one = board.get_team_penguins(TeamEnum.ONE)
                     fish_one: int = data.fishes.int_value[0]
                     team_one: Team = Team(name=TeamEnum.ONE, penguins=penguins_one, fish=fish_one)
