@@ -51,16 +51,17 @@ class _NetworkInterface:
         self.socket.sendall(data)
         logging.debug("Sent data: %s", data.decode("utf-8"))
 
-    def receive_socket_data(self) -> Union[bytes, None]:
+    def receive_socket_data(self) -> bytes:
         """
         Receives the raw tcp socket packages.
         :return: A package in bytes, None if there where no packages.
         """
         try:
             data = self.socket.recv(16129)
+            # print(data.decode("utf-8"))
             return data
         except socket.timeout:
-            return None
+            return b""
         except ConnectionResetError:
             logging.error("The remote host closed the connection unexpectedly.")
             self.close()
@@ -72,9 +73,9 @@ class _NetworkInterface:
         """
         room_regex = re.compile(br"<room[\s\S]+?</room>")
         tag_regex = re.compile(br"<.*/>")
+        chunk = b""
         while True:
-            chunk = self.receive_socket_data()
-            if chunk:
+            if chunk or self.buffer:
                 self.buffer += chunk
                 if room_regex.search(self.buffer):
                     receive = room_regex.search(self.buffer).group()
@@ -84,3 +85,4 @@ class _NetworkInterface:
                     receive = tag_regex.search(self.buffer).group()
                     self.buffer = self.buffer.replace(receive, b"")
                     return receive
+            chunk = self.receive_socket_data()

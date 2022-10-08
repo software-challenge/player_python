@@ -4,6 +4,7 @@ This is the plugin for this year's game `Penguins`.
 import logging
 import math
 from typing import List, Union
+from warnings import warn
 
 _hexagonTemplate = [
     "  _______  \xA0",
@@ -778,20 +779,12 @@ class GameState:
 
     def get_most_fish_moves(self) -> List[Move]:
         """
+        **This method is deprecated.**
         Returns a list of all Moves that will get the most fish from possible moves.
 
         :return: A list of Moves.
         """
-        moves = self.possible_moves
-        moves.sort(key=lambda move_x: self.board.get_field(move_x.to_value).get_fish(), reverse=True)
-        for i, move in enumerate(moves):
-            first_fish = self.board.get_field(moves[0].to_value).get_fish()
-            current_fish = self.board.get_field(move.to_value).get_fish()
-            if first_fish and current_fish:
-                if current_fish < first_fish:
-                    moves = moves[:i]
-                    break
-        return moves
+        warn('This method is deprecated.', DeprecationWarning, stacklevel=2)
 
     def current_team_from_turn(self) -> Team:
         """
