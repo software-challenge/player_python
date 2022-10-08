@@ -116,6 +116,7 @@ class _XFluxClient:
                     logging.info("The server left. Shutting down...")
                     self.handle_disconnect()
                 else:
+                    logging.info(f"Received new object: {response}")
                     self.on_object(response)
             elif self.running:
                 logging.error(f"Received object of unknown class: {response}")

@@ -4,14 +4,14 @@ from socha import *
 
 
 class Logic(IClientHandler):
-    gameState: GameState
+    game_state: GameState
 
     def calculate_move(self) -> Move:
-        possible_moves = self.gameState.possible_moves
+        possible_moves = self.game_state.possible_moves
         return possible_moves[random.randint(0, len(possible_moves) - 1)]
 
     def on_update(self, state: GameState):
-        self.gameState = state
+        self.game_state = state
 
 
 if __name__ == "__main__":
