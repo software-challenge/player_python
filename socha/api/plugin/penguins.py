@@ -152,6 +152,20 @@ class Vector:
         return f"Vector({self.d_x}, {self.d_x})"
 
 
+class CartesianCoordinate:
+    """
+    Represents a coordinate in a normal cartesian coordinate system, that has been taught in school.
+    This class is used to translate and represent a hexagonal coordinate in a cartesian and with that a 2D-Array.
+    """
+
+
+class HexCoordinate:
+    """
+    Represents a coordinate in a hexagonal coordinate system, that differs from the normal cartesian one.
+    This class is used to represent the hexagonal game board.
+    """
+
+
 class Coordinate:
     """
     Represents a coordinate both in the normal two-dimensional array and on a hexagonal board.

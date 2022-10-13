@@ -14,7 +14,7 @@ from socha.api.protocol.protocol import State, Board, Data, \
 
 def _convertBoard(protocolBoard: Board) -> penguins.Board:
     """
-    Converts a protocol Board to a usable gam board for using in the logic.
+    Converts a protocol Board to a usable game board for using in the logic.
     :rtype: object
     """
     boardList: List[List[Field]] = []
