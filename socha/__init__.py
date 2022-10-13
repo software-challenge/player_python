@@ -14,5 +14,5 @@ __all__ = [
     'Board',
     'Fishes',
     'GameState',
-    'Result'
+    'Result',
 ]

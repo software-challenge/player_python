@@ -36,29 +36,24 @@ class VectorTest(unittest.TestCase):
 
 class CoordinateTest(unittest.TestCase):
     def testCoordinateInit(self):
-        c = Coordinate(5, -5)
+        c = HexCoordinate(5, -5)
         self.assertEqual(c.x, 5)
         self.assertEqual(c.y, -5)
 
     def testGetDistance(self):
-        c1 = Coordinate(5, 15)
-        c2 = Coordinate(15, 5)
-        self.assertEqual(c1.get_distance(c2), 14.142135623730951)
+        c1 = HexCoordinate(5, 15)
+        c2 = HexCoordinate(15, 5)
+        self.assertEqual(c1.distance(c2), 14.142135623730951)
 
     def testGetArray(self):
-        c = Coordinate(15, 7)
-        self.assertEqual(c.get_array().x, Coordinate(7, 7, False).x)
-        self.assertEqual(c.get_array().y, Coordinate(7, 7, False).y)
-
-    def testGetDoubleHex(self):
-        c = Coordinate(7, 7, False)
-        self.assertEqual(c.get_double_hex().x, Coordinate(15, 7, True).x)
-        self.assertEqual(c.get_double_hex().y, Coordinate(15, 7, True).y)
+        c = HexCoordinate(15, 7)
+        self.assertEqual(c.to_cartesian().x, HexCoordinate(7, 7).x)
+        self.assertEqual(c.to_cartesian().y, HexCoordinate(7, 7).y)
 
 
 class MoveTest(unittest.TestCase):
     def testMoveInit(self):
-        m = Move(from_value=Coordinate(0, 0), to_value=Coordinate(15, 7))
+        m = Move(from_value=HexCoordinate(0, 0), to_value=HexCoordinate(15, 7))
         self.assertEqual(m.from_value.x, 0)
         self.assertEqual(m.from_value.y, 0)
         self.assertEqual(m.to_value.x, 15)
@@ -73,7 +68,7 @@ class TeamTest(unittest.TestCase):
 
 class FieldTest(unittest.TestCase):
     def testFieldInit(self):
-        f = Field(coordinate=Coordinate(0, 0), field="ONE")
+        f = Field(coordinate=HexCoordinate(0, 0), field="ONE")
         self.assertEqual(f.coordinate.x, 0)
         self.assertEqual(f.coordinate.y, 0)
         self.assertEqual(f.field.color(), "ONE")
@@ -83,36 +78,36 @@ class FieldTest(unittest.TestCase):
         for i in range(7):
             l.append([])
             for j in range(7):
-                l[i].append(Field(coordinate=Coordinate(j, i), field=0))
+                l[i].append(Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=0))
         b = Board(l)
         e = b.get_empty_fields()
         self.assertEqual(len(e), 49)
 
 
 class GameStateTest(unittest.TestCase):
-    b = Board(game_field=[[Field(coordinate=Coordinate(j, i), field=1) for i in range(8)] for j in range(8)])
-    g = GameState(board=b, turn=0, start_team=Team(color="ONE"), fishes=Fishes(fishes_one=0, fishes_two=5),
-                  last_move=Move(from_value=Coordinate(0, 0), to_value=Coordinate(7, 7)))
+    b = Board(game_field=[[Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=1) for i in range(8)] for j in range(8)])
+    g = GameState(board=b, turn=1, start_team=Team(color="ONE"), fishes=Fishes(fishes_one=1, fishes_two=0),
+                  last_move=Move(from_value=None, to_value=HexCoordinate(7, 7)))
 
     def testGameStateInit(self):
-        self.assertEqual(self.g.turn, 0)
+        self.assertEqual(self.g.turn, 1)
         self.assertEqual(self.g.start_team.color(), Team(color="ONE").color())
-        self.assertEqual(self.g.fishes.fishes_one, Fishes(fishes_one=0, fishes_two=5).fishes_one)
-        self.assertEqual(self.g.fishes.fishes_two, Fishes(fishes_one=0, fishes_two=5).fishes_two)
+        self.assertEqual(self.g.fishes.fishes_one, Fishes(fishes_one=1, fishes_two=0).fishes_one)
+        self.assertEqual(self.g.fishes.fishes_two, Fishes(fishes_one=1, fishes_two=0).fishes_two)
 
     def test_perform_low_index_move(self):
-        new_state = self.g.perform_move(Move(to_value=Coordinate(1, 1)))
-        self.assertEqual(new_state.turn, 1)
+        new_state = self.g.perform_move(Move(to_value=HexCoordinate(1, 1)))
+        self.assertEqual(new_state.turn, 2)
         self.assertEqual(new_state.fishes.fishes_one, 1)
-        self.assertEqual(new_state.fishes.fishes_two, 0)
+        self.assertEqual(new_state.fishes.fishes_two, 1)
         self.assertEqual(new_state.last_move.to_value.x, 1)
         self.assertEqual(new_state.last_move.to_value.y, 1)
 
     def test_perform_high_index_move(self):
-        new_state = self.g.perform_move(Move(to_value=Coordinate(15, 7)))
-        self.assertEqual(new_state.turn, 1)
+        new_state = self.g.perform_move(Move(to_value=HexCoordinate(15, 7)))
+        self.assertEqual(new_state.turn, 2)
         self.assertEqual(new_state.fishes.fishes_one, 1)
-        self.assertEqual(new_state.fishes.fishes_two, 0)
+        self.assertEqual(new_state.fishes.fishes_two, 1)
         self.assertEqual(new_state.last_move.to_value.x, 15)
         self.assertEqual(new_state.last_move.to_value.y, 7)
 
@@ -120,4 +115,4 @@ class GameStateTest(unittest.TestCase):
         self.g.board._game_field[0][0].field = 0
         self.g.possible_moves = self.g._get_possible_moves(self.g.current_team)
         with self.assertRaises(Exception):
-            self.g.perform_move(Move(to_value=Coordinate(0, 0)))
+            self.g.perform_move(Move(to_value=HexCoordinate(0, 0)))
