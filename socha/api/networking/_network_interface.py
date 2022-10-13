@@ -49,7 +49,7 @@ class _NetworkInterface:
         :param data: The data that is being sent as string.
         """
         self.socket.sendall(data)
-        logging.debug("Sent data: %s", data.decode("utf-8"))
+        logging.debug("Sent data:\n %s", data.decode("utf-8"))
 
     def receive_socket_data(self) -> bytes:
         """
@@ -80,9 +80,11 @@ class _NetworkInterface:
                 if room_regex.search(self.buffer):
                     receive = room_regex.search(self.buffer).group()
                     self.buffer = self.buffer.replace(receive, b"")
+                    logging.debug("Received data:\n %s", receive.decode("utf-8"))
                     return receive
                 if tag_regex.search(self.buffer):
                     receive = tag_regex.search(self.buffer).group()
                     self.buffer = self.buffer.replace(receive, b"")
+                    logging.debug("Received data:\n %s", receive.decode("utf-8"))
                     return receive
             chunk = self.receive_socket_data()

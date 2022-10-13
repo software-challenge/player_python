@@ -16,7 +16,7 @@ class Starter:
     """
 
     def __init__(self, logic: IClientHandler, host: str = "localhost", port: int = 13050, reservation: str = None,
-                 room_id: str = None, survive: bool = False, log: bool = False):
+                 room_id: str = None, survive: bool = False, log: bool = False, verbose: bool = False):
         """
         All these arguments can be overwritten, when parsed via start arguments,
         or you initialize this class with the desired values.
@@ -28,6 +28,7 @@ class Starter:
         :param room_id: Room Id the client will try to connect.
         :param survive: If True the client will keep running, even if the connection to the server is terminated.
         :param log: If True the client will write a log file to the current directory.
+        :param verbose: Verbose option for logging.
         """
         args = self._handle_start_args()
 
@@ -38,12 +39,18 @@ class Starter:
         self.keep_alive: bool = args.survive or survive
         self.write_log: bool = args.log or log
 
+        if args.verbose or verbose:
+            level: int = logging.DEBUG
+        else:
+            level: int = logging.INFO
+
         if self.write_log:
             now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            logging.basicConfig(filename=f"log{now}", level=logging.INFO)
+            logging.basicConfig(filename=f"log{now}", level=level,
+                                format="%(asctime)s: %(levelname)s - %(message)s")
             logging.getLogger().addHandler(logging.StreamHandler())
         else:
-            logging.basicConfig(level=logging.INFO)
+            logging.basicConfig(level=level, format="%(asctime)s: %(levelname)s - %(message)s")
         logging.info("Starting...")
 
         self.client = _PlayerClient(host=self.host, port=self.port, handler=logic, keep_alive=self.keep_alive)
@@ -72,4 +79,5 @@ class Starter:
                                  'terminated.')
         parser.add_argument('-l', '--log', action='store_true',
                             help='If present the client will write a log file to the current directory.')
+        parser.add_argument('-v', '--verbose', action='store_true', help='Verbose option for logging.')
         return parser.parse_args()
