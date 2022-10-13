@@ -171,35 +171,75 @@ class CartesianCoordinate:
         self.y = y
 
     def to_vector(self):
+        """
+        Converts the cartesian coordinate to a vector.
+        """
         return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'CartesianCoordinate':
+        """
+        Adds a vector to the cartesian coordinate.
+
+        :param vector: The vector to add.
+        :return: The new cartesian coordinate.
+        """
         vector: Vector = self.to_vector().addition(vector)
         return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
 
     def subtract_vector(self, vector: Vector) -> 'CartesianCoordinate':
+        """
+        Subtracts a vector from the cartesian coordinate.
+
+        :param vector: The vector to subtract.
+        :return: The new cartesian coordinate.
+        """
         vector: Vector = self.to_vector().subtraction(vector)
         return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
 
     def distance(self, other: 'CartesianCoordinate') -> float:
+        """
+        Calculates the distance between two cartesian coordinates.
+
+        :param other: The other cartesian coordinate to calculate the distance to.
+        :return: The distance between the two cartesian coordinates.
+        """
         return self.to_vector().subtraction(other.to_vector()).magnitude()
 
     def to_hex(self) -> 'HexCoordinate':
+        """
+        Converts the cartesian coordinate to a hex coordinate.
+
+        :return: The hex coordinate.
+        """
         return HexCoordinate(x=self.x * 2 + (1 if self.y % 2 == 1 else 0), y=self.y)
 
     def to_index(self) -> Optional[int]:
+        """
+        Converts the cartesian coordinate to an index.
+
+        :return: The index or None if the coordinate is not valid.
+        """
         if 0 <= self.x <= 7 and 0 <= self.y <= 7:
             return self.y * 8 + self.x
         return None
 
     @staticmethod
     def from_index(index: int) -> Optional['CartesianCoordinate']:
+        """
+        Converts an index to a cartesian coordinate.
+
+        :param index: The index to convert.
+        :return: The cartesian coordinate.
+        """
         if 0 <= index <= 63:
             return CartesianCoordinate(x=index % 8, y=int(index / 8))
         return None
 
     def __repr__(self) -> str:
         return f"CartesianCoordinate({self.x}, {self.y})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, CartesianCoordinate) and self.x == other.x and self.y == other.y
 
 
 class HexCoordinate:
@@ -219,27 +259,63 @@ class HexCoordinate:
         self.y = y
 
     def to_cartesian(self) -> CartesianCoordinate:
+        """
+        Converts the hex coordinate to a cartesian coordinate.
+
+        :return: The cartesian coordinate.
+        """
         return CartesianCoordinate(x=math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), y=self.y)
 
     def to_vector(self) -> Vector:
+        """
+        Converts the hex coordinate to a vector.
+
+        :return: The vector.
+        """
         return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'HexCoordinate':
+        """
+        Adds a vector to the hex coordinate.
+
+        :param vector: The vector to add.
+        :return: The new hex coordinate.
+        """
         vector: Vector = self.to_vector().addition(vector)
         return HexCoordinate(x=vector.d_x, y=vector.d_y)
 
     def subtract_vector(self, vector: Vector) -> 'HexCoordinate':
+        """
+        Subtracts a vector from the hex coordinate.
+
+        :param vector: The vector to subtract.
+        :return: The new hex coordinate.
+        """
         vector: Vector = self.to_vector().subtraction(vector)
         return HexCoordinate(x=vector.d_x, y=vector.d_y)
 
     def get_neighbors(self) -> List['HexCoordinate']:
+        """
+        Returns a list of all neighbors of the hex coordinate.
+
+        :return: The list of neighbors.
+        """
         return [self.add_vector(vector) for vector in self.to_vector().directions]
 
     def distance(self, other: 'HexCoordinate') -> float:
+        """
+        Calculates the distance between two hex coordinates.
+
+        :param other: The other hex coordinate to calculate the distance to.
+        :return: The distance between the two hex coordinates.
+        """
         return self.to_vector().subtraction(other.to_vector()).magnitude()
 
     def __repr__(self) -> str:
         return f"HexCoordinate({self.x}, {self.y})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
 
 
 class Coordinate:
@@ -888,8 +964,10 @@ class GameState:
         if self.is_valid_move(move):
             new_board = self.board._move(move)
             adding_fish = new_board.get_field(move.to_value).get_fish()
-            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else 0
-            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else 0
+            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else \
+                self.fishes.fishes_one
+            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else \
+                self.fishes.fishes_two
             new_fishes = Fishes(new_fishes_one, new_fishes_two)
             return GameState(board=new_board, turn=self.turn + 1, start_team=self.start_team, fishes=new_fishes,
                              last_move=move)
