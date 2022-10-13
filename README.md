@@ -148,6 +148,7 @@ you can of course pass start arguments.
 | `-R ROOM `,  `--room ROOM `                      | Room Id the client will try to connect.                                                      |
 | `-s `,  `--survive `                             | If present the client will keep running, even if the connection to the server is terminated. |
 | `-l `,  `--log `                                 | If present the client will write a log file to the current directory.                        |
+| `-v `,  `--verbose `                             | Verbose option for logging.                                                                  |
 
 ## Make your player ready to hand in
 
@@ -163,7 +164,6 @@ There you must enter the following and place it in the root of your directory.
 
 ```shell
 #!/bin/sh
-chmod +x logic.py
 . venv/bin/activate
 python ./logic.py "$@"
 ```

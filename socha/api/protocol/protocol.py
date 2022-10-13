@@ -776,7 +776,7 @@ class WelcomeMessage(RoomOrchestrationMessage):
 
 
 @dataclass
-class Result:
+class Result(ObservableRoomMessage):
     """
     Result of a game.
     This will the server send after a game is finished.

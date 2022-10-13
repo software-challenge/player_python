@@ -3,7 +3,7 @@ This is the plugin for this year's game `Penguins`.
 """
 import logging
 import math
-from typing import List, Union
+from typing import List, Union, Optional
 from warnings import warn
 
 _hexagonTemplate = [
@@ -137,10 +137,12 @@ class Vector:
 
     def to_coordinates(self) -> 'Coordinate':
         """
+        **This method has been deprecated.**
         Converts the vector to coordinate object.
 
-        :return:    The coordinate object.
+        :return: The coordinate object.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return Coordinate(self.d_x, self.d_y, is_double=True)
 
     def __str__(self) -> str:
@@ -152,8 +154,173 @@ class Vector:
         return f"Vector({self.d_x}, {self.d_x})"
 
 
+class CartesianCoordinate:
+    """
+    Represents a coordinate in a normal cartesian coordinate system, that has been taught in school.
+    This class is used to translate and represent a hexagonal coordinate in a cartesian and with that a 2D-Array.
+    """
+
+    def __init__(self, x: int, y: int):
+        """
+        Constructor for the CartesianCoordinate class.
+
+        :param x: The x-coordinate on a cartesian coordinate system.
+        :param y: The y-coordinate on a cartesian coordinate system.
+        """
+        self.x = x
+        self.y = y
+
+    def to_vector(self):
+        """
+        Converts the cartesian coordinate to a vector.
+        """
+        return Vector(d_x=self.x, d_y=self.y)
+
+    def add_vector(self, vector: Vector) -> 'CartesianCoordinate':
+        """
+        Adds a vector to the cartesian coordinate.
+
+        :param vector: The vector to add.
+        :return: The new cartesian coordinate.
+        """
+        vector: Vector = self.to_vector().addition(vector)
+        return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
+
+    def subtract_vector(self, vector: Vector) -> 'CartesianCoordinate':
+        """
+        Subtracts a vector from the cartesian coordinate.
+
+        :param vector: The vector to subtract.
+        :return: The new cartesian coordinate.
+        """
+        vector: Vector = self.to_vector().subtraction(vector)
+        return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
+
+    def distance(self, other: 'CartesianCoordinate') -> float:
+        """
+        Calculates the distance between two cartesian coordinates.
+
+        :param other: The other cartesian coordinate to calculate the distance to.
+        :return: The distance between the two cartesian coordinates.
+        """
+        return self.to_vector().subtraction(other.to_vector()).magnitude()
+
+    def to_hex(self) -> 'HexCoordinate':
+        """
+        Converts the cartesian coordinate to a hex coordinate.
+
+        :return: The hex coordinate.
+        """
+        return HexCoordinate(x=self.x * 2 + (1 if self.y % 2 == 1 else 0), y=self.y)
+
+    def to_index(self) -> Optional[int]:
+        """
+        Converts the cartesian coordinate to an index.
+
+        :return: The index or None if the coordinate is not valid.
+        """
+        if 0 <= self.x <= 7 and 0 <= self.y <= 7:
+            return self.y * 8 + self.x
+        return None
+
+    @staticmethod
+    def from_index(index: int) -> Optional['CartesianCoordinate']:
+        """
+        Converts an index to a cartesian coordinate.
+
+        :param index: The index to convert.
+        :return: The cartesian coordinate.
+        """
+        if 0 <= index <= 63:
+            return CartesianCoordinate(x=index % 8, y=int(index / 8))
+        return None
+
+    def __repr__(self) -> str:
+        return f"CartesianCoordinate({self.x}, {self.y})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, CartesianCoordinate) and self.x == other.x and self.y == other.y
+
+
+class HexCoordinate:
+    """
+    Represents a coordinate in a hexagonal coordinate system, that differs from the normal cartesian one.
+    This class is used to represent the hexagonal game board.
+    """
+
+    def __init__(self, x: int, y: int):
+        """
+        Constructor for the HexCoordinate class.
+
+        :param x: The x-coordinate on a hexagonal coordinate system.
+        :param y: The y-coordinate on a hexagonal coordinate system.
+        """
+        self.x = x
+        self.y = y
+
+    def to_cartesian(self) -> CartesianCoordinate:
+        """
+        Converts the hex coordinate to a cartesian coordinate.
+
+        :return: The cartesian coordinate.
+        """
+        return CartesianCoordinate(x=math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), y=self.y)
+
+    def to_vector(self) -> Vector:
+        """
+        Converts the hex coordinate to a vector.
+
+        :return: The vector.
+        """
+        return Vector(d_x=self.x, d_y=self.y)
+
+    def add_vector(self, vector: Vector) -> 'HexCoordinate':
+        """
+        Adds a vector to the hex coordinate.
+
+        :param vector: The vector to add.
+        :return: The new hex coordinate.
+        """
+        vector: Vector = self.to_vector().addition(vector)
+        return HexCoordinate(x=vector.d_x, y=vector.d_y)
+
+    def subtract_vector(self, vector: Vector) -> 'HexCoordinate':
+        """
+        Subtracts a vector from the hex coordinate.
+
+        :param vector: The vector to subtract.
+        :return: The new hex coordinate.
+        """
+        vector: Vector = self.to_vector().subtraction(vector)
+        return HexCoordinate(x=vector.d_x, y=vector.d_y)
+
+    def get_neighbors(self) -> List['HexCoordinate']:
+        """
+        Returns a list of all neighbors of the hex coordinate.
+
+        :return: The list of neighbors.
+        """
+        return [self.add_vector(vector) for vector in self.to_vector().directions]
+
+    def distance(self, other: 'HexCoordinate') -> float:
+        """
+        Calculates the distance between two hex coordinates.
+
+        :param other: The other hex coordinate to calculate the distance to.
+        :return: The distance between the two hex coordinates.
+        """
+        return self.to_vector().subtraction(other.to_vector()).magnitude()
+
+    def __repr__(self) -> str:
+        return f"HexCoordinate({self.x}, {self.y})"
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
+
+
 class Coordinate:
     """
+    **This class has benn deprecated**
     Represents a coordinate both in the normal two-dimensional array and on a hexagonal board.
         *Note that the board is stored in a normal array,
         only to represent relations in a hexagonal grid the indices of the normal array are converted,
@@ -162,12 +329,14 @@ class Coordinate:
 
     def __init__(self, x: int, y: int, is_double: bool = True):
         """
+        **This class has benn deprecated**
         Constructor for the Coordinates class.
 
         :param x: The x-coordinate of the coordination system.
         :param y: The y-coordinate of the coordination system.
         :param is_double: Determines if the coordinate is in double hex format. Default is True.
         """
+        warn(f'{self.__class__.__name__} has been deprecated.', DeprecationWarning, stacklevel=2)
         self.x = x
         self.y = y
         self.is_double = is_double
@@ -179,7 +348,7 @@ class Coordinate:
         :param vector: The vector to add.
         :return: The new coordinate.
         """
-
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return self.get_vector().addition(vector).to_coordinates() if self.is_double else \
             self.get_double_hex().get_vector().addition(vector).to_coordinates().get_array()
 
@@ -190,6 +359,7 @@ class Coordinate:
         :param vector: The vector to subtract.
         :return: The new coordinate.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return self.get_vector().subtraction(vector).to_coordinates()
 
     def get_distance(self, other: 'Coordinate') -> float:
@@ -199,6 +369,7 @@ class Coordinate:
         :param other: The other coordinate to calculate the distance to.
         :return: The distance between the two coordinates as Vector object.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return self.get_vector().subtraction(other.get_vector()).magnitude()
 
     def get_vector(self) -> Vector:
@@ -207,15 +378,8 @@ class Coordinate:
 
         :return: The vector from the coordinate to the origin.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return Vector(self.x, self.y)
-
-    def get_hex_neighbors(self) -> List[Vector]:
-        """
-        Gets the six neighbors of the coordinate.
-
-        :return: A list of the six neighbors of the coordinate.
-        """
-        ...
 
     def _array_to_double_hex(self) -> 'Coordinate':
         """
@@ -239,6 +403,7 @@ class Coordinate:
 
         :return: Self if the coordinate is an array, _double_hex_to_array if the coordinate is a double hex coordinate.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return self if not self.is_double else self._double_hex_to_array()
 
     def get_double_hex(self) -> 'Coordinate':
@@ -247,12 +412,15 @@ class Coordinate:
 
         :return: Self if the coordinate is a double hex coordinate, _double_hex_to_array if the coordinate is an array.
         """
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return self if self.is_double else self._array_to_double_hex()
 
     def __str__(self) -> str:
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return f"[{self.x}, {self.y}]"
 
     def __eq__(self, other: object) -> bool:
+        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
         return isinstance(other, Coordinate) and self.x == other.x and self.y == other.y
 
 
@@ -261,7 +429,7 @@ class Move:
     Represents a move in the game.
     """
 
-    def __init__(self, to_value: Coordinate, from_value: Coordinate = None):
+    def __init__(self, to_value: HexCoordinate, from_value: HexCoordinate = None):
         """
         :param to_value: The destination of the move.
         :param from_value: The origin of the move.
@@ -275,7 +443,7 @@ class Move:
 
         :return: The delta of the move as a Vector object.
         """
-        return self.to_value.get_distance(self.from_value)
+        return self.to_value.distance(self.from_value)
 
     def reversed(self):
         """
@@ -354,7 +522,7 @@ class Field:
     Represents a field in the game.
     """
 
-    def __init__(self, coordinate: Coordinate, field: Union[int, str, Team]):
+    def __init__(self, coordinate: HexCoordinate, field: Union[int, str, Team]):
         """
         The Field represents a field on the game board.
         It says what state itself it has and where it is on the board.
@@ -427,21 +595,21 @@ class Board:
                     fields.append(field)
         return fields
 
-    def is_occupied(self, coordinates: Coordinate) -> bool:
+    def is_occupied(self, coordinates: HexCoordinate) -> bool:
         """
         :param coordinates: The coordinates of the field.
         :return: True if the field is occupied, false otherwise.
         """
         return self.get_field(coordinates).is_occupied()
 
-    def is_valid(self, coordinates: Coordinate) -> bool:
+    def is_valid(self, coordinates: HexCoordinate) -> bool:
         """
         Checks if the coordinates are in the boundaries of the board.
 
         :param coordinates: The coordinates of the field.
         :return: True if the field is valid, false otherwise.
         """
-        arrayCoordinates = coordinates.get_array()
+        arrayCoordinates = coordinates.to_cartesian()
         return 0 <= arrayCoordinates.x < self.width() and 0 <= arrayCoordinates.y < self.height()
 
     def width(self) -> int:
@@ -467,7 +635,7 @@ class Board:
         """
         return self._game_field[y][x]
 
-    def get_field(self, position: Coordinate) -> Field:
+    def get_field(self, position: HexCoordinate) -> Field:
         """
         Gets the field at the given position.
 
@@ -475,22 +643,22 @@ class Board:
         :return: The field at the given position.
         :raise IndexError: If the position is not valid.
         """
-        array_coordinates = position.get_array()
-        if self.is_valid(array_coordinates):
-            return self._get_field(array_coordinates.x, array_coordinates.y)
+        cartesian = position.to_cartesian()
+        if self.is_valid(position):
+            return self._get_field(cartesian.x, cartesian.y)
 
-        raise IndexError(f"Index out of range: [x={array_coordinates.x}, y={array_coordinates.y}]")
+        raise IndexError(f"Index out of range: [x={cartesian.x}, y={cartesian.y}]")
 
-    def get_field_or_none(self, position: Coordinate) -> Union[Field, None]:
+    def get_field_or_none(self, position: HexCoordinate) -> Union[Field, None]:
         """
         Gets the field at the given position no matter if it is valid or not.
 
         :param position: The position of the field.
         :return: The field at the given position, or None if the position is not valid.
         """
-        position = position.get_array()
+        cartesian = position.to_cartesian()
         if self.is_valid(position):
-            return self._get_field(position.x, position.y)
+            return self._get_field(cartesian.x, cartesian.y)
         return None
 
     def get_field_by_index(self, index: int) -> Field:
@@ -505,9 +673,7 @@ class Board:
         :param index: The index of the field.
         :return: The field at the given index.
         """
-        x = index // self.width()
-        y = index % self.width()
-        return self.get_field(Coordinate(x, y, False))
+        return self.get_field(CartesianCoordinate.from_index(index).to_hex())
 
     def get_all_fields(self) -> List[Field]:
         """
@@ -555,7 +721,7 @@ class Board:
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: Coordinate, direction: Vector) -> List[Move]:
+    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector) -> List[Move]:
         """
         Gets all moves in the given direction from the given origin.
 
@@ -565,18 +731,18 @@ class Board:
         """
         moves = []
         for i in range(1, self.width()):
-            destination = origin.get_double_hex().add_vector(direction.scalar_product(i))
+            destination = origin.add_vector(direction.scalar_product(i))
             if self._is_destination_valid(destination):
                 moves.append(Move(from_value=origin, to_value=destination))
             else:
                 break
         return moves
 
-    def _is_destination_valid(self, field: Coordinate) -> bool:
+    def _is_destination_valid(self, field: HexCoordinate) -> bool:
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
 
-    def possible_moves_from(self, position: Coordinate) -> List[Move]:
+    def possible_moves_from(self, position: HexCoordinate) -> List[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
 
@@ -599,7 +765,7 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field.is_occupied()]
 
-    def get_teams_penguins(self, team: Team) -> List[Coordinate]:
+    def get_teams_penguins(self, team: Team) -> List[HexCoordinate]:
         """
         Searches the board for all penguins of the given team.
 
@@ -609,9 +775,9 @@ class Board:
         teams_penguins = []
         for x in range(self.width()):
             for y in range(self.height()):
-                current_field = self.get_field(Coordinate(x, y, False))
+                current_field = self.get_field(CartesianCoordinate(x, y).to_hex())
                 if current_field.is_occupied() and current_field.get_team().team() == team:
-                    coordinates = Coordinate(x, y, False).get_double_hex()
+                    coordinates = CartesianCoordinate(x, y).to_hex()
                     teams_penguins.append(coordinates)
         return teams_penguins
 
@@ -655,10 +821,10 @@ class Board:
         """
         new_board = Board(self._game_field)
         to_field = new_board.get_field(move.to_value)
-        to_field_coo = move.to_value.get_array()
+        to_field_coo = move.to_value.to_cartesian()
         new_board._game_field[to_field_coo.x][to_field_coo.y] = Field(coordinate=move.to_value, field=to_field.field)
         if move.from_value:
-            from_field_coo = move.from_value.get_array()
+            from_field_coo = move.from_value.to_cartesian()
             new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
         return new_board
 
@@ -769,22 +935,13 @@ class GameState:
         if len(self.board.get_teams_penguins(current_team)) < 4:
             for x in range(self.board.width()):
                 for y in range(self.board.height()):
-                    field = self.board.get_field(Coordinate(x, y, False))
+                    field = self.board.get_field(CartesianCoordinate(x, y).to_hex())
                     if not field.is_occupied() and field.get_fish() == 1:
-                        moves.append(Move(from_value=None, to_value=Coordinate(x, y, False).get_double_hex()))
+                        moves.append(Move(from_value=None, to_value=CartesianCoordinate(x, y).to_hex()))
         else:
             for piece in self.board.get_teams_penguins(current_team):
                 moves.extend(self.board.possible_moves_from(piece))
         return moves
-
-    def get_most_fish_moves(self) -> List[Move]:
-        """
-        **This method is deprecated.**
-        Returns a list of all Moves that will get the most fish from possible moves.
-
-        :return: A list of Moves.
-        """
-        warn('This method is deprecated.', DeprecationWarning, stacklevel=2)
 
     def current_team_from_turn(self) -> Team:
         """
@@ -807,8 +964,10 @@ class GameState:
         if self.is_valid_move(move):
             new_board = self.board._move(move)
             adding_fish = new_board.get_field(move.to_value).get_fish()
-            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else 0
-            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else 0
+            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else \
+                self.fishes.fishes_one
+            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else \
+                self.fishes.fishes_two
             new_fishes = Fishes(new_fishes_one, new_fishes_two)
             return GameState(board=new_board, turn=self.turn + 1, start_team=self.start_team, fishes=new_fishes,
                              last_move=move)
