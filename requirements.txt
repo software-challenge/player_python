@@ -1,1 +1,1 @@
-xsdata==22.7
+xsdata==22.9

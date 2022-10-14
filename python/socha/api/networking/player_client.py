@@ -5,26 +5,35 @@ import logging
 import time
 from typing import List, Union
 
+
+from socha.socha import GameState, Move, Field, CartesianCoordinate, Team, Score, TeamEnum, Progress, Penguin, \
+    HexCoordinate, Board, WelcomeMessage
+
 from socha.api.networking._xflux import _XFluxClient
-from socha.api.plugin import penguins
-from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
-from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, ObservableRoomMessage
+from socha.api.protocol.protocol import State, IBoard, Data, \
+    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Room, Result, MoveRequest, ObservableRoomMessage, \
+    IWelcomeMessage
+from socha.api.protocol.room_message import RoomOrchestrationMessage
 
 
-def _convertBoard(protocolBoard: Board) -> penguins.Board:
+def _convertBoard(protocolBoard: IBoard) -> Board:
     """
     Converts a protocol Board to a usable game board for using in the logic.
     :rtype: object
     """
-    boardList: List[List[Field]] = []
+    boardList = []
     for y, row in enumerate(protocolBoard.list_value):
         rowList: List[Field] = []
         for x, fieldsValue in enumerate(row.field_value):
-            fieldCoordinate = Coordinate(x, y, is_double=False).get_double_hex()
-            rowList.append(Field(coordinate=fieldCoordinate, field=fieldsValue))
+            fieldCoordinate = CartesianCoordinate(x, y).to_hex()
+            if not isinstance(fieldsValue, int):
+                fieldTeamEnum = TeamEnum.ONE if fieldsValue == 'ONE' else TeamEnum.TWO
+                penguin: Penguin = Penguin(position=fieldCoordinate, team=fieldTeamEnum)
+                rowList.append(Field(coordinate=fieldCoordinate, penguin=penguin, fish=0))
+            else:
+                rowList.append(Field(coordinate=fieldCoordinate, penguin=None, fish=int(fieldsValue)))
         boardList.append(rowList)
-    return penguins.Board(boardList)
+    return Board(boardList)
 
 
 class IClientHandler:
@@ -93,6 +102,7 @@ class _PlayerClient(_XFluxClient):
     """
     The PlayerClient handles all incoming and outgoing objects accordingly to their types.
     """
+    welcome_message: WelcomeMessage
 
     def __init__(self, host: str, port: int, handler: IClientHandler, keep_alive: bool):
         super().__init__(host, port)
@@ -121,23 +131,47 @@ class _PlayerClient(_XFluxClient):
         if isinstance(message, Room):
             room_id: str = message.room_id
             data = message.data.class_binding
+            if isinstance(data, RoomOrchestrationMessage):
+                if isinstance(data, IWelcomeMessage):
+                    self.welcome_message = WelcomeMessage(data.team.name)
             if isinstance(data, MoveRequest):
                 start_time = time.time()
                 response = self.game_handler.calculate_move()
                 logging.info(f"Sent {response} after {time.time() - start_time} seconds.")
                 if response:
                     from_value = None
-                    to = To(x=response.to_value.x, y=response.to_value.y)
-                    if response.from_value:
-                        from_value = From(x=response.from_value.x, y=response.from_value.y)
+                    to = To(x=response.to.x, y=response.to.y)
+                    if response._from:
+                        from_value = From(x=response._from.x, y=response._from.y)
                     response = Data(class_value="move", from_value=from_value, to=to)
                     self.send_message_to_room(room_id, response)
             if isinstance(data, ObservableRoomMessage):
                 # TODO Set observer data
                 if isinstance(data, State):
-                    game_state = GameState(turn=data.turn, start_team=Team(data.start_team),
-                                           board=_convertBoard(data.board), last_move=data.last_move,
-                                           fishes=penguins.Fishes(data.fishes.int_value[0], data.fishes.int_value[1]))
+                    board: Board = _convertBoard(data.board)
+                    penguins_one = board.get_team_penguins(TeamEnum.ONE)
+                    fish_one: int = data.fishes.int_value[0]
+                    team_one: Team = Team(name=TeamEnum.ONE, penguins=penguins_one, fish=fish_one)
+                    penguins_two = board.get_team_penguins(TeamEnum.TWO)
+                    fish_two: int = data.fishes.int_value[1]
+                    team_two: Team = Team(name=TeamEnum.TWO, penguins=penguins_two, fish=fish_two)
+                    game_state = GameState(
+                        welcome_message=self.welcome_message,
+                        start_team=team_one if data.start_team == "ONE" else team_two,
+                        board=board,
+                        last_move=None if data.last_move is None else Move(
+                            _from=None if data.last_move.from_value is None else
+                            HexCoordinate(x=data.last_move.from_value.x,
+                                          y=data.last_move.from_value.y),
+                            to=HexCoordinate(x=data.last_move.to.x,
+                                             y=data.last_move.to.y),
+                            team=team_one.name),
+                        round=Progress(round=data.turn // 2, turn=data.turn),
+                        score=Score(
+                            team_one=team_one,
+                            team_two=team_two
+                        )
+                    )
                     self.game_handler.history.append(game_state)
                     self.game_handler.on_update(game_state)
                 elif isinstance(data, Result):

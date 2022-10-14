@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from socha.api.plugin.penguins import Team
+from socha.socha import Team
 from socha.api.protocol.protocol_packet import AdminLobbyRequest, ResponsePacket, ProtocolPacket, LobbyRequest
 from socha.api.protocol.room_message import RoomOrchestrationMessage, RoomMessage, \
     ObservableRoomMessage
@@ -478,7 +478,7 @@ class Winner:
 
 
 @dataclass
-class Board:
+class IBoard:
     """
     The protocol representation of a board.
     It contains a list of list of fields, which size is 7x7.
@@ -609,7 +609,7 @@ class State(ObservableRoomMessage):
             "type": "Element",
         }
     )
-    board: Optional[Board] = field(
+    board: Optional[IBoard] = field(
         default=None,
         metadata={
             "type": "Element",
@@ -767,7 +767,7 @@ class Room(ProtocolPacket):
 
 
 @dataclass
-class WelcomeMessage(RoomOrchestrationMessage):
+class IWelcomeMessage(RoomOrchestrationMessage):
     """
     Welcome message is sent to the client when the client joins the room.
     In this message the server tells the client which team it is.

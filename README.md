@@ -104,7 +104,7 @@ But if you want to avoid unnecessary imports,
 you can of course import only what you actually need.
 
 ````python
-from socha import *
+from python.socha import *
 ````
 
 If you now want to develop and implement your logic, then the structure of the class should look like this.

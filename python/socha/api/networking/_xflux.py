@@ -12,8 +12,12 @@ from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
 from socha.api.networking._network_interface import _NetworkInterface
-from socha.api.plugin.penguins import Move
+from socha.socha import Move
+from socha.socha import Team
+
 from socha.api.protocol.protocol import *
+from socha.api.protocol.protocol_packet import ProtocolPacket
+from socha.socha import TeamEnum
 
 
 def customClassFactory(clazz, params: dict):
@@ -23,7 +27,8 @@ def customClassFactory(clazz, params: dict):
         except KeyError:
             ...
         if params.get("class_value") == "welcomeMessage":
-            welcome_message = WelcomeMessage(Team(params.get("color")))
+            welcome_message = IWelcomeMessage(Team(name=TeamEnum.ONE if params.get("color") == "ONE" else TeamEnum.TWO,
+                                                   penguins=[], fish=0))
             return clazz(class_binding=welcome_message, **params)
         elif params.get("class_value") == "memento":
             state_object = params.get("state")
