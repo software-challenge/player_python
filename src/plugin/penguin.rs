@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use crate::plugins::penguins::coordinate::HexCoordinate;
+use crate::plugin::coordinate::HexCoordinate;
 use super::team::TeamEnum;
 
 #[pyclass]

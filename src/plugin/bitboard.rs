@@ -1,11 +1,11 @@
 use pyo3::prelude::*;
 
-use crate::plugins::penguins::coordinate::{CartesianCoordinate, HexCoordinate};
-use crate::plugins::penguins::field::Field;
-use crate::plugins::penguins::penguin::Penguin;
-use crate::plugins::penguins::r#move::Move;
-use crate::plugins::penguins::team::TeamEnum;
-use crate::plugins::penguins::vector::Vector;
+use crate::plugin::coordinate::{CartesianCoordinate, HexCoordinate};
+use crate::plugin::field::Field;
+use crate::plugin::penguin::Penguin;
+use crate::plugin::r#move::Move;
+use crate::plugin::team::TeamEnum;
+use crate::plugin::vector::Vector;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Copy, Debug, Hash)]
@@ -52,7 +52,7 @@ impl BitBoard {
             && self.fish_4 == other.fish_4
     }
 
-    pub fn empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.one == 0 &&
             self.two == 0 &&
             self.fish_0 == 0 &&
@@ -99,7 +99,7 @@ impl BitBoard {
     }
 
     pub fn disjoint(&self, other: &BitBoard) -> bool {
-        self.intersection(other).empty()
+        self.intersection(other).is_empty()
     }
 
     pub fn complement(&self, other: &BitBoard) -> BitBoard {
@@ -258,8 +258,8 @@ impl BitBoard {
             self.fish_4 & (1 << index) != 0
     }
 
-    pub fn contains(&self, indexes: Vec<u64>) -> bool {
-        for index in indexes {
+    pub fn contains(&self, indeces: Vec<u64>) -> bool {
+        for index in indeces {
             if !self.contains_field(index) {
                 return false;
             }
@@ -343,12 +343,26 @@ impl BitBoard {
         moves
     }
 
-    pub fn get_moves_from(&self, index: u64, team: TeamEnum) -> Vec<Move> {
+    pub fn possible_moves_from(&self, index: u64, team: TeamEnum) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
         for direction in Vector::neighbours() {
             moves.append(&mut self.get_directive_moves(index, direction.clone(), team.clone()));
         }
         moves
+    }
+
+    fn move(&self, move_: Move) -> BitBoard {
+        let mut new_board: BitBoard = self.clone();
+        let origin: HexCoordinate = move_.get_origin().unwrap();
+        let destination: HexCoordinate = move_.get_destination();
+        let origin_index: u64 = origin.to_cartesian().to_index().unwrap();
+        let destination_index: u64 = destination.to_cartesian().to_index().unwrap();
+        let origin_field: Field = Field(
+        let destination_field: Field = self.get_field(destination_index);
+        new_board.set_field(origin_index, 0);
+        new_board.set_field(destination_index, self.get_fish(destination_index) + 1);
+
+        new_board
     }
 
     pub fn __repr__(&self) -> String {

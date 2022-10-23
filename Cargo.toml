@@ -1,13 +1,14 @@
 [package]
 name = "socha"
-version = "0.9.6"
+version = "0.1.0"
 edition = "2021"
 
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
 name = "socha"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.17.1", features = ["extension-module"] }
+pyo3 = { version = "0.17.3", features = ["extension-module"] }
 libm = "0.2.5"
 libmath = "0.2.1"

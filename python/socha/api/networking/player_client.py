@@ -5,15 +5,12 @@ import logging
 import time
 from typing import List, Union
 
-
-from socha.socha import GameState, Move, Field, CartesianCoordinate, Team, Score, TeamEnum, Progress, Penguin, \
-    HexCoordinate, Board, WelcomeMessage
-
-from socha.api.networking._xflux import _XFluxClient
-from socha.api.protocol.protocol import State, IBoard, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Room, Result, MoveRequest, ObservableRoomMessage, \
-    IWelcomeMessage
-from socha.api.protocol.room_message import RoomOrchestrationMessage
+from python.socha import Board, Field, CartesianCoordinate, TeamEnum, Penguin, GameState, Move, WelcomeMessage, Team, \
+    HexCoordinate, Progress, Score
+from python.socha.api.networking._xflux import _XFluxClient
+from python.socha.api.protocol.protocol import IBoard, Result, Error, Join, JoinRoom, JoinPrepared, Room, \
+    IWelcomeMessage, MoveRequest, From, Data, State, To, Joined
+from python.socha.api.protocol.room_message import RoomOrchestrationMessage, ObservableRoomMessage
 
 
 def _convertBoard(protocolBoard: IBoard) -> Board:
@@ -149,10 +146,10 @@ class _PlayerClient(_XFluxClient):
                 # TODO Set observer data
                 if isinstance(data, State):
                     board: Board = _convertBoard(data.board)
-                    penguins_one = board.get_team_penguins(TeamEnum.ONE)
+                    penguins_one = board.get_teams_penguins(TeamEnum.ONE)
                     fish_one: int = data.fishes.int_value[0]
                     team_one: Team = Team(name=TeamEnum.ONE, penguins=penguins_one, fish=fish_one)
-                    penguins_two = board.get_team_penguins(TeamEnum.TWO)
+                    penguins_two = board.get_teams_penguins(TeamEnum.TWO)
                     fish_two: int = data.fishes.int_value[1]
                     team_two: Team = Team(name=TeamEnum.TWO, penguins=penguins_two, fish=fish_two)
                     game_state = GameState(

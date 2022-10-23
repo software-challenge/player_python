@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use crate::plugins::penguins::vector::Vector;
+use crate::plugin::vector::Vector;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]

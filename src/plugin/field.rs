@@ -3,8 +3,8 @@
 
 use pyo3::prelude::*;
 
-use crate::plugins::penguins::coordinate::HexCoordinate;
-use crate::plugins::penguins::penguin::Penguin;
+use crate::plugin::coordinate::HexCoordinate;
+use crate::plugin::penguin::Penguin;
 use super::team::TeamEnum;
 
 #[pyclass]
@@ -29,7 +29,7 @@ impl Field {
         }
     }
 
-    pub fn empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.fish == 0 && self.penguin.is_none()
     }
 
@@ -37,7 +37,11 @@ impl Field {
         self.penguin.is_some()
     }
 
-    pub fn get_penguin_team(&self) -> Option<TeamEnum> {
+    pub fn get_fish(&self) -> i32 {
+        self.fish
+    }
+
+    pub fn get_team(&self) -> Option<TeamEnum> {
         match &self.penguin {
             Some(penguin) => Some(penguin.team.clone()),
             None => None,

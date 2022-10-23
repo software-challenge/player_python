@@ -1,12 +1,12 @@
 use pyo3::prelude::*;
 
-use crate::plugins::penguins::coordinate::{HexCoordinate, CartesianCoordinate};
-use crate::plugins::penguins::field::Field;
-use crate::plugins::penguins::penguin::Penguin;
-use crate::plugins::penguins::r#move::Move;
-use crate::plugins::penguins::team::TeamEnum;
-use crate::plugins::penguins::vector::Vector;
-use crate::plugins::penguins::bitboard::BitBoard;
+use crate::plugin::coordinate::{HexCoordinate, CartesianCoordinate};
+use crate::plugin::field::Field;
+use crate::plugin::penguin::Penguin;
+use crate::plugin::r#move::Move;
+use crate::plugin::team::TeamEnum;
+use crate::plugin::vector::Vector;
+use crate::plugin::bitboard::BitBoard;
 
 
 #[pyclass]
@@ -105,8 +105,8 @@ impl Board {
         self.board.get_directive_moves(coordinate.to_cartesian().to_index().unwrap(), direction, team)
     }
 
-    pub fn get_moves_from(&self, coordinate: HexCoordinate, team: TeamEnum) -> Vec<Move> {
-        self.board.get_moves_from(coordinate.to_cartesian().to_index().unwrap(), team)
+    pub fn possible_moves_from(&self, coordinate: HexCoordinate, team: TeamEnum) -> Vec<Move> {
+        self.board.possible_moves_from(coordinate.to_cartesian().to_index().unwrap(), team)
     }
 
     pub fn get_penguins(&self) -> Vec<Penguin> {
@@ -130,7 +130,7 @@ impl Board {
         penguins
     }
 
-    pub fn get_team_penguins(&self, team: TeamEnum) -> Vec<Penguin> {
+    pub fn get_teams_penguins(&self, team: TeamEnum) -> Vec<Penguin> {
         let mut penguins: Vec<Penguin> = Vec::new();
         for index in 0..64 {
             if team == TeamEnum::ONE && self.board.one >> index & 1 != 0 {

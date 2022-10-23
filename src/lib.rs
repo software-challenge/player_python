@@ -1,16 +1,16 @@
-pub mod plugins;
+pub mod plugin;
 
 use pyo3::prelude::*;
-use crate::plugins::penguins::bitboard::BitBoard;
 
-use crate::plugins::penguins::board::Board;
-use crate::plugins::penguins::coordinate::{CartesianCoordinate, HexCoordinate};
-use crate::plugins::penguins::field::Field;
-use crate::plugins::penguins::game_state::{GameState, Progress, Score, WelcomeMessage};
-use crate::plugins::penguins::penguin::Penguin;
-use crate::plugins::penguins::r#move::Move;
-use crate::plugins::penguins::team::{Team, TeamEnum};
-use crate::plugins::penguins::vector::Vector;
+use crate::plugin::bitboard::BitBoard;
+use crate::plugin::board::Board;
+use crate::plugin::coordinate::{CartesianCoordinate, HexCoordinate};
+use crate::plugin::field::Field;
+use crate::plugin::game_state::{GameState, Progress, Score, WelcomeMessage};
+use crate::plugin::penguin::Penguin;
+use crate::plugin::r#move::Move;
+use crate::plugin::team::{Team, TeamEnum};
+use crate::plugin::vector::Vector;
 
 
 #[pymodule]

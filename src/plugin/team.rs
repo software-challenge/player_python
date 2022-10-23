@@ -1,5 +1,5 @@
 use pyo3::prelude::*;
-use crate::plugins::penguins::penguin::Penguin;
+use crate::plugin::penguin::Penguin;
 
 pub struct ONE {}
 

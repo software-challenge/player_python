@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
-from socha.socha import Team
-from socha.api.protocol.protocol_packet import AdminLobbyRequest, ResponsePacket, ProtocolPacket, LobbyRequest
-from socha.api.protocol.room_message import RoomOrchestrationMessage, RoomMessage, \
-    ObservableRoomMessage
+from python.socha import Team
+from python.socha.api.protocol.protocol_packet import ProtocolPacket, AdminLobbyRequest, ResponsePacket, LobbyRequest
+from python.socha.api.protocol.room_message import RoomMessage, ObservableRoomMessage, RoomOrchestrationMessage
 
 
 @dataclass

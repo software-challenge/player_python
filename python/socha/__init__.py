@@ -1,5 +1,24 @@
-import socha.socha
+from .socha import *
+from api.networking.player_client import IClientHandler
+from api.protocol.protocol import Result
+from starter import Starter
 
-__doc__ = socha.__doc__
-if hasattr(socha, "__all__"):
-    __all__ = socha.__all__
+__all__ = [
+    'BitBoard',
+    'Board',
+    'CartesianCoordinate',
+    'Field',
+    'GameState',
+    'HexCoordinate',
+    'IClientHandler',
+    'Move',
+    'Penguin',
+    'Progress',
+    'Result',
+    'Score',
+    'Starter',
+    'Team',
+    'TeamEnum',
+    'Vector',
+    'WelcomeMessage',
+]

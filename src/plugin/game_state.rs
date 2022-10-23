@@ -22,9 +22,9 @@
 
 use pyo3::prelude::*;
 
-use crate::plugins::penguins::board::Board;
-use crate::plugins::penguins::r#move::Move;
-use crate::plugins::penguins::team::Team;
+use crate::plugin::board::Board;
+use crate::plugin::r#move::Move;
+use crate::plugin::team::Team;
 
 use super::coordinate::HexCoordinate;
 use super::team::TeamEnum;
@@ -94,7 +94,7 @@ pub struct GameState {
     #[pyo3(get, set)]
     pub board: Board,
     #[pyo3(get, set)]
-    pub round: Progress,
+    pub progress: Progress,
     #[pyo3(get, set)]
     pub score: Score,
     #[pyo3(get, set)]
@@ -105,18 +105,18 @@ pub struct GameState {
 impl GameState {
     #[new]
     pub(crate) fn new(welcome_message: WelcomeMessage, start_team: Team, board: Board,
-                      round: Progress, score: Score, last_move: Option<Move>) -> Self {
+            progress: Progress, score: Score, last_move: Option<Move>) -> Self {
         GameState {
             welcome_message,
             start_team,
             board,
-            round,
+            progress,
             score,
             last_move,
         }
     }
 
-    fn get_team(&self) -> Team {
+    fn current_team(&self) -> Team {
         let team_one_moves = self.possible_moves(TeamEnum::ONE);
         let team_two_moves = self.possible_moves(TeamEnum::TWO);
         if team_one_moves.is_empty() && !team_two_moves.is_empty() {
@@ -130,7 +130,7 @@ impl GameState {
                 TeamEnum::TWO => self.start_team.opponent(),
             }
         } else {
-            match self.round.turn % 2 {
+            match self.progress.turn % 2 {
                 0 => self.start_team.clone(),
                 1 => self.start_team.opponent(),
                 _ => panic!("Invalid turn number"),
@@ -139,7 +139,7 @@ impl GameState {
     }
 
     fn get_opponent(&self) -> Team {
-        self.get_team().opponent()
+        self.current_team().opponent()
     }
 
     fn possible_moves(&self, team: TeamEnum) -> Vec<Move> {
@@ -152,19 +152,26 @@ impl GameState {
             if team == TeamEnum::ONE {
                 let from: Vec<HexCoordinate> = self.board.board.get_coordinates(self.board.board.one);
                 for coordinate in from {
-                    for possible_moves in self.board.get_moves_from(coordinate, team.clone()) {
+                    for possible_moves in self.board.possible_moves_from(coordinate, team.clone()) {
                         moves.push(possible_moves);
                     }
                 }
             } else {
                 let from: Vec<HexCoordinate> = self.board.board.get_coordinates(self.board.board.two);
                 for coordinate in from {
-                    for possible_moves in self.board.get_moves_from(coordinate, team.clone()) {
+                    for possible_moves in self.board.possible_moves_from(coordinate, team.clone()) {
                         moves.push(possible_moves);
                     }
                 }
             }
         }
         moves
+    }
+
+    pub fn is_valid_move(&self, r#move: &Move) -> bool {
+        self.possible_moves(r#move.team.clone()).contains(r#move)
+    }
+
+    pub fn perform_move(&self, r#move: &Move) -> GameState {
     }
 }
