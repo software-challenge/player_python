@@ -1,6 +1,8 @@
 import random
 
 from socha import *
+from socha.api.networking.player_client import IClientHandler
+from socha.starter import Starter
 
 
 class Logic(IClientHandler):
