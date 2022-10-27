@@ -7,7 +7,7 @@ from typing import List, Union
 
 from socha.api.networking._xflux import _XFluxClient
 from socha.api.plugin import penguins
-from socha.api.plugin.penguins import Field, GameState, Move, Coordinate
+from socha.api.plugin.penguins import Field, GameState, Move, CartesianCoordinate
 from socha.api.protocol.protocol import State, Board, Data, \
     Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, ObservableRoomMessage
 
@@ -21,7 +21,7 @@ def _convertBoard(protocolBoard: Board) -> penguins.Board:
     for y, row in enumerate(protocolBoard.list_value):
         rowList: List[Field] = []
         for x, fieldsValue in enumerate(row.field_value):
-            fieldCoordinate = Coordinate(x, y, is_double=False).get_double_hex()
+            fieldCoordinate = CartesianCoordinate(x, y).to_hex()
             rowList.append(Field(coordinate=fieldCoordinate, field=fieldsValue))
         boardList.append(rowList)
     return penguins.Board(boardList)
@@ -105,7 +105,7 @@ class _PlayerClient(_XFluxClient):
     def observe_room(self, room_id: str, observer):
         ...
 
-    def join_game(self, game_type: str = None):
+    def join_game(self):
         super().send(Join())
 
     def join_game_room(self, room_id: str):
