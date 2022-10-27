@@ -74,18 +74,19 @@ class FieldTest(unittest.TestCase):
         self.assertEqual(f.field.color(), "ONE")
 
     def testGetEmptyField(self):
-        l = []
+        list_value = []
         for i in range(7):
-            l.append([])
+            list_value.append([])
             for j in range(7):
-                l[i].append(Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=0))
-        b = Board(l)
+                list_value[i].append(Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=0))
+        b = Board(list_value)
         e = b.get_empty_fields()
         self.assertEqual(len(e), 49)
 
 
 class GameStateTest(unittest.TestCase):
-    b = Board(game_field=[[Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=1) for i in range(8)] for j in range(8)])
+    b = Board(game_field=[[Field(coordinate=CartesianCoordinate(j, i).to_hex(), field=1) for i in range(8)] for j in
+                          range(8)])
     g = GameState(board=b, turn=1, start_team=Team(color="ONE"), fishes=Fishes(fishes_one=1, fishes_two=0),
                   last_move=Move(from_value=None, to_value=HexCoordinate(7, 7)))
 

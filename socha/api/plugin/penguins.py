@@ -135,16 +135,6 @@ class Vector:
         """
         return abs(self.d_x) == abs(self.d_y) or (self.d_x % 2 == 0 and self.d_y == 0)
 
-    def to_coordinates(self) -> 'Coordinate':
-        """
-        **This method has been deprecated.**
-        Converts the vector to coordinate object.
-
-        :return: The coordinate object.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return Coordinate(self.d_x, self.d_y, is_double=True)
-
     def __str__(self) -> str:
         """
         Returns the string representation of the vector.
@@ -316,112 +306,6 @@ class HexCoordinate:
 
     def __eq__(self, other: object) -> bool:
         return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
-
-
-class Coordinate:
-    """
-    **This class has benn deprecated**
-    Represents a coordinate both in the normal two-dimensional array and on a hexagonal board.
-        *Note that the board is stored in a normal array,
-        only to represent relations in a hexagonal grid the indices of the normal array are converted,
-        so that one can work with it better in this hexagonal grid.*
-    """
-
-    def __init__(self, x: int, y: int, is_double: bool = True):
-        """
-        **This class has benn deprecated**
-        Constructor for the Coordinates class.
-
-        :param x: The x-coordinate of the coordination system.
-        :param y: The y-coordinate of the coordination system.
-        :param is_double: Determines if the coordinate is in double hex format. Default is True.
-        """
-        warn(f'{self.__class__.__name__} has been deprecated.', DeprecationWarning, stacklevel=2)
-        self.x = x
-        self.y = y
-        self.is_double = is_double
-
-    def add_vector(self, vector: Vector) -> 'Coordinate':
-        """
-        Adds a vector to the coordinate.
-
-        :param vector: The vector to add.
-        :return: The new coordinate.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return self.get_vector().addition(vector).to_coordinates() if self.is_double else \
-            self.get_double_hex().get_vector().addition(vector).to_coordinates().get_array()
-
-    def subtract_vector(self, vector: Vector) -> 'Coordinate':
-        """
-        Subtracts a vector from the coordinate.
-
-        :param vector: The vector to subtract.
-        :return: The new coordinate.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return self.get_vector().subtraction(vector).to_coordinates()
-
-    def get_distance(self, other: 'Coordinate') -> float:
-        """
-        Calculates the distance between two coordinates.
-
-        :param other: The other coordinate to calculate the distance to.
-        :return: The distance between the two coordinates as Vector object.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return self.get_vector().subtraction(other.get_vector()).magnitude()
-
-    def get_vector(self) -> Vector:
-        """
-        Gets the vector from the coordinate to the origin.
-
-        :return: The vector from the coordinate to the origin.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return Vector(self.x, self.y)
-
-    def _array_to_double_hex(self) -> 'Coordinate':
-        """
-        Converts the coordinate to double hex coordinates.
-
-        :return: The double hex coordinates.
-        """
-        return Coordinate(self.x * 2 + (1 if self.y % 2 == 1 else 0), self.y, True)
-
-    def _double_hex_to_array(self) -> 'Coordinate':
-        """
-        Converts the double hex coordinates to coordinate.
-
-        :return: The coordinate.
-        """
-        return Coordinate(math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), self.y, False)
-
-    def get_array(self) -> 'Coordinate':
-        """
-        Checks if the coordinate is an array or double hex coordinate.
-
-        :return: Self if the coordinate is an array, _double_hex_to_array if the coordinate is a double hex coordinate.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return self if not self.is_double else self._double_hex_to_array()
-
-    def get_double_hex(self) -> 'Coordinate':
-        """
-        Checks if the coordinate is a double hex coordinate.
-
-        :return: Self if the coordinate is a double hex coordinate, _double_hex_to_array if the coordinate is an array.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return self if self.is_double else self._array_to_double_hex()
-
-    def __str__(self) -> str:
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return f"[{self.x}, {self.y}]"
-
-    def __eq__(self, other: object) -> bool:
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return isinstance(other, Coordinate) and self.x == other.x and self.y == other.y
 
 
 class Move:
