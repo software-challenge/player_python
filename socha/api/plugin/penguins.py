@@ -135,16 +135,6 @@ class Vector:
         """
         return abs(self.d_x) == abs(self.d_y) or (self.d_x % 2 == 0 and self.d_y == 0)
 
-    def to_coordinates(self) -> 'Coordinate':
-        """
-        **This method has been deprecated.**
-        Converts the vector to coordinate object.
-
-        :return: The coordinate object.
-        """
-        warn('This method has been deprecated.', DeprecationWarning, stacklevel=2)
-        return Coordinate(self.d_x, self.d_y, is_double=True)
-
     def __str__(self) -> str:
         """
         Returns the string representation of the vector.
