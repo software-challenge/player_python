@@ -8,8 +8,9 @@
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
-> Please note that this is a very early version, which may still contain some bugs. However, the client is able to play
-> a game from start to end.
+
+> Please read the [documentation for this client](https://software-challenge-python-client.readthedocs.io/en/latest/)
+> before you asking questions or opening an issue.
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
@@ -31,6 +32,8 @@ which installs the packages inside the folder.
 
 > Pleas make sure that you have at least **Python 3.6** installed.
 > Check with `$ python -V` or `$ python3 -V`.
+> 
+> If not present you can install python with the following commands:
 > - Windows: `> winget install -e --id Python.Python.3.6`
 > - Debian: `$ sudo apt install python3.6`
 > - Arch: `$ sudo pacman -S python`
@@ -173,9 +176,9 @@ you should have a directory structure that looks something like this:
 
 ````
 my_player/
-|- venv/
-|- logic.py
-|- start.sh
+├── venv/
+├── logic.py
+└── start.sh
 ````
 
 The `my_player` directory,
