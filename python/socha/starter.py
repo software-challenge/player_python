@@ -36,7 +36,7 @@ class Starter:
         self.port: int = args.port or port
         self.reservation: str = args.reservation or reservation
         self.room_id: str = args.room or room_id
-        self.keep_alive: bool = args.survive or survive
+        self.survive: bool = args.survive or survive
         self.write_log: bool = args.log or log
 
         if args.verbose or verbose:
@@ -53,7 +53,7 @@ class Starter:
             logging.basicConfig(level=level, format="%(asctime)s: %(levelname)s - %(message)s")
         logging.info("Starting...")
 
-        self.client = _PlayerClient(host=self.host, port=self.port, handler=logic, keep_alive=self.keep_alive)
+        self.client = _PlayerClient(host=self.host, port=self.port, handler=logic, survive=self.survive)
 
         if reservation:
             self.client.join_game_with_reservation(reservation)

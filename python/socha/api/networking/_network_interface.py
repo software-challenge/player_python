@@ -8,10 +8,10 @@ import socket
 
 class _NetworkInterface:
     """
-    This interface handels all package transfers. It'll send and _receive data from a given connection.
+    This interface handels all package transfers. It'll _send and _receive data from a given connection.
     """
 
-    def __init__(self, host="localhost", port=13050, timeout=5):
+    def __init__(self, host="localhost", port=13050, timeout=10):
         """
         :param host: Host of the server. Default is localhost.
         :param port: Port of the server. Default is 13050.
@@ -19,16 +19,18 @@ class _NetworkInterface:
         """
         self.host = host
         self.port = port
+        self.timeout = timeout
         self.connected: bool = False
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.settimeout(timeout)
+        self.socket = None
 
         self.buffer: bytes = b""
 
     def connect(self):
         """
-        Connects the socket to the server and will be ready to listen for and send data.
+        Connects the socket to the server and will be ready to listen for and _send data.
         """
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.settimeout(self.timeout)
         self.socket.connect((self.host, self.port))
         self.connected = True
         logging.info("Connected to server.")
@@ -44,7 +46,7 @@ class _NetworkInterface:
     def send(self, data: bytes):
         """
         Sends the data to the server. It puts the data in the sending queue and the _SocketHandler thread will get
-        and send it.
+        and _send it.
         :param data: The data that is being sent as string.
         """
         self.socket.sendall(data)

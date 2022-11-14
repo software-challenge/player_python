@@ -9,7 +9,7 @@ from socha.api.protocol.room_message import RoomMessage, ObservableRoomMessage, 
 @dataclass
 class Left(ProtocolPacket):
     """
-    If the game is over the server will send this message to the clients and closes the connection afterwards.
+    If the game is over the server will _send this message to the clients and closes the connection afterwards.
     """
 
     class Meta:
@@ -27,7 +27,7 @@ class Left(ProtocolPacket):
 @dataclass
 class MoveRequest(RoomMessage):
     """
-    Request a client to send a Move.
+    Request a client to _send a Move.
     """
 
 
@@ -37,7 +37,7 @@ class Close(ProtocolPacket):
     Is sent by one party immediately before this party closes the communication connection and should make the
     receiving party also close the connection.
 
-    This should not be sent manually, the XFluxClient will automatically send it when stopped.
+    This should not be sent manually, the XFluxClient will automatically _send it when stopped.
     """
 
     class Meta:
@@ -47,7 +47,7 @@ class Close(ProtocolPacket):
 @dataclass
 class Authenticate(AdminLobbyRequest):
     """
-    Authenticates a client as administrator to send AdminLobbyRequest`s. \n
+    Authenticates a client as administrator to _send AdminLobbyRequest`s. \n
     *Is not answered if successful.*
     """
 
@@ -182,7 +182,7 @@ class Slot(ProtocolPacket):
 class Step(AdminLobbyRequest):
     """
     When the client is authenticated as administrator,
-    it can send this step request to the server to advance the game for one move.
+    it can _send this step request to the server to advance the game for one move.
     This is not possible if the game is not paused.
     """
 
@@ -202,7 +202,7 @@ class Step(AdminLobbyRequest):
 class Prepare(AdminLobbyRequest):
     """
     When the client is authenticated as administrator,
-    it can send this request to prepare the room for the game.
+    it can _send this request to prepare the room for the game.
     """
 
     class Meta:
@@ -517,7 +517,7 @@ class Definition:
 @dataclass
 class Entry:
     """
-    Is send when a game is won by one of the players.
+    Is _send when a game is won by one of the players.
     This element contains the winning player and the score of the player.
     """
 
@@ -743,7 +743,7 @@ class Data:
 class Room(ProtocolPacket):
     """
     The root element of every room packet.
-    It contains a data element when send that contains the actual data,
+    It contains a data element when _send that contains the actual data,
     that are needed for the game to work.
     """
 
@@ -778,7 +778,7 @@ class IWelcomeMessage(RoomOrchestrationMessage):
 class Result(ObservableRoomMessage):
     """
     Result of a game.
-    This will the server send after a game is finished.
+    This will the server _send after a game is finished.
     """
     definition: Definition
     scores: Scores

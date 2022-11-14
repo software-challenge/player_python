@@ -5,7 +5,7 @@ build-backend = "maturin"
 [project]
 name = "socha"
 requires-python = ">=3.7"
-version = "0.9.8"
+version = "0.9.9"
 authors = [
     { name = "FalconsSky", email = "stu222782@mail.uni-kiel.de" },
 ]
@@ -29,7 +29,9 @@ classifiers = [
     "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
     "Operating System :: OS Independent",
 ]
-
+homepage = "https://software-challenge.de/"
+repository = "https://github.com/FalconsSky/socha-python-client"
+documentation = "https://software-challenge-python-client.readthedocs.io/en/latest/"
 
 [tool.maturin]
 python-source = "python"
