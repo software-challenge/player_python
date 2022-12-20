@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='socha',
-    version='0.9.9',
+    version='1.0.0',
     packages=['socha', 'socha.api', 'socha.api.plugin', 'socha.api.protocol',
               'socha.api.networking'],
     url='https://github.com/FalconsSky/Software-Challenge-Python-Client',

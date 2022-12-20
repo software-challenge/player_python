@@ -1,6 +1,34 @@
 import unittest
+import random
 
 from socha.api.plugin.penguins import *
+
+
+def create_random_board() -> Board:
+    game_field = []
+    teams = ["ONE", "TWO"]
+    one_penguins = 0
+    two_penguins = 0
+    for y in range(8):
+        row = []
+        for x in range(8):
+            choice = random.choice([0, 1])
+            if choice == 0:
+                field = Field(CartesianCoordinate(x, y).to_hex(), random.randint(0, 4))
+            else:
+                if one_penguins <= 4 and two_penguins <= 4:
+                    if one_penguins == two_penguins:
+                        team = random.choice(teams)
+                    elif one_penguins > two_penguins:
+                        team = "TWO"
+                    else:
+                        team = "ONE"
+                    field = Field(CartesianCoordinate(x, y).to_hex(), team)
+                else:
+                    field = Field(CartesianCoordinate(x, y).to_hex(), random.randint(0, 4))
+            row.append(field)
+        game_field.append(row)
+    return Board(game_field)
 
 
 class VectorTest(unittest.TestCase):
@@ -82,6 +110,70 @@ class FieldTest(unittest.TestCase):
         b = Board(list_value)
         e = b.get_empty_fields()
         self.assertEqual(len(e), 49)
+
+
+class BoardTest(unittest.TestCase):
+    b = create_random_board()
+
+    def test_get_empty_fields(self):
+        empty_fields = self.b.get_empty_fields()
+
+        for field in empty_fields:
+            self.assertTrue(field.is_empty())
+
+    def test_is_occupied(self):
+        for x in range(self.b.width() - 1):
+            for y in range(self.b.height() - 1):
+                field = self.b._get_field(x, y)
+                if field.is_occupied():
+                    self.assertTrue(self.b.is_occupied(field.coordinate))
+                else:
+                    self.assertFalse(self.b.is_occupied(field.coordinate))
+
+    def test_is_valid(self):
+        for x in range(self.b.width()):
+            for y in range(self.b.height()):
+                self.assertTrue(self.b.is_valid(CartesianCoordinate(x, y).to_hex()))
+
+        self.assertFalse(self.b.is_valid(CartesianCoordinate(-1, 0).to_hex()))
+        self.assertFalse(self.b.is_valid(CartesianCoordinate(0, -1).to_hex()))
+        self.assertFalse(self.b.is_valid(CartesianCoordinate(8, 0).to_hex()))
+        self.assertFalse(self.b.is_valid(CartesianCoordinate(0, 8).to_hex()))
+
+    def test_get_field(self):
+        valid_coordinates = []
+        for y in range(self.b.height() - 1):
+            for x in range(self.b.width() - 1):
+                valid_coordinates.append(CartesianCoordinate(x, y).to_hex())
+        random_coordinates = random.choice(valid_coordinates)
+        field = self.b.get_field(random_coordinates)
+        self.assertEqual(field.coordinate, random_coordinates)
+        self.assertTrue(isinstance(field.field, int) or isinstance(field.field, Team))
+
+        invalid_coordinates = [CartesianCoordinate(-1, 0).to_hex(), CartesianCoordinate(0, -1).to_hex(),
+                               CartesianCoordinate(self.b.width(), 0).to_hex(),
+                               CartesianCoordinate(0, self.b.height()).to_hex()]
+        random_coordinates = random.choice(invalid_coordinates)
+        with self.assertRaises(IndexError):
+            self.b.get_field(random_coordinates)
+
+    def test_get_field_by_index(self):
+        random_indices = random.randint(0, 63)
+        field = self.b.get_field_by_index(random_indices)
+        self.assertEqual(field.coordinate, CartesianCoordinate(random_indices % self.b.width(),
+                                                               int(random_indices / self.b.width())).to_hex())
+        self.assertTrue(isinstance(field.field, int) or isinstance(field.field, Team))
+
+        random_indices = random.randint(-100, -1)
+        with self.assertRaises(IndexError):
+            self.b.get_field_by_index(random_indices)
+
+    def test_get_most_fish(self):
+        most_fish_fields = self.b.get_most_fish()
+        self.assertTrue(isinstance(most_fish_fields, list))
+        self.assertTrue(all(isinstance(field, Field) for field in most_fish_fields))
+        self.assertTrue(all(isinstance(field.field, int) for field in most_fish_fields))
+        self.assertTrue(all(field.field >= 0 for field in most_fish_fields))
 
 
 class GameStateTest(unittest.TestCase):

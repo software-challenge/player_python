@@ -223,7 +223,7 @@ class CartesianCoordinate:
         """
         if 0 <= index <= 63:
             return CartesianCoordinate(x=index % 8, y=int(index / 8))
-        return None
+        raise IndexError("Index out of range.")
 
     def __repr__(self) -> str:
         return f"CartesianCoordinate({self.x}, {self.y})"
@@ -449,10 +449,12 @@ class Field:
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Field) and self.field == __o.field
-
-    def __str__(self):
-        return f"This Field is occupied by {self.field}" + (
-            " fish(es)." if isinstance(self.field, int) else ".")
+    
+    def __repr__(self):
+        if isinstance(self.field, int):
+            return f"Field({self.coordinate}, Fish({self.field}))"
+        else:
+            return f"Field({self.coordinate}, {self.field})"
 
 
 class Board:
@@ -671,7 +673,8 @@ class Board:
 
         :return: A list of Fields.
         """
-        fields = self.get_all_fields()
+
+        fields = list(filter(lambda field_x: not field_x.is_occupied(), self.get_all_fields()))
         fields.sort(key=lambda field_x: field_x.get_fish(), reverse=True)
         for i, field in enumerate(fields):
             if field.get_fish() < fields[0].get_fish():
