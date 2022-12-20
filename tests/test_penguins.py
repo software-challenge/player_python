@@ -150,8 +150,9 @@ class BoardTest(unittest.TestCase):
         self.assertEqual(field.coordinate, random_coordinates)
         self.assertTrue(isinstance(field.field, int) or isinstance(field.field, Team))
 
-        invalid_coordinates = [HexCoordinate(-1, 0), HexCoordinate(0, -1), HexCoordinate(self.b.width(), 0),
-                               HexCoordinate(0, self.b.height())]
+        invalid_coordinates = [CartesianCoordinate(-1, 0).to_hex(), CartesianCoordinate(0, -1).to_hex(),
+                               CartesianCoordinate(self.b.width(), 0).to_hex(),
+                               CartesianCoordinate(0, self.b.height()).to_hex()]
         random_coordinates = random.choice(invalid_coordinates)
         with self.assertRaises(IndexError):
             self.b.get_field(random_coordinates)
