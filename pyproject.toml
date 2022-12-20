@@ -1,11 +1,10 @@
 [build-system]
-requires = ["maturin>=0.13,<0.14"]
-build-backend = "maturin"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "socha"
-requires-python = ">=3.7"
-version = "0.9.9"
+version = "1.0.0"
 authors = [
     { name = "FalconsSky", email = "stu222782@mail.uni-kiel.de" },
 ]
