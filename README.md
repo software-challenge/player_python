@@ -2,7 +2,6 @@
 
 # Python Client for the Software-Challenge Germany 2023
 
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/FalconsSky/Software-Challenge-Python-Client/static%20and%20unit%20tests?label=Test)](https://github.com/FalconsSky/Software-Challenge-Python-Client)
 [![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/latest/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
