@@ -673,7 +673,8 @@ class Board:
 
         :return: A list of Fields.
         """
-        fields = self.get_all_fields()
+
+        fields = list(filter(lambda field_x: not field_x.is_occupied(), self.get_all_fields()))
         fields.sort(key=lambda field_x: field_x.get_fish(), reverse=True)
         for i, field in enumerate(fields):
             if field.get_fish() < fields[0].get_fish():
