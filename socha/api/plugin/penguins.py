@@ -223,7 +223,7 @@ class CartesianCoordinate:
         """
         if 0 <= index <= 63:
             return CartesianCoordinate(x=index % 8, y=int(index / 8))
-        return None
+        raise IndexError("Index out of range.")
 
     def __repr__(self) -> str:
         return f"CartesianCoordinate({self.x}, {self.y})"
