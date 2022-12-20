@@ -449,10 +449,12 @@ class Field:
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Field) and self.field == __o.field
-
-    def __str__(self):
-        return f"This Field is occupied by {self.field}" + (
-            " fish(es)." if isinstance(self.field, int) else ".")
+    
+    def __repr__(self):
+        if isinstance(self.field, int):
+            return f"Field({self.coordinate}, Fish({self.field}))"
+        else:
+            return f"Field({self.coordinate}, {self.field})"
 
 
 class Board:
