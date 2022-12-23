@@ -4,7 +4,6 @@ Handels the tcp connection to the server.
 import logging
 import re
 import socket
-from typing import Union
 
 
 class _NetworkInterface:

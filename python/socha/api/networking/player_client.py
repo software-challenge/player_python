@@ -5,12 +5,12 @@ import logging
 import time
 from typing import List, Union
 
-from python.socha import Board, Field, CartesianCoordinate, TeamEnum, Penguin, GameState, Move, WelcomeMessage, Team, \
+from socha import Board, Field, CartesianCoordinate, TeamEnum, Penguin, GameState, Move, WelcomeMessage, Team, \
     HexCoordinate, Progress, Score
-from python.socha.api.networking._xflux import _XFluxClient
-from python.socha.api.protocol.protocol import IBoard, Result, Error, Join, JoinRoom, JoinPrepared, Room, \
+from socha.api.networking._xflux import _XFluxClient
+from socha.api.protocol.protocol import IBoard, Result, Error, Join, JoinRoom, JoinPrepared, Room, \
     IWelcomeMessage, MoveRequest, From, Data, State, To, Joined
-from python.socha.api.protocol.room_message import RoomOrchestrationMessage, ObservableRoomMessage
+from socha.api.protocol.room_message import RoomOrchestrationMessage, ObservableRoomMessage
 
 
 def _convertBoard(protocolBoard: IBoard) -> Board:
@@ -103,8 +103,8 @@ class _PlayerClient(_XFluxClient):
 
     def __init__(self, host: str, port: int, handler: IClientHandler, keep_alive: bool):
         super().__init__(host, port)
-        self.game_handler = handler
-        self.keep_alive = keep_alive
+        self.game_handler: IClientHandler = handler
+        self.keep_alive: bool = keep_alive
 
     def authenticate(self, password: str, consumer):
         ...
@@ -163,7 +163,7 @@ class _PlayerClient(_XFluxClient):
                             to=HexCoordinate(x=data.last_move.to.x,
                                              y=data.last_move.to.y),
                             team=team_one.name),
-                        round=Progress(round=data.turn // 2, turn=data.turn),
+                        progress=Progress(round=data.turn // 2, turn=data.turn),
                         score=Score(
                             team_one=team_one,
                             team_two=team_two

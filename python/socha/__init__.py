@@ -1,7 +1,7 @@
 from .socha import *
-from api.networking.player_client import IClientHandler
-from api.protocol.protocol import Result
-from starter import Starter
+from socha.api.networking.player_client import IClientHandler
+from socha.api.protocol.protocol import Result
+from socha.starter import Starter
 
 __all__ = [
     'BitBoard',
