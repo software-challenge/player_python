@@ -44,5 +44,6 @@ impl Move {
 impl std::fmt::Display for Move {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "Move(from={:?}, to={}, team={})", self._from, self.to, self.team)
+            .map_err(|_e| core::fmt::Error)
     }
 }

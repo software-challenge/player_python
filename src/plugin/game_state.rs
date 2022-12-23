@@ -130,7 +130,7 @@ impl GameState {
                 TeamEnum::TWO => self.start_team.opponent(),
             }
         } else {
-            match self.progress.turn % 2 {
+            match &self.progress.turn % 2 {
                 0 => self.start_team.clone(),
                 1 => self.start_team.opponent(),
                 _ => panic!("Invalid turn number"),
@@ -168,10 +168,11 @@ impl GameState {
         moves
     }
 
-    pub fn is_valid_move(&self, r#move: &Move) -> bool {
-        self.possible_moves(r#move.team.clone()).contains(r#move)
+    pub fn is_valid_move(&self, _move: &Move) -> bool {
+        self.possible_moves(_move.team.clone()).contains(_move)
     }
 
-    pub fn perform_move(&self, r#move: &Move) -> GameState {
+    pub fn perform_move(&self, _move: &Move) -> GameState {
+        self.clone()
     }
 }

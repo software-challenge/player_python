@@ -138,11 +138,11 @@ impl BitBoard {
         }
     }
 
-    pub fn update(&mut self, move_: &Move) {
-        if move_._from != None {
-            let from = move_._from.clone().unwrap().to_cartesian().to_index().unwrap();
-            let to = move_.to.to_cartesian().to_index().unwrap();
-            match move_.team {
+    pub fn update(&mut self, r#move: &Move) {
+        if r#move._from != None {
+            let from = r#move._from.clone().unwrap().to_cartesian().to_index().unwrap();
+            let to = r#move.to.to_cartesian().to_index().unwrap();
+            match r#move.team {
                 TeamEnum::ONE => {
                     self.one ^= 1 << from;
                     self.one |= 1 << to;
@@ -153,8 +153,8 @@ impl BitBoard {
                 }
             }
         } else {
-            let to = move_.to.to_cartesian().to_index().unwrap();
-            match move_.team {
+            let to = r#move.to.to_cartesian().to_index().unwrap();
+            match r#move.team {
                 TeamEnum::ONE => {
                     self.one |= 1 << to;
                 }
@@ -258,8 +258,8 @@ impl BitBoard {
             self.fish_4 & (1 << index) != 0
     }
 
-    pub fn contains(&self, indeces: Vec<u64>) -> bool {
-        for index in indeces {
+    pub fn contains(&self, indexes: Vec<u64>) -> bool {
+        for index in indexes {
             if !self.contains_field(index) {
                 return false;
             }
@@ -351,16 +351,16 @@ impl BitBoard {
         moves
     }
 
-    fn move(&self, move_: Move) -> BitBoard {
+    fn r#move(&self, r#move: Move) -> BitBoard {
         let mut new_board: BitBoard = self.clone();
-        let origin: HexCoordinate = move_.get_origin().unwrap();
-        let destination: HexCoordinate = move_.get_destination();
+        let origin: HexCoordinate = r#move._from.unwrap();
+        let destination: HexCoordinate = r#move.to;
         let origin_index: u64 = origin.to_cartesian().to_index().unwrap();
         let destination_index: u64 = destination.to_cartesian().to_index().unwrap();
-        let origin_field: Field = Field(
+        let origin_field: Field = self.get_field(origin_index);
         let destination_field: Field = self.get_field(destination_index);
-        new_board.set_field(origin_index, 0);
-        new_board.set_field(destination_index, self.get_fish(destination_index) + 1);
+        new_board.set_field(&origin_field);
+        new_board.set_field(&destination_field);
 
         new_board
     }
@@ -412,5 +412,6 @@ impl Default for BitBoard {
 impl std::fmt::Display for BitBoard {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{}", self.__repr__())
+        .map_err(|_e| core::fmt::Error)
     }
 }

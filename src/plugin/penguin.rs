@@ -27,5 +27,6 @@ impl Penguin {
 impl std::fmt::Display for Penguin {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "Penguin(position={}, team={})", self.position, self.team)
+        .map_err(|_e| core::fmt::Error)
     }
 }

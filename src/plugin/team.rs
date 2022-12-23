@@ -21,11 +21,13 @@ pub enum TeamEnum {
 }
 
 impl std::fmt::Display for TeamEnum {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            TeamEnum::ONE => write!(f, "{}", ONE::NAME),
-            TeamEnum::TWO => write!(f, "{}", TWO::NAME),
-        }
+        fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            match self {
+                TeamEnum::ONE => write!(f, "{}", String::from(ONE::NAME))
+                    .map_err(|_e| core::fmt::Error),
+                TeamEnum::TWO => write!(f, "{}", String::from(TWO::NAME))
+                    .map_err(|_e| core::fmt::Error),
+            }
     }
 }
 
@@ -74,5 +76,6 @@ impl Team {
 impl std::fmt::Display for Team {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "Team(name={}, penguins={:?}, fish={})", self.name, self.penguins, self.fish)
+        .map_err(|_e| core::fmt::Error)
     }
 }

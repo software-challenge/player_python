@@ -37,10 +37,6 @@ impl Field {
         self.penguin.is_some()
     }
 
-    pub fn get_fish(&self) -> i32 {
-        self.fish
-    }
-
     pub fn get_team(&self) -> Option<TeamEnum> {
         match &self.penguin {
             Some(penguin) => Some(penguin.team.clone()),
@@ -58,11 +54,9 @@ impl Field {
 
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(
-            f,
-            "Field(coordinate={}, penguin={:?}, fish={})",
-            self.coordinate, self.penguin, self.fish
-        )
+        write!(f,"Field(coordinate={}, penguin={:?}, fish={})",
+               self.coordinate, self.penguin, self.fish ).
+            map_err(|_e| core::fmt::Error)
     }
 }
 
