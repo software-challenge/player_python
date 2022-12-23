@@ -1,0 +1,61 @@
+name: publish python bindings
+
+on:
+  push:
+    branches:
+      - rust/master
+  pull_request:
+    branches:
+      - rust/master
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: 'rust/master'
+    - uses: messense/maturin-action@v1
+      with:
+        manylinux: auto
+        command: build
+        args: --release --sdist -o dist --find-interpreter
+    - name: Commit
+      uses: EndBug/add-and-commit@v9
+      with:
+        message: "commit linux packages"
+        add: dist
+
+  windows:
+    runs-on: windows-latest
+    needs: linux
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: 'rust/master'
+    - uses: messense/maturin-action@v1
+      with:
+        command: build
+        args: --release -o dist --find-interpreter
+    - name: Commit
+      uses: EndBug/add-and-commit@v9
+      with:
+        message: "commit windows packages"
+        add: dist
+
+  macos:
+    runs-on: macos-latest
+    needs: windows
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: 'rust/master'
+    - uses: messense/maturin-action@v1
+      with:
+        command: build
+        args: --release -o dist --universal2 --find-interpreter
+    - name: Commit
+      uses: EndBug/add-and-commit@v9
+      with:
+        message: "commit macos packages"
+        add: dist
