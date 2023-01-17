@@ -699,26 +699,24 @@ class Board:
     def move(self, move: Move) -> 'Board':
         """
         Moves the penguin from the origin to the destination.
+        **Please make sure that the move is correct, because this method will not check that.**
 
         :param move: The move to execute.
         :return: The new board with the moved penguin.
         """
-        new_board = Board(self._game_field)
-        to_field = new_board.get_field(move.to_value)
-        to_field_coo = move.to_value.to_cartesian()
-        new_board._game_field[to_field_coo.x][to_field_coo.y] = Field(coordinate=move.to_value, field=to_field.field)
+        board_state = [[Field(coordinate=field.coordinate, penguin=field.penguin, fish=field.fish) for field in row]
+                       for row in self._game_field]
+        updated_board = Board(board_state)
+        moving_penguin = Penguin(team_enum=move.team_enum, coordinate=move.to_value)
         if move.from_value:
-            from_field_coo = move.from_value.to_cartesian()
-            new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
-        return new_board
-
-    @staticmethod
-    def _fillUpString(placeholder: str, string: str) -> str:
-        len_placeholder = len(placeholder)
-        len_string = len(string)
-        difference = len_placeholder - len_string
-        rest = difference - int(difference / 2) * 2
-        return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
+            origin_field_coordinate = move.from_value.to_cartesian()
+            moving_penguin = board_state[origin_field_coordinate.x][origin_field_coordinate.y].penguin
+            board_state[origin_field_coordinate.x][origin_field_coordinate.y] = Field(coordinate=move.from_value,
+                                                                                      penguin=None, fish=0)
+        destination_field = updated_board.get_field(move.to_value)
+        destination_field.penguin = moving_penguin
+        destination_field.fish = 0
+        return updated_board
 
     def pretty_print(self):
         for i, row in enumerate(self._game_field):
