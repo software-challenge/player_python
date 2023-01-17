@@ -396,10 +396,53 @@ class Field:
         return isinstance(__o, Field) and self.penguin == __o.penguin and self.fish == self.fish
 
     def __repr__(self):
-        if isinstance(self.field, int):
-            return f"Field({self.coordinate}, Fish({self.field}))"
+        return f"Field({self.coordinate}, {self.penguin}, Fish({self.fish}))"
+
+
+class Team:
+    """
+    The Team class is useful for storing and manipulating information about teams in the game. It allows you to
+    easily create objects for each team_enum, keep track of their attributes, and compare them to their opponents.
+    """
+
+    def __init__(self, name: TeamEnum, fish: int, penguins: List[Penguin], moves: List[Move]):
+        self.name = name
+        self.fish = fish
+        self.penguins = penguins
+        self.moves = moves
+
+    def team(self) -> TeamEnum:
+        """
+        :return: The team_enum object.
+        """
+        return self.name
+
+    def get_penguins(self) -> List[Penguin]:
+        return self.penguins
+
+    def get_moves(self) -> List[Move]:
+        return self.moves
+
+    def color(self) -> str:
+        """
+        :return: The name of this team_enum.
+        """
+        if self.color == TeamEnum.ONE:
+            return TeamEnum.ONE.value
         else:
-            return f"Field({self.coordinate}, {self.field})"
+            return TeamEnum.TWO.value
+
+    def opponent(self) -> TeamEnum:
+        if self.color == TeamEnum.ONE:
+            return TeamEnum.TWO
+        else:
+            return TeamEnum.ONE
+
+    def __repr__(self) -> str:
+        return f"Team(name={self.color}, penguins={self.penguins}, fish={self.fish})"
+
+    def __str__(self) -> str:
+        return f"Team(name={self.color}, penguins={self.penguins}, fish={self.fish})"
 
 
 class Board:
