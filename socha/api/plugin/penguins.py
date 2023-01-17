@@ -291,11 +291,14 @@ class Move:
     Represents a move in the game.
     """
 
-    def __init__(self, to_value: HexCoordinate, from_value: HexCoordinate = None):
+    def __init__(self, team_enum: TeamEnum, to_value: HexCoordinate, from_value: HexCoordinate = None):
         """
-        :param to_value: The destination of the move.
-        :param from_value: The origin of the move.
+        Args:
+            team_enum: The team_enum that performs the move.
+            to_value: The destination of the move.
+            from_value: The origin of the move.
         """
+        self.team_enum = team_enum
         self.from_value = from_value
         self.to_value = to_value
 
@@ -313,10 +316,10 @@ class Move:
 
         :return: The reversed move.
         """
-        return Move(from_value=self.to_value, to_value=self.from_value)
+        return Move(team_enum=self.team_enum, to_value=self.from_value, from_value=self.to_value)
 
-    def __str__(self) -> str:
-        return "Move(from = {}, to = {})".format(self.from_value, self.to_value)
+    def __repr__(self):
+        return f"Move(team_enum={self.team_enum.value}, from={self.from_value}, to={self.to_value})"
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Move) and self.to_value == __o.to_value and \
