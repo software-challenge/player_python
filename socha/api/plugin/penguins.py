@@ -789,15 +789,17 @@ class GameState:
         """
         current_team = current_team or self.current_team
         moves = []
-        if len(self.board.get_teams_penguins(current_team)) < 4:
+        if len(self.current_pieces) < 4:
             for x in range(self.board.width()):
                 for y in range(self.board.height()):
                     field = self.board.get_field(CartesianCoordinate(x, y).to_hex())
                     if not field.is_occupied() and field.get_fish() == 1:
-                        moves.append(Move(from_value=None, to_value=CartesianCoordinate(x, y).to_hex()))
+                        moves.append(
+                            Move(team_enum=current_team.name, from_value=None,
+                                 to_value=CartesianCoordinate(x, y).to_hex()))
         else:
-            for piece in self.board.get_teams_penguins(current_team):
-                moves.extend(self.board.possible_moves_from(piece))
+            for piece in self.current_pieces:
+                moves.extend(self.board.possible_moves_from(piece.coordinate, current_team.name))
         return moves
 
     def current_team_from_turn(self) -> Team:
@@ -806,30 +808,52 @@ class GameState:
 
         :return: The team that has the current turn.
         """
-        current_team_by_turn = self.start_team if self.turn % 2 == 0 else self.start_team.opponent()
-        if not self._get_possible_moves(current_team_by_turn):
-            return current_team_by_turn.opponent()
-        return current_team_by_turn
+        moves = self._get_possible_moves(self.first_team)
+        if self.turn % 2 == 0:
+            if len(moves) > 0:
+                return self.first_team
+            else:
+                return self.second_team
+        else:
+            if len(moves) > 0:
+                return self.second_team
+            else:
+                return self.first_team
 
-    def perform_move(self, move: Move) -> 'GameState':
+    def perform_move(self, move: Move) -> Union['GameState', int]:
         """
         Performs the given move on the current game state.
 
-        :param move: The move to perform.
-        :return: The new game state after the move has been performed.
+        Args:
+            move: The that will be performed.
+
+        Returns:
+            Union['GameState', int]: The new GameState if the move was successful. -1 if the move couldn't be performed.
         """
-        if self.is_valid_move(move):
-            new_board = self.board._move(move)
+        if self.is_valid_move(move) and self.current_team.name == move.team_enum:
+            new_board = self.board.move(move)
             adding_fish = new_board.get_field(move.to_value).get_fish()
-            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else \
-                self.fishes.fishes_one
-            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else \
-                self.fishes.fishes_two
-            new_fishes = Fishes(new_fishes_one, new_fishes_two)
-            return GameState(board=new_board, turn=self.turn + 1, start_team=self.start_team, fishes=new_fishes,
-                             last_move=move)
-        logging.error(f"Performed invalid move while simulating: {move}")
-        raise Exception(f"Invalid move: {move}")
+            if self.current_team.name == TeamEnum.ONE:
+                new_move_one = self.first_team.moves.append(move)
+                new_fishes_one = self.first_team.fish + adding_fish
+                new_move_two = self.second_team.moves
+                new_fishes_two = self.second_team.fish
+            else:
+                new_move_one = self.first_team.moves
+                new_fishes_one = self.first_team.fish
+                new_move_two = self.second_team.moves.append(move)
+                new_fishes_two = self.second_team.fish + adding_fish
+            new_first_team = Team(
+                name=self.first_team.name, penguins=self.first_team.penguins, fish=new_fishes_one, moves=new_move_one)
+            new_second_team = Team(
+                name=self.second_team.name, penguins=self.second_team.penguins, fish=new_fishes_two, moves=new_move_two)
+            new_turn = self.turn + 1
+            new_last_move = move
+            return GameState(board=new_board, turn=new_turn, first_team=new_first_team, second_team=new_second_team,
+                             last_move=new_last_move)
+        else:
+            logging.error(f"Performed invalid move while simulating: {move}")
+            return -1
 
     def is_valid_move(self, move: Move) -> bool:
         """
