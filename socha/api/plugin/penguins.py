@@ -3,18 +3,9 @@ This is the plugin for this year's game `Penguins`.
 """
 import logging
 import math
+import warnings
+from enum import Enum
 from typing import List, Union, Optional
-from warnings import warn
-
-_hexagonTemplate = [
-    "  _______  \xA0",
-    " /       \\ \xA0",
-    "/XXXXXXXXX\\\xA0",
-    "\\YYYYYYYYY/\xA0",
-    " \\_______/ \xA0"
-]
-
-_emptyHexagonPlaceholder = "\xA0\xA0\xA0\xA0\xA0\xA0"
 
 
 class Vector:
@@ -712,23 +703,17 @@ class Board:
         return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
 
     def pretty_print(self):
-        """
-        Prints the board in a pretty way.
-        """
-        result = ""
-        for i, column in enumerate(self._game_field):
-            for row in _hexagonTemplate:
-                result += _emptyHexagonPlaceholder if i % 2 != 0 else ""
-                for field in column:
-                    if field.is_empty():
-                        hexagon = " " * len(row)
-                    elif "XXXXXXXXX" in row:
-                        hexagon = row.replace("XXXXXXXXX", self._fillUpString("XXXXXXXXX", str(field.coordinate)))
-                    else:
-                        hexagon = row.replace("YYYYYYYYY", self._fillUpString("YYYYYYYYY", str(field.field)))
-                    result += hexagon
-                result += "\n"
-        print(result)
+        for i, row in enumerate(self._game_field):
+            for field in row:
+                if i % 2 == 0:
+                    print(" ", end="")
+                if field.is_empty():
+                    print("-", end=" ")
+                elif field.is_occupied():
+                    print(field.get_team().value[0], end=" ")
+                else:
+                    print(field.get_fish(), end=" ")
+            print()
 
     def __eq__(self, __o: 'Board'):
         return self._game_field == __o._game_field
