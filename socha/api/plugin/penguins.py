@@ -354,50 +354,47 @@ class Field:
     Represents a field in the game.
     """
 
-    def __init__(self, coordinate: HexCoordinate, field: Union[int, str, Team]):
+    def __init__(self, coordinate: HexCoordinate, penguin: Optional[Penguin], fish: int):
         """
         The Field represents a field on the game board.
         It says what state itself it has and where it is on the board.
 
-        :param coordinate: The coordinate of the field.
-        :param field: The state of the field. Can be either the number of fishes, or a Team.
+        Args:
+            coordinate:
+            penguin:
+            fish:
         """
         self.coordinate = coordinate
-        self.field: Union[int, str, Team]
-        if isinstance(field, int):
-            self.field = field
-        elif field.isalpha():
-            self.field = Team(field)
-        else:
-            raise TypeError(f"The field's input is wrong: {field}")
+        self.penguin = penguin
+        self.fish = fish
 
     def is_empty(self) -> bool:
         """
-        :return: True if the field is has no fishes, False otherwise.
+        :return: True if the field is has no fishes and no penguin, False otherwise.
         """
-        return self.field == 0
+        return True if not self.penguin and self.fish == 0 else False
 
     def is_occupied(self) -> bool:
         """
         :return: True if the field is occupied by a penguin, False otherwise.
         """
-        return isinstance(self.field, Team)
+        return True if self.penguin else False
 
     def get_fish(self) -> Union[None, int]:
         """
         :return: The amount of fish on the field, None if the field is occupied.
         """
-        return None if self.is_occupied() else self.field
+        return self.fish
 
-    def get_team(self) -> Union[Team, None]:
+    def get_team(self) -> Union[TeamEnum, None]:
         """
-        :return: The team of the field if it is occupied by penguin, None otherwise.
+        :return: The team_enum of the field if it is occupied by penguin, None otherwise.
         """
-        return self.field if isinstance(self.field, Team) else None
+        return None if not self.penguin else self.penguin.team
 
     def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, Field) and self.field == __o.field
-    
+        return isinstance(__o, Field) and self.penguin == __o.penguin and self.fish == self.fish
+
     def __repr__(self):
         if isinstance(self.field, int):
             return f"Field({self.coordinate}, Fish({self.field}))"
