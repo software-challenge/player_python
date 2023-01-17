@@ -692,6 +692,11 @@ class Board:
         return [field for field in self.get_all_fields() if field in other]
 
     def _move(self, move: Move) -> 'Board':
+        warnings.warn("'_move' is deprecated and will be removed in a future version. Use 'move' instead.",
+                      DeprecationWarning)
+        return self.move(move)
+
+    def move(self, move: Move) -> 'Board':
         """
         Moves the penguin from the origin to the destination.
 
