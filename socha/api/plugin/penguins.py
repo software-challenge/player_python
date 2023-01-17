@@ -326,60 +326,27 @@ class Move:
                (self.from_value is None or self.from_value == __o.from_value)
 
 
-class Team:
+class Penguin:
     """
-    Represents a team in the game.
+       The Penguin class represents a penguin object with a coordinate and a team_enum.
     """
 
-    def __init__(self, color: str):
+    def __init__(self, coordinate: HexCoordinate, team_enum: TeamEnum):
         """
-        A Team can be either yourself or your opponent.
-        
-        :param color: The color of the team. Can be either 'ONE' or 'TWO'.
+        Args:
+           coordinate (HexCoordinate): The coordinate of the penguin on the game board.
+           team_enum (TeamEnum): The team_enum that the penguin belongs to.
         """
-        self.one = {
-            'opponent': 'TWO',
-            'name': 'ONE',
-            'letter': 'R',
-            'color': 'Rot'
-        }
-        self.two = {
-            'opponent': 'ONE',
-            'name': 'TWO',
-            'letter': 'B',
-            'color': 'Blau'
-        }
-        self.team_enum = None
-        if color == "ONE":
-            self.team_enum = self.one
-        elif color == "TWO":
-            self.team_enum = self.two
-        else:
-            raise Exception(f"Invalid : {color}")
+        self.coordinate = coordinate
+        self.team = team_enum
 
-    def team(self) -> 'Team':
-        """
-        :return: The team object.
-        """
-        return self
+    def __eq__(self, other):
+        if not isinstance(other, Penguin):
+            return False
+        return self.coordinate == other.coordinate and self.team == other.team
 
-    def color(self) -> str:
-        """
-        :return: The color of this team.
-        """
-        return self.team_enum['name']
-
-    def opponent(self) -> 'Team':
-        """
-        :return: The opponent of this team.
-        """
-        return Team(self.team_enum['opponent'])
-
-    def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, Team) and self.team_enum['name'] == __o.team_enum['name']
-
-    def __str__(self) -> str:
-        return self.team_enum['name']
+    def __repr__(self):
+        return f'Penguin({self.coordinate}, {self.team.value})'
 
 
 class Field:
