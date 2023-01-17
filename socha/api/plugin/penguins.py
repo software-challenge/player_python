@@ -586,19 +586,24 @@ class Board:
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector) -> List[Move]:
+    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: TeamEnum) -> List[Move]:
         """
         Gets all moves in the given direction from the given origin.
 
-        :param origin: The origin of the move.
-        :param direction: The direction of the move.
-        :return: A list with all moves that fulfill the criteria.
+        Args:
+            origin: The origin of the move.
+            direction: The direction of the move.
+            team_enum: Team to make moves for.
+
+        Returns:
+                List[Move]: List of moves that can be made in the given direction from the given index,
+                            for the given team_enum
         """
         moves = []
         for i in range(1, self.width()):
             destination = origin.add_vector(direction.scalar_product(i))
             if self._is_destination_valid(destination):
-                moves.append(Move(from_value=origin, to_value=destination))
+                moves.append(Move(team_enum=team_enum, from_value=origin, to_value=destination))
             else:
                 break
         return moves
@@ -607,19 +612,25 @@ class Board:
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
 
-    def possible_moves_from(self, position: HexCoordinate) -> List[Move]:
+    def possible_moves_from(self, position: HexCoordinate, team_enum: TeamEnum) -> List[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
 
-        :param position: The position to start from.
-        :return: A list of all possible moves from the given position.
-        :raise: IndexError if the position is not valid.
+        Args:
+            position: The position to start from.
+            team_enum: A list of all possible moves from the given position.
+
+        Returns:
+            List[Move]: List of all possible moves that can be made from the given index, for the given team_enum
+
+        Raises:
+            IndexError: If the Index is out of range.
         """
         if not self.is_valid(position):
             raise IndexError(f"Index out of range: [x={position.x}, y={position.y}]")
         moves = []
         for direction in Vector().directions:
-            moves.extend(self.get_moves_in_direction(position, direction))
+            moves.extend(self.get_moves_in_direction(position, direction, team_enum))
         return moves
 
     def get_penguins(self) -> List[Field]:
@@ -632,16 +643,18 @@ class Board:
 
     def get_teams_penguins(self, team: Team) -> List[HexCoordinate]:
         """
-        Searches the board for all penguins of the given team.
+        Searches the board for all penguins of the given team_enum.
 
-        :param team: The team to search for.
-        :return: A list of all coordinates that are occupied by a penguin of the given team.
+        :param team: The team_enum to search for.
+        :return: A list of all coordinates that are occupied by a penguin of the given team_enum.
         """
+        warnings.warn("Please use the method get_penguins in the Team class instead of this method. This method will "
+                      "be deprecated in future versions.", DeprecationWarning)
         teams_penguins = []
         for x in range(self.width()):
             for y in range(self.height()):
                 current_field = self.get_field(CartesianCoordinate(x, y).to_hex())
-                if current_field.is_occupied() and current_field.get_team().team() == team:
+                if current_field.is_occupied() and current_field.get_team() == team.name:
                     coordinates = CartesianCoordinate(x, y).to_hex()
                     teams_penguins.append(coordinates)
         return teams_penguins
