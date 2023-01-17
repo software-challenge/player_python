@@ -735,25 +735,6 @@ class Board:
         return self._game_field == __o._game_field
 
 
-class Fishes:
-    """
-    Represents the amount of fish each player has.
-    """
-
-    def __init__(self, fishes_one: int, fishes_two: int):
-        self.fishes_one = fishes_one
-        self.fishes_two = fishes_two
-
-    def get_fish_by_team(self, team: Team):
-        """
-        Looks up the amount of fish a team has.
-
-        :param team: A team object, that represents the team to get the fish amount of.
-        :return: The amount of fish of the given team.
-        """
-        return self.fishes_one if team.team_enum == Team("ONE").team_enum else self.fishes_two
-
-
 class GameState:
     """
        A `GameState` contains all information, that describes the game state at a given time, that is, between two game
