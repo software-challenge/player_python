@@ -281,6 +281,11 @@ class HexCoordinate(Coordinate):
         return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
 
 
+class TeamEnum(Enum):
+    ONE = "ONE"
+    TWO = "TWO"
+
+
 class Move:
     """
     Represents a move in the game.
