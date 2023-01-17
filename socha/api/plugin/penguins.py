@@ -758,25 +758,25 @@ class GameState:
        describing the then current state.
        """
 
-    def __init__(self, board: Board, turn: int, start_team: Team, fishes: Fishes, last_move: Move = None):
+    def __init__(self, board: Board, turn: int, first_team: Team, second_team: Team, last_move: Move = None):
         """
         Creates a new `GameState` with the given parameters.
 
-        :param board: The board of the game.
-        :param turn: The turn number of the game.
-        :param start_team: The team that has the first turn.
-        :param fishes: The number of fishes each team has.
-        :param last_move: The last move made.
+        Args:
+            board: The board of the game.
+            turn: The turn number of the game.
+            first_team: The team_enum that has the first turn.
+            second_team: The team_enum that has the second turn.
+            last_move: The last move made.
         """
-        self.start_team = start_team
         self.board = board
         self.turn = turn
+        self.first_team = first_team
+        self.second_team = second_team
+        self.last_move = last_move
         self.round = int((self.turn + 1) / 2)
         self.current_team = self.current_team_from_turn()
-        self.other_team = self.current_team_from_turn().opponent()
-        self.last_move = last_move
-        self.fishes = fishes
-        self.current_pieces = self.board.get_teams_penguins(self.current_team)
+        self.current_pieces = self.current_team.get_penguins()
         self.possible_moves = self._get_possible_moves(self.current_team)
 
     def _get_possible_moves(self, current_team: Team = None) -> List[Move]:
