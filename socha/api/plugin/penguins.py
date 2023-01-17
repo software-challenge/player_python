@@ -144,27 +144,36 @@ class Vector:
         return f"Vector({self.d_x}, {self.d_x})"
 
 
-class CartesianCoordinate:
+class Coordinate:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def to_vector(self) -> Vector:
+        """
+        Converts the coordinate to a vector.
+        """
+        return Vector(d_x=self.x, d_y=self.y)
+
+    def distance(self, other: 'Coordinate') -> float:
+        """
+        Calculates the distance between two coordinates.
+
+        :param other: The other coordinate to calculate the distance to.
+        :return: The distance between the two cartesian coordinates.
+        """
+        return self.to_vector().subtraction(other.to_vector()).magnitude()
+
+    def add_vector(self, vector: Vector): ...
+
+    def subtract_vector(self, vector: Vector): ...
+
+
+class CartesianCoordinate(Coordinate):
     """
     Represents a coordinate in a normal cartesian coordinate system, that has been taught in school.
     This class is used to translate and represent a hexagonal coordinate in a cartesian and with that a 2D-Array.
     """
-
-    def __init__(self, x: int, y: int):
-        """
-        Constructor for the CartesianCoordinate class.
-
-        :param x: The x-coordinate on a cartesian coordinate system.
-        :param y: The y-coordinate on a cartesian coordinate system.
-        """
-        self.x = x
-        self.y = y
-
-    def to_vector(self):
-        """
-        Converts the cartesian coordinate to a vector.
-        """
-        return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'CartesianCoordinate':
         """
@@ -185,15 +194,6 @@ class CartesianCoordinate:
         """
         vector: Vector = self.to_vector().subtraction(vector)
         return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
-
-    def distance(self, other: 'CartesianCoordinate') -> float:
-        """
-        Calculates the distance between two cartesian coordinates.
-
-        :param other: The other cartesian coordinate to calculate the distance to.
-        :return: The distance between the two cartesian coordinates.
-        """
-        return self.to_vector().subtraction(other.to_vector()).magnitude()
 
     def to_hex(self) -> 'HexCoordinate':
         """
@@ -232,21 +232,11 @@ class CartesianCoordinate:
         return isinstance(other, CartesianCoordinate) and self.x == other.x and self.y == other.y
 
 
-class HexCoordinate:
+class HexCoordinate(Coordinate):
     """
     Represents a coordinate in a hexagonal coordinate system, that differs from the normal cartesian one.
     This class is used to represent the hexagonal game board.
     """
-
-    def __init__(self, x: int, y: int):
-        """
-        Constructor for the HexCoordinate class.
-
-        :param x: The x-coordinate on a hexagonal coordinate system.
-        :param y: The y-coordinate on a hexagonal coordinate system.
-        """
-        self.x = x
-        self.y = y
 
     def to_cartesian(self) -> CartesianCoordinate:
         """
@@ -255,14 +245,6 @@ class HexCoordinate:
         :return: The cartesian coordinate.
         """
         return CartesianCoordinate(x=math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), y=self.y)
-
-    def to_vector(self) -> Vector:
-        """
-        Converts the hex coordinate to a vector.
-
-        :return: The vector.
-        """
-        return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'HexCoordinate':
         """
@@ -291,15 +273,6 @@ class HexCoordinate:
         :return: The list of neighbors.
         """
         return [self.add_vector(vector) for vector in self.to_vector().directions]
-
-    def distance(self, other: 'HexCoordinate') -> float:
-        """
-        Calculates the distance between two hex coordinates.
-
-        :param other: The other hex coordinate to calculate the distance to.
-        :return: The distance between the two hex coordinates.
-        """
-        return self.to_vector().subtraction(other.to_vector()).magnitude()
 
     def __repr__(self) -> str:
         return f"HexCoordinate({self.x}, {self.y})"
