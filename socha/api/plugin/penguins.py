@@ -728,8 +728,10 @@ class Board:
                     print(field.get_fish(), end=" ")
             print()
 
-    def __eq__(self, __o: 'Board'):
-        return self._game_field == __o._game_field
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self._game_field == other._game_field
+        return False
 
 
 class GameState:
