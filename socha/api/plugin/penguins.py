@@ -642,23 +642,19 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field.is_occupied()]
 
-    def get_teams_penguins(self, team: Team) -> List[HexCoordinate]:
+    def get_teams_penguins(self, team: Team) -> List[Penguin]:
         """
         Searches the board for all penguins of the given team_enum.
 
         :param team: The team_enum to search for.
         :return: A list of all coordinates that are occupied by a penguin of the given team_enum.
         """
-        warnings.warn("Please use the method get_penguins in the Team class instead of this method. This method will "
-                      "be deprecated in future versions.", DeprecationWarning)
-        teams_penguins = []
-        for x in range(self.width()):
-            for y in range(self.height()):
-                current_field = self.get_field(CartesianCoordinate(x, y).to_hex())
-                if current_field.is_occupied() and current_field.get_team() == team.name:
-                    coordinates = CartesianCoordinate(x, y).to_hex()
-                    teams_penguins.append(coordinates)
-        return teams_penguins
+        penguins = []
+        for row in self._game_field:
+            for field in row:
+                if field.penguin and field.penguin.team_enum == team.name:
+                    penguins.append(field.penguin)
+        return penguins
 
     def get_most_fish(self) -> List[Field]:
         """
