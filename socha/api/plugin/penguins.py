@@ -717,9 +717,9 @@ class Board:
 
     def pretty_print(self):
         for i, row in enumerate(self._game_field):
+            if (i + 1) % 2 == 0:
+                print(" ", end="")
             for field in row:
-                if i % 2 == 0:
-                    print(" ", end="")
                 if field.is_empty():
                     print("-", end=" ")
                 elif field.is_occupied():
