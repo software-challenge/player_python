@@ -423,7 +423,8 @@ class Team:
         else:
             return TeamEnum.TWO.value
 
-    def opponent(self) -> None:
+    @staticmethod
+    def opponent() -> None:
         warnings.warn("Use the opponent method in GameState.")
         return None
 
