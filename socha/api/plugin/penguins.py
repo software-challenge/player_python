@@ -310,7 +310,7 @@ class Move:
         return Move(team_enum=self.team_enum, to_value=self.from_value, from_value=self.to_value)
 
     def __repr__(self):
-        return f"Move(team_enum={self.team_enum.value}, from={self.from_value}, to={self.to_value})"
+        return f"Move(team={self.team_enum.value}, from={self.from_value}, to={self.to_value})"
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Move) and self.to_value == __o.to_value and \
@@ -329,15 +329,15 @@ class Penguin:
            team_enum (TeamEnum): The team_enum that the penguin belongs to.
         """
         self.coordinate = coordinate
-        self.team = team_enum
+        self.team_enum = team_enum
 
     def __eq__(self, other):
         if not isinstance(other, Penguin):
             return False
-        return self.coordinate == other.coordinate and self.team == other.team
+        return self.coordinate == other.coordinate and self.team_enum == other.team_enum
 
     def __repr__(self):
-        return f'Penguin({self.coordinate}, {self.team.value})'
+        return f'Penguin({self.coordinate}, {self.team_enum.value})'
 
 
 class Field:
@@ -381,7 +381,7 @@ class Field:
         """
         :return: The team_enum of the field if it is occupied by penguin, None otherwise.
         """
-        return None if not self.penguin else self.penguin.team
+        return None if not self.penguin else self.penguin.team_enum
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Field) and self.penguin == __o.penguin and self.fish == self.fish
@@ -418,7 +418,7 @@ class Team:
         """
         :return: The name of this team_enum.
         """
-        if self.color == TeamEnum.ONE:
+        if self.name == TeamEnum.ONE:
             return TeamEnum.ONE.value
         else:
             return TeamEnum.TWO.value
@@ -430,10 +430,13 @@ class Team:
             return TeamEnum.ONE
 
     def __repr__(self) -> str:
-        return f"Team(name={self.color}, penguins={self.penguins}, fish={self.fish})"
+        return f"Team(name={self.name}, fish={self.fish}, penguins={len(self.penguins)}, moves={len(self.moves)})"
 
-    def __str__(self) -> str:
-        return f"Team(name={self.color}, penguins={self.penguins}, fish={self.fish})"
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.name == other.name and self.fish == other.fish and self.penguins == other.penguins and \
+                   self.moves == other.moves
+        return False
 
 
 class Board:
