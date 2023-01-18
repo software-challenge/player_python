@@ -828,18 +828,26 @@ class GameState:
             adding_fish = new_board.get_field(move.to_value).get_fish()
             if self.current_team.name == TeamEnum.ONE:
                 new_move_one = self.first_team.moves.append(move)
+                new_penguins_one = list(
+                    map(lambda x: setattr(x, 'coordinate', move.to_value) if x.coordinate == move.from_value else x,
+                        self.first_team.penguins))
                 new_fishes_one = self.first_team.fish + adding_fish
                 new_move_two = self.second_team.moves
+                new_penguins_two = self.second_team.penguins
                 new_fishes_two = self.second_team.fish
             else:
                 new_move_one = self.first_team.moves
+                new_penguins_one = self.first_team.penguins
                 new_fishes_one = self.first_team.fish
                 new_move_two = self.second_team.moves.append(move)
+                new_penguins_two = list(
+                    map(lambda x: setattr(x, 'coordinate', move.to_value) if x.coordinate == move.from_value else x,
+                        self.second_team.penguins))
                 new_fishes_two = self.second_team.fish + adding_fish
             new_first_team = Team(
-                name=self.first_team.name, penguins=self.first_team.penguins, fish=new_fishes_one, moves=new_move_one)
+                name=self.first_team.name, penguins=new_penguins_one, fish=new_fishes_one, moves=new_move_one)
             new_second_team = Team(
-                name=self.second_team.name, penguins=self.second_team.penguins, fish=new_fishes_two, moves=new_move_two)
+                name=self.second_team.name, penguins=new_penguins_two, fish=new_fishes_two, moves=new_move_two)
             new_turn = self.turn + 1
             new_last_move = move
             return GameState(board=new_board, turn=new_turn, first_team=new_first_team, second_team=new_second_team,
