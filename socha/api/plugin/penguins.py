@@ -757,7 +757,7 @@ class GameState:
        describing the then current state.
        """
 
-    def __init__(self, board: Board, turn: int, first_team: Team, second_team: Team, last_move: Move = None):
+    def __init__(self, board: Board, turn: int, first_team: Team, second_team: Team, last_move: Optional[Move]):
         """
         Creates a new `GameState` with the given parameters.
 
@@ -778,7 +778,7 @@ class GameState:
         self.current_pieces = self.current_team.get_penguins()
         self.possible_moves = self._get_possible_moves(self.current_team)
 
-    def _get_possible_moves(self, current_team: Team = None) -> List[Move]:
+    def _get_possible_moves(self, current_team: Optional[Team]) -> List[Move]:
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all Fields that are not occupied by a penguin from that team.
@@ -788,7 +788,7 @@ class GameState:
         """
         current_team = current_team or self.current_team
         moves = []
-        if len(self.current_pieces) < 4:
+        if len(self.board.get_teams_penguins(current_team)) < 4:
             for x in range(self.board.width()):
                 for y in range(self.board.height()):
                     field = self.board.get_field(CartesianCoordinate(x, y).to_hex())
@@ -797,7 +797,7 @@ class GameState:
                             Move(team_enum=current_team.name, from_value=None,
                                  to_value=CartesianCoordinate(x, y).to_hex()))
         else:
-            for piece in self.current_pieces:
+            for piece in self.board.get_teams_penguins(current_team):
                 moves.extend(self.board.possible_moves_from(piece.coordinate, current_team.name))
         return moves
 
