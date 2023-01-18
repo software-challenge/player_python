@@ -423,11 +423,9 @@ class Team:
         else:
             return TeamEnum.TWO.value
 
-    def opponent(self) -> TeamEnum:
-        if self.color == TeamEnum.ONE:
-            return TeamEnum.TWO
-        else:
-            return TeamEnum.ONE
+    def opponent(self) -> None:
+        warnings.warn("Use the opponent method in GameState.")
+        return None
 
     def __repr__(self) -> str:
         return f"Team(name={self.name}, fish={self.fish}, penguins={len(self.penguins)}, moves={len(self.moves)})"
@@ -869,3 +867,19 @@ class GameState:
             if possible_move == move:
                 return True
         return False
+
+    def opponent(self) -> Team:
+        """
+        Returns the opponent team of the current team.
+
+        Returns:
+            Team: The team which is the opponent of the current team.
+        """
+        if self.current_team == self.first_team:
+            return self.second_team
+        else:
+            return self.first_team
+
+    def __repr__(self):
+        return f"GameState(turn={self.turn}, round={self.round}, first_team={self.first_team}, " \
+               f"second_team={self.second_team}, last_move={self.last_move}, current_team={self.current_team})"
