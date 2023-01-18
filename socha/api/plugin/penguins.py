@@ -803,21 +803,15 @@ class GameState:
 
     def current_team_from_turn(self) -> Team:
         """
-        Calculates the current team from the turn number.
+        Calculates the current team from the turn number and available moves.
 
         :return: The team that has the current turn.
         """
-        moves = self._get_possible_moves(self.first_team)
-        if self.turn % 2 == 0:
-            if len(moves) > 0:
-                return self.first_team
-            else:
-                return self.second_team
-        else:
-            if len(moves) > 0:
-                return self.second_team
-            else:
-                return self.first_team
+        current_team = self.first_team if self.turn % 2 == 0 else self.second_team
+        possible_moves = self._get_possible_moves(current_team)
+        if not possible_moves:
+            current_team = self.second_team if self.turn % 2 == 0 else self.first_team
+        return current_team
 
     def perform_move(self, move: Move) -> Union['GameState', int]:
         """
