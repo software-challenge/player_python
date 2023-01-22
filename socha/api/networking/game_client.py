@@ -7,9 +7,9 @@ from typing import List, Union
 
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
 from socha.api.plugin import penguins
-from socha.api.plugin.penguins import Field, GameState, Move, CartesianCoordinate, TeamEnum, Penguin
+from socha.api.plugin.penguins import Field, GameState, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
 from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, ObservableRoomMessage, Left
+    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left
 from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
@@ -155,29 +155,24 @@ class GameClient(XMLProtocolInterface):
         """
         room_id = message.room_id
         if isinstance(message, Joined):
-            self._on_joined(room_id)
+            self._game_handler.on_game_joined(room_id=room_id)
         elif isinstance(message, Left):
-            self._on_left()
+            self._game_handler.on_game_left()
         elif isinstance(message.data.class_binding, MoveRequest):
             self._on_move_request(room_id)
         elif isinstance(message.data.class_binding, State):
             self._on_state(message)
         elif isinstance(message.data.class_binding, Result):
-            self._on_result(message)
+            self._game_handler.history.append(message.data.class_binding)
+            self._game_handler.on_game_over(message.data.class_binding)
         elif isinstance(message, Room):
-            self._on_room_message(message)
-
-    def _on_joined(self, room_id):
-        self._game_handler.on_game_joined(room_id=room_id)
-
-    def _on_left(self):
-        self._game_handler.on_game_left()
+            self._game_handler.on_room_message(message.data.class_binding)
 
     def _on_move_request(self, room_id):
         start_time = time.time()
         move_response = self._game_handler.calculate_move()
         if move_response:
-            self._game_handler.history[-1].perform_move(move_response)
+            self._game_handler.history.append(self._game_handler.history[-1].perform_move(move_response))
             from_pos = None
             to_pos = To(x=move_response.to_value.x, y=move_response.to_value.y)
             if move_response.from_value:
@@ -192,6 +187,7 @@ class GameClient(XMLProtocolInterface):
             if isinstance(item, GameState):
                 last_game_state = item
                 break
+        # print(last_game_state)
         first_team = Team(TeamEnum.ONE if message.data.class_binding.start_team == "ONE" else TeamEnum.TWO,
                           fish=0, penguins=[] if not last_game_state else last_game_state.first_team.penguins,
                           moves=[] if not last_game_state else last_game_state.first_team.moves)
@@ -207,9 +203,14 @@ class GameClient(XMLProtocolInterface):
             last_move=None,
         )
         if message.data.class_binding.last_move:
+            from_value = None if not message.data.class_binding.last_move.from_value else HexCoordinate(
+                x=message.data.class_binding.last_move.from_value.x,
+                y=message.data.class_binding.last_move.from_value.y)
+            to_value = HexCoordinate(x=message.data.class_binding.last_move.to.x,
+                                     y=message.data.class_binding.last_move.to.y)
             last_move = Move(team_enum=game_state.opponent().name,
-                             from_value=message.data.class_binding.last_move.from_value,
-                             to_value=message.data.class_binding.last_move.to)
+                             from_value=from_value,
+                             to_value=to_value)
             game_state.last_move = last_move
             game_state.opponent().fish += message.data.class_binding.fishes.int_value[
                 0] if game_state.current_team is TeamEnum.ONE else message.data.class_binding.fishes.int_value[
@@ -219,13 +220,6 @@ class GameClient(XMLProtocolInterface):
                 Penguin(team_enum=game_state.opponent().name, coordinate=game_state.last_move.to_value))
         self._game_handler.history.append(game_state)
         self._game_handler.on_update(game_state)
-
-    def _on_result(self, message):
-        self._game_handler.history.append(message.data.class_binding)
-        self._game_handler.on_game_over(message.data.class_binding)
-
-    def _on_room_message(self, message):
-        self._game_handler.on_room_message(message.data.class_binding)
 
     def start(self):
         """
@@ -242,7 +236,7 @@ class GameClient(XMLProtocolInterface):
             self._game_handler.while_disconnected(player_client=self)
         if self.auto_reconnect:
             for i in range(3):
-                logging.info(f"Try to establish a connection with the server... {i+1}")
+                logging.info(f"Try to establish a connection with the server... {i + 1}")
                 try:
                     self.connect()
                     if self.network_interface.connected:
