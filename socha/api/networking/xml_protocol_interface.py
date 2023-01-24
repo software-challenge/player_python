@@ -44,17 +44,6 @@ def customClassFactory(clazz, params: dict):
     return clazz(**params)
 
 
-def once(func):
-    def wrapper(*args, **kwargs):
-        if not wrapper.called:
-            wrapper.called = True
-            return func(*args, **kwargs)
-        return b''
-
-    wrapper.called = False
-    return wrapper
-
-
 PROTOCOL_PREFIX = "<protocol>".encode("utf-8")
 
 
@@ -67,6 +56,7 @@ class XMLProtocolInterface:
         self.network_interface = NetworkSocket(host, port)
         self.connect()
         self.running = False
+        self.first_time = True
 
         context = XmlContext()
         deserialize_config = ParserConfig(class_factory=customClassFactory)
@@ -122,7 +112,7 @@ class XMLProtocolInterface:
             raise ValueError("Cannot send `None` to server")
 
         with self._encode_context() as encode:
-            shipment = self._protocol_prefix() + encode(obj)
+            shipment = PROTOCOL_PREFIX + encode(obj) if self.first_time is True else encode(obj)
 
         try:
             self.network_interface.send(shipment)
@@ -131,14 +121,6 @@ class XMLProtocolInterface:
             raise
         else:
             logging.debug("Sent shipment to server: %s", shipment)
-
-    @classmethod
-    @once
-    def _protocol_prefix(cls) -> bytes:
-        """
-        Returns the prefix to be used for the protocol.
-        """
-        return PROTOCOL_PREFIX
 
     @contextlib.contextmanager
     def _encode_context(self) -> Iterator[Callable[[Any], bytes]]:
