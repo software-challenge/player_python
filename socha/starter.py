@@ -55,15 +55,10 @@ class Starter:
             logging.basicConfig(level=level, format="%(asctime)s: %(levelname)s - %(message)s")
         logging.info("Starting...")
 
-        self.client = GameClient(host=self.host, port=self.port, handler=logic, auto_reconnect=self.auto_reconnect,
-                                 survive=self.survive)
+        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
+                                 room_id=room_id, auto_reconnect=self.auto_reconnect, survive=self.survive)
 
-        if reservation:
-            self.client.join_game_with_reservation(reservation)
-        elif room_id:
-            self.client.join_game_room(room_id)
-        else:
-            self.client.join_game()
+        self.client.join()
 
         self.client.start()
 

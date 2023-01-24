@@ -125,9 +125,12 @@ class GameClient(XMLProtocolInterface):
     The PlayerClient handles all incoming and outgoing objects accordingly to their types.
     """
 
-    def __init__(self, host: str, port: int, handler: IClientHandler, auto_reconnect: bool, survive: bool):
+    def __init__(self, host: str, port: int, handler: IClientHandler, reservation: str,
+                 room_id: str, auto_reconnect: bool, survive: bool):
         super().__init__(host, port)
         self._game_handler = handler
+        self.reservation = reservation
+        self.room_id = room_id
         self.auto_reconnect = auto_reconnect
         self.survive = survive
 
@@ -228,11 +231,27 @@ class GameClient(XMLProtocolInterface):
         self.running = True
         self._client_loop()
 
+    def join(self) -> None:
+        """
+        Tries to join a game with a connected server. It uses the reservation, or room id to join.
+        If their are not present it joins just without, as fallback.
+        """
+        if self.reservation:
+            self.join_game_with_reservation(self.reservation)
+        elif self.room_id:
+            self.join_game_room(self.room_id)
+        else:
+            self.join_game()
+
+        self.first_time = False
+        self._game_handler.history.append([])
+
     def _handle_left(self):
+        self.first_time = True
+        self.disconnect()
         if self.survive:
             logging.info("The server left. Client is in survive mode and keeps running.\n"
                          "Please shutdown the client manually.")
-            self.disconnect()
             self._game_handler.while_disconnected(player_client=self)
         if self.auto_reconnect:
             for i in range(3):
@@ -245,12 +264,10 @@ class GameClient(XMLProtocolInterface):
                 except Exception as e:
                     logging.exception(e)
                 time.sleep(1)
+            self.join()
             return
         logging.info("The server left.")
         self.stop()
-
-    def _handle_other(self, response):
-        self._on_object(response)
 
     def _client_loop(self):
         """
@@ -261,14 +278,14 @@ class GameClient(XMLProtocolInterface):
         while self.running:
             if self.network_interface.connected:
                 response = self._receive()
-                logging.debug(f"Received new object: {response}")
                 if not response:
                     continue
                 elif isinstance(response, ProtocolPacket):
+                    logging.debug(f"Received new object: {response}")
                     if isinstance(response, Left):
                         self._handle_left()
                     else:
-                        self._handle_other(response)
+                        self._on_object(response)
                 elif self.running:
                     logging.error(f"Received object of unknown class: {response}")
                     raise NotImplementedError("Received object of unknown class.")
