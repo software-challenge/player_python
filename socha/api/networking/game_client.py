@@ -42,7 +42,7 @@ def _convert_board(protocol_board: Board) -> penguins.Board:
 
 
 class IClientHandler:
-    history: List[Union[GameState, Error, Result]] = []
+    history: List[List[Union[GameState, Error, Result]]] = []
 
     def calculate_move(self) -> Move:
         """
