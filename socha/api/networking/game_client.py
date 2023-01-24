@@ -166,7 +166,7 @@ class GameClient(XMLProtocolInterface):
         elif isinstance(message.data.class_binding, State):
             self._on_state(message)
         elif isinstance(message.data.class_binding, Result):
-            self._game_handler.history.append(message.data.class_binding)
+            self._game_handler.history[-1].append(message.data.class_binding)
             self._game_handler.on_game_over(message.data.class_binding)
         elif isinstance(message, Room):
             self._game_handler.on_room_message(message.data.class_binding)
@@ -175,7 +175,6 @@ class GameClient(XMLProtocolInterface):
         start_time = time.time()
         move_response = self._game_handler.calculate_move()
         if move_response:
-            self._game_handler.history.append(self._game_handler.history[-1].perform_move(move_response))
             from_pos = None
             to_pos = To(x=move_response.to_value.x, y=move_response.to_value.y)
             if move_response.from_value:
@@ -186,42 +185,38 @@ class GameClient(XMLProtocolInterface):
 
     def _on_state(self, message):
         last_game_state = None
-        for item in self._game_handler.history[::-1]:
+        for item in self._game_handler.history[-1][::-1]:
             if isinstance(item, GameState):
                 last_game_state = item
                 break
-        # print(last_game_state)
-        first_team = Team(TeamEnum.ONE if message.data.class_binding.start_team == "ONE" else TeamEnum.TWO,
-                          fish=0, penguins=[] if not last_game_state else last_game_state.first_team.penguins,
-                          moves=[] if not last_game_state else last_game_state.first_team.moves)
-        second_team = Team(TeamEnum.TWO if first_team.name == TeamEnum.ONE else TeamEnum.ONE,
-                           fish=0, penguins=[] if not last_game_state else last_game_state.second_team.penguins,
-                           moves=[] if not last_game_state else last_game_state.second_team.moves)
-
-        game_state = GameState(
-            board=_convert_board(message.data.class_binding.board),
-            turn=message.data.class_binding.turn,
-            first_team=first_team,
-            second_team=second_team,
-            last_move=None,
-        )
-        if message.data.class_binding.last_move:
+        if last_game_state:
             from_value = None if not message.data.class_binding.last_move.from_value else HexCoordinate(
                 x=message.data.class_binding.last_move.from_value.x,
                 y=message.data.class_binding.last_move.from_value.y)
             to_value = HexCoordinate(x=message.data.class_binding.last_move.to.x,
                                      y=message.data.class_binding.last_move.to.y)
-            last_move = Move(team_enum=game_state.opponent().name,
+            last_move = Move(team_enum=last_game_state.current_team.name,
                              from_value=from_value,
                              to_value=to_value)
-            game_state.last_move = last_move
-            game_state.opponent().fish += message.data.class_binding.fishes.int_value[
-                0] if game_state.current_team is TeamEnum.ONE else message.data.class_binding.fishes.int_value[
-                1]
-            game_state.opponent().moves.append(game_state.last_move)
-            game_state.opponent().penguins.append(
-                Penguin(team_enum=game_state.opponent().name, coordinate=game_state.last_move.to_value))
-        self._game_handler.history.append(game_state)
+            game_state = last_game_state.perform_move(last_move)
+        else:
+            first_team = Team(TeamEnum.ONE,
+                              fish=0 if not last_game_state else last_game_state.first_team.fish,
+                              penguins=[] if not last_game_state else last_game_state.first_team.penguins,
+                              moves=[] if not last_game_state else last_game_state.first_team.moves)
+            second_team = Team(TeamEnum.TWO,
+                               0 if not last_game_state else last_game_state.second_team.fish,
+                               penguins=[] if not last_game_state else last_game_state.second_team.penguins,
+                               moves=[] if not last_game_state else last_game_state.second_team.moves)
+
+            game_state = GameState(
+                board=_convert_board(message.data.class_binding.board),
+                turn=message.data.class_binding.turn,
+                first_team=first_team,
+                second_team=second_team,
+                last_move=None,
+            )
+        self._game_handler.history[-1].append(game_state)
         self._game_handler.on_update(game_state)
 
     def start(self):

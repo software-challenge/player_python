@@ -302,7 +302,7 @@ class Move:
     Represents a move in the game.
     """
 
-    def __init__(self, team_enum: TeamEnum, to_value: HexCoordinate, from_value: HexCoordinate = None):
+    def __init__(self, team_enum: TeamEnum, to_value: HexCoordinate, from_value: Optional[HexCoordinate]):
         """
         Args:
             team_enum: The team_enum that performs the move.
@@ -419,7 +419,7 @@ class Field:
         """
         return True if self.penguin else False
 
-    def get_fish(self) -> Union[None, int]:
+    def get_fish(self) -> int:
         """
         :return: The amount of fish on the field, None if the field is occupied.
         """
@@ -527,20 +527,20 @@ class Board:
     Class which represents a game board. Consisting of a two-dimensional array of fields.
     """
 
-    def __init__(self, game_field: List[List[Field]]):
+    def __init__(self, board: List[List[Field]]):
         """
         The Board shows the state where each field is, how many fish and which team is on each field.
 
-        :param game_field: The game field as a two-dimensional array of fields.
+        :param board: The game field as a two-dimensional array of fields.
         """
-        self._game_field = game_field
+        self.board = board
 
     def get_empty_fields(self) -> List[Field]:
         """
         :return: A list of all empty fields.
         """
         fields: List[Field] = []
-        for row in self._game_field:
+        for row in self.board:
             for field in row:
                 if field.is_empty():
                     fields.append(field)
@@ -567,13 +567,13 @@ class Board:
         """
         :return: The width of the board.
         """
-        return len(self._game_field[0])
+        return len(self.board[0])
 
     def height(self) -> int:
         """
         :return: The height of the board.
         """
-        return len(self._game_field)
+        return len(self.board)
 
     def _get_field(self, x: int, y: int) -> Field:
         """
@@ -584,7 +584,7 @@ class Board:
         :param y: The y-coordinate of the field.
         :return: The field at the given coordinates.
         """
-        return self._game_field[y][x]
+        return self.board[y][x]
 
     def get_field(self, position: HexCoordinate) -> Field:
         """
@@ -633,7 +633,7 @@ class Board:
 
         :return: All Fields of the board.
         """
-        return [field for row in self._game_field for field in row]
+        return [field for row in self.board for field in row]
 
     def compare_to(self, other: 'Board') -> List[Field]:
         """
@@ -645,8 +645,8 @@ class Board:
         if not isinstance(other, Board):
             raise TypeError("Can only compare to another Board object")
 
-        fields = [self._game_field[x][y] for x in range(len(self._game_field)) for y in range(len(self._game_field[0]))
-                  if self._game_field[x][y] != other._game_field[x][y]]
+        fields = [self.board[x][y] for x in range(len(self.board)) for y in range(len(self.board[0]))
+                  if self.board[x][y] != other.board[x][y]]
         return fields
 
     def contains(self, field: Field) -> bool:
@@ -656,7 +656,7 @@ class Board:
         :param field: The field to check for.
         :return: True if the board contains the field, False otherwise.
         """
-        for row in self._game_field:
+        for row in self.board:
             if field in row:
                 return True
         return False
@@ -742,7 +742,7 @@ class Board:
         :return: A list of all coordinates that are occupied by a penguin of the given team_enum.
         """
         penguins = []
-        for row in self._game_field:
+        for row in self.board:
             for field in row:
                 if field.penguin and field.penguin.team_enum == team:
                     penguins.append(field.penguin)
@@ -794,7 +794,7 @@ class Board:
         :param move: The move to execute.
         :return: The new board with the moved penguin.
         """
-        board_state = copy.deepcopy(self._game_field)
+        board_state = copy.deepcopy(self.board)
         updated_board = Board(board_state)
         moving_penguin = Penguin(team_enum=move.team_enum, coordinate=move.to_value)
         if move.from_value:
@@ -802,8 +802,9 @@ class Board:
                 logging.error(f"There is no penguin to move. Origin was: {self.get_field(move.from_value)}")
                 return self
             origin_field_coordinate = move.from_value.to_cartesian()
-            moving_penguin = board_state[origin_field_coordinate.x][origin_field_coordinate.y].penguin
-            board_state[origin_field_coordinate.x][origin_field_coordinate.y] = Field(coordinate=move.from_value,
+            moving_penguin = board_state[origin_field_coordinate.y][origin_field_coordinate.x].penguin
+            moving_penguin.coordinate = move.to_value
+            board_state[origin_field_coordinate.y][origin_field_coordinate.x] = Field(coordinate=move.from_value,
                                                                                       penguin=None, fish=0)
         destination_field = updated_board.get_field(move.to_value)
         destination_field.penguin = moving_penguin
@@ -811,21 +812,23 @@ class Board:
         return updated_board
 
     def pretty_print(self):
-        for i, row in enumerate(self._game_field):
+        print()
+        for i, row in enumerate(self.board):
             if (i + 1) % 2 == 0:
                 print(" ", end="")
             for field in row:
                 if field.is_empty():
-                    print("-", end=" ")
+                    print("~", end=" ")
                 elif field.is_occupied():
                     print(field.get_team().value[0], end=" ")
                 else:
                     print(field.get_fish(), end=" ")
             print()
+        print()
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self._game_field == other._game_field
+            return self.board == other.board
         return False
 
 
@@ -869,7 +872,7 @@ class GameState:
         self.second_team = second_team
         self.last_move = last_move
         self.round = int((self.turn + 1) / 2)
-        self.current_team = self.current_team_from_turn()
+        self.current_team = self.current_team_from_turn(self.turn)
         self.current_pieces = self.current_team.get_penguins()
         self.possible_moves = self._get_possible_moves(self.current_team)
 
@@ -896,16 +899,16 @@ class GameState:
                 moves.extend(self.board.possible_moves_from(piece.coordinate, current_team.name))
         return moves
 
-    def current_team_from_turn(self) -> Team:
+    def current_team_from_turn(self, turn: int) -> Team:
         """
         Calculates the current team from the turn number and available moves.
 
         :return: The team that has the current turn.
         """
-        current_team = self.first_team if self.turn % 2 == 0 else self.second_team
+        current_team = self.first_team if turn % 2 == 0 else self.second_team
         possible_moves = self._get_possible_moves(current_team)
         if not possible_moves:
-            current_team = self.second_team if self.turn % 2 == 0 else self.first_team
+            current_team = self.second_team if turn % 2 == 0 else self.first_team
         return current_team
 
     def perform_move(self, move: Move) -> 'GameState':
@@ -913,47 +916,45 @@ class GameState:
         Performs the given move on the current game state.
 
         Args:
-            move: The that will be performed.
+            move: The move that has to be performed.
 
         Returns:
-            Union['GameState', int]: The new GameState if the move was successful. -1 if the move couldn't be performed.
+            GameState: The new state of the game after the move.
         """
         if self.is_valid_move(move) and self.current_team.name == move.team_enum:
             new_board = self.board.move(move)
             new_first_team = copy.deepcopy(self.first_team)
             new_second_team = copy.deepcopy(self.second_team)
-            adding_fish = new_board.get_field(move.to_value).get_fish()
             if self.current_team.name == TeamEnum.ONE:
-                new_move_one = new_first_team.moves + [move]
-                new_penguins_one = new_first_team.penguins
-                if not move.from_value:
-                    new_penguins_one.append(Penguin(team_enum=TeamEnum.ONE, coordinate=move.to_value))
-                else:
-                    for penguin in new_penguins_one:
-                        if penguin.coordinate == move.from_value:
-                            penguin.coordinate = move.to_value
-                new_fishes_one = new_first_team.fish + adding_fish
-                new_first_team = Team(
-                    name=self.first_team.name, penguins=new_penguins_one, fish=new_fishes_one, moves=new_move_one)
+                self._update_team(new_first_team, move, new_board)
             else:
-                new_move_two = new_second_team.moves + [move]
-                new_penguins_two = new_second_team.penguins
-                if not move.from_value:
-                    new_penguins_two.append(Penguin(team_enum=TeamEnum.TWO, coordinate=move.to_value))
-                else:
-                    for penguin in new_penguins_two:
-                        if penguin.coordinate == move.from_value:
-                            penguin.coordinate = move.to_value
-                new_fishes_two = new_second_team.fish + adding_fish
-                new_second_team = Team(
-                    name=self.second_team.name, penguins=new_penguins_two, fish=new_fishes_two, moves=new_move_two)
+                self._update_team(new_second_team, move, new_board)
             new_turn = self.turn + 1
             new_last_move = move
             return GameState(board=new_board, turn=new_turn, first_team=new_first_team, second_team=new_second_team,
                              last_move=new_last_move)
         else:
             logging.error(f"Performed invalid move while simulating: {move}")
-            return self
+            raise ValueError(f"Invalid move attempted: {move}")
+
+    def _update_team(self, team: Team, move: Move, new_board: Board) -> None:
+        """
+        Helper function to update the given team when a move is performed.
+
+        Args:
+            team: The team that will be updated.
+            move: The move that was performed.
+            new_board: The updated board.
+        """
+        team.moves.append(move)
+        adding_fish = self.board.get_field(move.to_value).get_fish()
+        new_penguin = new_board.get_field(move.to_value).penguin
+        teams_penguin = next(filter(lambda x: x.coordinate == move.from_value, team.penguins), None)
+        if teams_penguin:
+            teams_penguin.coordinate = new_penguin.coordinate
+        else:
+            team.penguins.append(new_penguin)
+        team.fish += adding_fish
 
     def is_valid_move(self, move: Move) -> bool:
         """
@@ -962,10 +963,7 @@ class GameState:
         :param move: The move to check.
         :return: True if the move is valid, False otherwise.
         """
-        for possible_move in self.possible_moves:
-            if possible_move == move:
-                return True
-        return False
+        return move in self.possible_moves
 
     def opponent(self) -> Team:
         """
