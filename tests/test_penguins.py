@@ -136,8 +136,8 @@ class TestMove(unittest.TestCase):
     def setUp(self):
         self.move1 = Move(team_enum=TeamEnum.ONE, from_value=HexCoordinate(3, 4), to_value=HexCoordinate(5, 12))
         self.move2 = Move(team_enum=TeamEnum.TWO, from_value=HexCoordinate(5, 12), to_value=HexCoordinate(3, 4))
-        self.move3 = Move(team_enum=TeamEnum.ONE, to_value=HexCoordinate(5, 12))
-        self.move4 = Move(team_enum=TeamEnum.TWO, to_value=HexCoordinate(3, 4))
+        self.move3 = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(5, 12))
+        self.move4 = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(3, 4))
 
     def test_get_delta(self):
         self.assertEqual(self.move1.get_delta(), 8.246211251235321)
@@ -148,8 +148,10 @@ class TestMove(unittest.TestCase):
     def test_reversed(self):
         self.assertEqual(self.move1.reversed(), self.move2)
         self.assertEqual(self.move2.reversed(), self.move1)
-        self.assertEqual(self.move3.reversed(), Move(team_enum=TeamEnum.ONE, to_value=HexCoordinate(5, 12)))
-        self.assertEqual(self.move4.reversed(), Move(team_enum=TeamEnum.TWO, to_value=HexCoordinate(3, 4)))
+        self.assertEqual(self.move3.reversed(),
+                         Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(5, 12)))
+        self.assertEqual(self.move4.reversed(),
+                         Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(3, 4)))
 
 
 class TestPenguin(unittest.TestCase):
@@ -318,7 +320,7 @@ class TestBoard(unittest.TestCase):
     def test_get_all_fields(self):
         all_fields = self.board.get_all_fields()
         self.assertEqual(len(all_fields), self.board.width() * self.board.height())
-        for row in self.board._game_field:
+        for row in self.board.board:
             for field in row:
                 self.assertIn(field, all_fields)
 
@@ -327,10 +329,10 @@ class TestBoard(unittest.TestCase):
         board2 = Board(copy.deepcopy(self.game_field))
         self.assertEqual(len(board1.compare_to(board2)), 0)
 
-        board2._game_field[0][0] = Field(self.coord1, None, 5)
+        board2.board[0][0] = Field(self.coord1, None, 5)
         self.assertNotEqual(len(board1.compare_to(board2)), 0)
 
-        board1._game_field[0][0].penguin = Penguin(HexCoordinate(0, 0), TeamEnum.ONE)
+        board1.board[0][0].penguin = Penguin(HexCoordinate(0, 0), TeamEnum.ONE)
         self.assertNotEqual(len(board1.compare_to(board2)), 0)
 
     def test_contains(self):
@@ -392,4 +394,4 @@ class TestBoard(unittest.TestCase):
 
     def test_get_most_fish(self):
         self.assertEqual(len(self.board.get_most_fish()), 2)
-        self.assertEqual(self.board._game_field[2][0].fish, self.board.get_most_fish()[0].fish)
+        self.assertEqual(self.board.board[2][0].fish, self.board.get_most_fish()[0].fish)
