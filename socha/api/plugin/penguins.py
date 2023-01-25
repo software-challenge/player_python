@@ -1,20 +1,12 @@
 """
 This is the plugin for this year's game `Penguins`.
 """
+import copy
 import logging
 import math
+import warnings
+from enum import Enum
 from typing import List, Union, Optional
-from warnings import warn
-
-_hexagonTemplate = [
-    "  _______  \xA0",
-    " /       \\ \xA0",
-    "/XXXXXXXXX\\\xA0",
-    "\\YYYYYYYYY/\xA0",
-    " \\_______/ \xA0"
-]
-
-_emptyHexagonPlaceholder = "\xA0\xA0\xA0\xA0\xA0\xA0"
 
 
 class Vector:
@@ -91,7 +83,7 @@ class Vector:
 
         :return: A radiant in float.
         """
-        return math.degrees(math.atan2(self.d_y, self.d_x))
+        return math.atan2(self.d_y, self.d_x)
 
     def are_identically(self, other: 'Vector'):
         """
@@ -135,36 +127,56 @@ class Vector:
         """
         return abs(self.d_x) == abs(self.d_y) or (self.d_x % 2 == 0 and self.d_y == 0)
 
-    def __str__(self) -> str:
+    def __repr__(self) -> str:
         """
         Returns the string representation of the vector.
 
         :return: The string representation of the vector.
         """
-        return f"Vector({self.d_x}, {self.d_x})"
+        return f"Vector({self.d_x}, {self.d_y})"
+
+    def __eq__(self, other):
+        """
+        Overrides the default equality operator to check if two Vector objects are equal.
+
+        :param other: The other Vector object to compare to.
+        :return: True if the two Vector objects are equal, False otherwise.
+        """
+        if isinstance(other, Vector):
+            return self.d_x == other.d_x and self.d_y == other.d_y
+        return False
 
 
-class CartesianCoordinate:
+class Coordinate:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+
+    def to_vector(self) -> Vector:
+        """
+        Converts the coordinate to a vector.
+        """
+        return Vector(d_x=self.x, d_y=self.y)
+
+    def distance(self, other: 'Coordinate') -> float:
+        """
+        Calculates the distance between two coordinates.
+
+        :param other: The other coordinate to calculate the distance to.
+        :return: The distance between the two cartesian coordinates.
+        """
+        return self.to_vector().subtraction(other.to_vector()).magnitude()
+
+    def add_vector(self, vector: Vector): ...
+
+    def subtract_vector(self, vector: Vector): ...
+
+
+class CartesianCoordinate(Coordinate):
     """
     Represents a coordinate in a normal cartesian coordinate system, that has been taught in school.
     This class is used to translate and represent a hexagonal coordinate in a cartesian and with that a 2D-Array.
     """
-
-    def __init__(self, x: int, y: int):
-        """
-        Constructor for the CartesianCoordinate class.
-
-        :param x: The x-coordinate on a cartesian coordinate system.
-        :param y: The y-coordinate on a cartesian coordinate system.
-        """
-        self.x = x
-        self.y = y
-
-    def to_vector(self):
-        """
-        Converts the cartesian coordinate to a vector.
-        """
-        return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'CartesianCoordinate':
         """
@@ -186,15 +198,6 @@ class CartesianCoordinate:
         vector: Vector = self.to_vector().subtraction(vector)
         return CartesianCoordinate(x=vector.d_x, y=vector.d_y)
 
-    def distance(self, other: 'CartesianCoordinate') -> float:
-        """
-        Calculates the distance between two cartesian coordinates.
-
-        :param other: The other cartesian coordinate to calculate the distance to.
-        :return: The distance between the two cartesian coordinates.
-        """
-        return self.to_vector().subtraction(other.to_vector()).magnitude()
-
     def to_hex(self) -> 'HexCoordinate':
         """
         Converts the cartesian coordinate to a hex coordinate.
@@ -214,16 +217,24 @@ class CartesianCoordinate:
         return None
 
     @staticmethod
-    def from_index(index: int) -> Optional['CartesianCoordinate']:
+    def from_index(index: int, width: int, height: int) -> Optional['CartesianCoordinate']:
         """
-        Converts an index to a cartesian coordinate.
+        Converts a given index to a CartesianCoordinate.
 
-        :param index: The index to convert.
-        :return: The cartesian coordinate.
+        Args:
+            index: The index to convert.
+            width: The width of the grid.
+            height: The height of the grid.
+
+        Returns:
+            Optional[CartesianCoordinate]: The CartesianCoordinate that corresponds to the given index, or None if the
+            index is out of range.
         """
-        if 0 <= index <= 63:
-            return CartesianCoordinate(x=index % 8, y=int(index / 8))
-        raise IndexError("Index out of range.")
+        if index < 0 or index >= width * height:
+            raise IndexError(f"Index out of range. The index has to be 0 <= {index} < {width * height}")
+        x = index % width
+        y = index // width
+        return CartesianCoordinate(x, y)
 
     def __repr__(self) -> str:
         return f"CartesianCoordinate({self.x}, {self.y})"
@@ -232,21 +243,11 @@ class CartesianCoordinate:
         return isinstance(other, CartesianCoordinate) and self.x == other.x and self.y == other.y
 
 
-class HexCoordinate:
+class HexCoordinate(Coordinate):
     """
     Represents a coordinate in a hexagonal coordinate system, that differs from the normal cartesian one.
     This class is used to represent the hexagonal game board.
     """
-
-    def __init__(self, x: int, y: int):
-        """
-        Constructor for the HexCoordinate class.
-
-        :param x: The x-coordinate on a hexagonal coordinate system.
-        :param y: The y-coordinate on a hexagonal coordinate system.
-        """
-        self.x = x
-        self.y = y
 
     def to_cartesian(self) -> CartesianCoordinate:
         """
@@ -255,14 +256,6 @@ class HexCoordinate:
         :return: The cartesian coordinate.
         """
         return CartesianCoordinate(x=math.floor((self.x / 2 - (1 if self.y % 2 == 1 else 0)) + 0.5), y=self.y)
-
-    def to_vector(self) -> Vector:
-        """
-        Converts the hex coordinate to a vector.
-
-        :return: The vector.
-        """
-        return Vector(d_x=self.x, d_y=self.y)
 
     def add_vector(self, vector: Vector) -> 'HexCoordinate':
         """
@@ -292,15 +285,6 @@ class HexCoordinate:
         """
         return [self.add_vector(vector) for vector in self.to_vector().directions]
 
-    def distance(self, other: 'HexCoordinate') -> float:
-        """
-        Calculates the distance between two hex coordinates.
-
-        :param other: The other hex coordinate to calculate the distance to.
-        :return: The distance between the two hex coordinates.
-        """
-        return self.to_vector().subtraction(other.to_vector()).magnitude()
-
     def __repr__(self) -> str:
         return f"HexCoordinate({self.x}, {self.y})"
 
@@ -308,97 +292,100 @@ class HexCoordinate:
         return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
 
 
+class TeamEnum(Enum):
+    ONE = "ONE"
+    TWO = "TWO"
+
+
 class Move:
     """
     Represents a move in the game.
     """
 
-    def __init__(self, to_value: HexCoordinate, from_value: HexCoordinate = None):
+    def __init__(self, team_enum: TeamEnum, to_value: HexCoordinate, from_value: Optional[HexCoordinate]):
         """
-        :param to_value: The destination of the move.
-        :param from_value: The origin of the move.
+        Args:
+            team_enum: The team_enum that performs the move.
+            to_value: The destination of the move.
+            from_value: The origin of the move.
         """
+        self.team_enum = team_enum
         self.from_value = from_value
         self.to_value = to_value
 
-    def get_delta(self):
+    def get_delta(self) -> float:
         """
-        Gets the distance between the origin and the destination.
+        This method calculates and returns the difference in distance between the to_value and from_value properties
+        of the Move object. If the from_value is not initialized, the distance is calculated between the to_value and
+        itself.
 
-        :return: The delta of the move as a Vector object.
+        :return: The delta of the move as a float.
         """
-        return self.to_value.distance(self.from_value)
+        return self.to_value.distance(self.to_value if not self.from_value else self.from_value)
 
     def reversed(self):
         """
-        Reverses the move.
+        This method returns a new Move object with the from_value and to_value properties reversed.
+        If the current Move object is not initialized with a from_value, the method returns the current object.
 
-        :return: The reversed move.
+        :return: The reversed move or the current move.
         """
-        return Move(from_value=self.to_value, to_value=self.from_value)
+        return self if not self.from_value else Move(team_enum=self.team_enum, to_value=self.from_value,
+                                                     from_value=self.to_value)
 
-    def __str__(self) -> str:
-        return "Move(from = {}, to = {})".format(self.from_value, self.to_value)
+    def __repr__(self):
+        return f"Move(team={self.team_enum.value}, from={self.from_value}, to={self.to_value})"
 
     def __eq__(self, __o: object) -> bool:
         return isinstance(__o, Move) and self.to_value == __o.to_value and \
                (self.from_value is None or self.from_value == __o.from_value)
 
 
-class Team:
+class Penguin:
     """
-    Represents a team in the game.
+       The Penguin class represents a penguin object with a coordinate and a team_enum.
     """
 
-    def __init__(self, color: str):
+    def __init__(self, coordinate: HexCoordinate, team_enum: TeamEnum):
         """
-        A Team can be either yourself or your opponent.
-        
-        :param color: The color of the team. Can be either 'ONE' or 'TWO'.
+        Args:
+           coordinate (HexCoordinate): The coordinate of the penguin on the game board.
+           team_enum (TeamEnum): The team_enum that the penguin belongs to.
         """
-        self.one = {
-            'opponent': 'TWO',
-            'name': 'ONE',
-            'letter': 'R',
-            'color': 'Rot'
-        }
-        self.two = {
-            'opponent': 'ONE',
-            'name': 'TWO',
-            'letter': 'B',
-            'color': 'Blau'
-        }
-        self.team_enum = None
-        if color == "ONE":
-            self.team_enum = self.one
-        elif color == "TWO":
-            self.team_enum = self.two
-        else:
-            raise Exception(f"Invalid : {color}")
+        self.coordinate = coordinate
+        self.team_enum = team_enum
 
-    def team(self) -> 'Team':
+    def get_distance(self, destination: HexCoordinate) -> float:
         """
-        :return: The team object.
-        """
-        return self
+        Calculates the distance from the current position to the given destination.
 
-    def color(self) -> str:
-        """
-        :return: The color of this team.
-        """
-        return self.team_enum['name']
+        Args:
+            destination: The destination to calculate the distance to.
 
-    def opponent(self) -> 'Team':
+        Returns:
+            float: The distance from the current position to the given destination.
         """
-        :return: The opponent of this team.
+        return self.coordinate.distance(destination)
+
+    def get_direction(self, destination: HexCoordinate) -> Vector:
         """
-        return Team(self.team_enum['opponent'])
+        Gets the direction of the move from the current coordinate to the given destination.
 
-    def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, Team) and self.team_enum['name'] == __o.team_enum['name']
+        Args:
+            destination: The destination coordinate.
 
-    def __str__(self) -> str:
-        return self.team_enum['name']
+        Returns:
+            Vector: The direction of the move.
+        """
+        return destination.subtract_vector(self.coordinate.to_vector()).to_vector()
+
+    def __eq__(self, other):
+        if not isinstance(other, Penguin):
+            return False
+        return self.coordinate == other.coordinate and self.team_enum == other.team_enum
+
+    def __repr__(self):
+        return f'Penguin({self.coordinate}, {self.team_enum.value})'
 
 
 class Field:
@@ -406,55 +393,133 @@ class Field:
     Represents a field in the game.
     """
 
-    def __init__(self, coordinate: HexCoordinate, field: Union[int, str, Team]):
+    def __init__(self, coordinate: HexCoordinate, penguin: Optional[Penguin], fish: int):
         """
         The Field represents a field on the game board.
         It says what state itself it has and where it is on the board.
 
-        :param coordinate: The coordinate of the field.
-        :param field: The state of the field. Can be either the number of fishes, or a Team.
+        Args:
+            coordinate:
+            penguin:
+            fish:
         """
         self.coordinate = coordinate
-        self.field: Union[int, str, Team]
-        if isinstance(field, int):
-            self.field = field
-        elif field.isalpha():
-            self.field = Team(field)
-        else:
-            raise TypeError(f"The field's input is wrong: {field}")
+        self.penguin = penguin
+        self.fish = fish
 
     def is_empty(self) -> bool:
         """
-        :return: True if the field is has no fishes, False otherwise.
+        :return: True if the field is has no fishes and no penguin, False otherwise.
         """
-        return self.field == 0
+        return True if not self.penguin and self.fish == 0 else False
 
     def is_occupied(self) -> bool:
         """
         :return: True if the field is occupied by a penguin, False otherwise.
         """
-        return isinstance(self.field, Team)
+        return True if self.penguin else False
 
-    def get_fish(self) -> Union[None, int]:
+    def get_fish(self) -> int:
         """
         :return: The amount of fish on the field, None if the field is occupied.
         """
-        return None if self.is_occupied() else self.field
+        return self.fish
 
-    def get_team(self) -> Union[Team, None]:
+    def get_team(self) -> Union[TeamEnum, None]:
         """
-        :return: The team of the field if it is occupied by penguin, None otherwise.
+        :return: The team_enum of the field if it is occupied by penguin, None otherwise.
         """
-        return self.field if isinstance(self.field, Team) else None
+        return None if not self.penguin else self.penguin.team_enum
 
-    def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, Field) and self.field == __o.field
-    
+    def get_value(self) -> Union[TeamEnum, int]:
+        """
+        Returns the current value of the field. If the field has no penguin on it, it returns the number of fish on it,
+        otherwise it returns the TeamEnum of the penguin on it.
+
+        Returns:
+            Union[TeamEnum, int]: The current value of the field.
+        """
+        return self.fish if not self.penguin else self.penguin.team_enum
+
+    def get_distance(self, destination: HexCoordinate) -> float:
+        """
+        Calculates the distance from the current position to the given destination.
+
+        Args:
+            destination: The destination to calculate the distance to.
+
+        Returns:
+            float: The distance from the current position to the given destination.
+        """
+        return self.coordinate.distance(destination)
+
+    def get_direction(self, destination: HexCoordinate) -> Vector:
+        """
+        Gets the direction of the move from the current coordinate to the given destination.
+
+        Args:
+            destination: The destination coordinate.
+
+        Returns:
+            Vector: The direction of the move.
+        """
+        return destination.subtract_vector(self.coordinate.to_vector()).to_vector()
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.coordinate == other.coordinate and self.penguin == other.penguin and self.fish == other.fish
+        return False
+
     def __repr__(self):
-        if isinstance(self.field, int):
-            return f"Field({self.coordinate}, Fish({self.field}))"
+        return f"Field({self.coordinate}, {self.penguin}, Fish({self.fish}))"
+
+
+class Team:
+    """
+    The Team class is useful for storing and manipulating information about teams in the game. It allows you to
+    easily create objects for each team_enum, keep track of their attributes, and compare them to their opponents.
+    """
+
+    def __init__(self, name: TeamEnum, fish: int, penguins: List[Penguin], moves: List[Move]):
+        self.name = name
+        self.fish = fish
+        self.penguins = penguins
+        self.moves = moves
+
+    def team(self) -> TeamEnum:
+        """
+        :return: The team_enum object.
+        """
+        return self.name
+
+    def get_penguins(self) -> List[Penguin]:
+        return self.penguins
+
+    def get_moves(self) -> List[Move]:
+        return self.moves
+
+    def color(self) -> str:
+        """
+        :return: The name of this team_enum.
+        """
+        if self.name == TeamEnum.ONE:
+            return TeamEnum.ONE.value
         else:
-            return f"Field({self.coordinate}, {self.field})"
+            return TeamEnum.TWO.value
+
+    @staticmethod
+    def opponent() -> None:
+        warnings.warn("Use the opponent method in GameState.")
+        return None
+
+    def __repr__(self) -> str:
+        return f"Team(name={self.name}, fish={self.fish}, penguins={len(self.penguins)}, moves={len(self.moves)})"
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.name == other.name and self.fish == other.fish and self.penguins == other.penguins and \
+                   self.moves == other.moves
+        return False
 
 
 class Board:
@@ -462,20 +527,20 @@ class Board:
     Class which represents a game board. Consisting of a two-dimensional array of fields.
     """
 
-    def __init__(self, game_field: List[List[Field]]):
+    def __init__(self, board: List[List[Field]]):
         """
         The Board shows the state where each field is, how many fish and which team is on each field.
 
-        :param game_field: The game field as a two-dimensional array of fields.
+        :param board: The game field as a two-dimensional array of fields.
         """
-        self._game_field = game_field
+        self.board = board
 
     def get_empty_fields(self) -> List[Field]:
         """
         :return: A list of all empty fields.
         """
         fields: List[Field] = []
-        for row in self._game_field:
+        for row in self.board:
             for field in row:
                 if field.is_empty():
                     fields.append(field)
@@ -502,13 +567,13 @@ class Board:
         """
         :return: The width of the board.
         """
-        return len(self._game_field)
+        return len(self.board[0])
 
     def height(self) -> int:
         """
         :return: The height of the board.
         """
-        return len(self._game_field[0])
+        return len(self.board)
 
     def _get_field(self, x: int, y: int) -> Field:
         """
@@ -519,7 +584,7 @@ class Board:
         :param y: The y-coordinate of the field.
         :return: The field at the given coordinates.
         """
-        return self._game_field[y][x]
+        return self.board[y][x]
 
     def get_field(self, position: HexCoordinate) -> Field:
         """
@@ -559,7 +624,8 @@ class Board:
         :param index: The index of the field.
         :return: The field at the given index.
         """
-        return self.get_field(CartesianCoordinate.from_index(index).to_hex())
+        return self.get_field(
+            CartesianCoordinate.from_index(index=index, width=self.width(), height=self.height()).to_hex())
 
     def get_all_fields(self) -> List[Field]:
         """
@@ -567,7 +633,7 @@ class Board:
 
         :return: All Fields of the board.
         """
-        return [self.get_field_by_index(i) for i in range(self.width() * self.height())]
+        return [field for row in self.board for field in row]
 
     def compare_to(self, other: 'Board') -> List[Field]:
         """
@@ -576,11 +642,11 @@ class Board:
         :param other: The other board to compare to.
         :return: A list of Fields that are different or a empty list if the boards are equal.
         """
-        fields = []
-        for x in range(len(self._game_field)):
-            for y in range(len(self._game_field[0])):
-                if self._game_field[x][y] != other._game_field[x][y]:
-                    fields.append(self._game_field[x][y])
+        if not isinstance(other, Board):
+            raise TypeError("Can only compare to another Board object")
+
+        fields = [self.board[x][y] for x in range(len(self.board)) for y in range(len(self.board[0]))
+                  if self.board[x][y] != other.board[x][y]]
         return fields
 
     def contains(self, field: Field) -> bool:
@@ -590,7 +656,7 @@ class Board:
         :param field: The field to check for.
         :return: True if the board contains the field, False otherwise.
         """
-        for row in self._game_field:
+        for row in self.board:
             if field in row:
                 return True
         return False
@@ -602,24 +668,35 @@ class Board:
         :param fields: The fields to check for.
         :return: True if the board contains all the given fields, False otherwise.
         """
+        if not fields:
+            return False
+
         for field in fields:
             if not self.contains(field):
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector) -> List[Move]:
+    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: TeamEnum) -> List[Move]:
         """
         Gets all moves in the given direction from the given origin.
 
-        :param origin: The origin of the move.
-        :param direction: The direction of the move.
-        :return: A list with all moves that fulfill the criteria.
+        Args:
+            origin: The origin of the move.
+            direction: The direction of the move.
+            team_enum: Team to make moves for.
+
+        Returns:
+                List[Move]: List of moves that can be made in the given direction from the given index,
+                            for the given team_enum
         """
+        if not self.get_field(origin).penguin or self.get_field(origin).penguin.team_enum != team_enum:
+            return []
+
         moves = []
         for i in range(1, self.width()):
             destination = origin.add_vector(direction.scalar_product(i))
             if self._is_destination_valid(destination):
-                moves.append(Move(from_value=origin, to_value=destination))
+                moves.append(Move(team_enum=team_enum, from_value=origin, to_value=destination))
             else:
                 break
         return moves
@@ -628,44 +705,48 @@ class Board:
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
 
-    def possible_moves_from(self, position: HexCoordinate) -> List[Move]:
+    def possible_moves_from(self, position: HexCoordinate, team_enum: TeamEnum) -> List[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
 
-        :param position: The position to start from.
-        :return: A list of all possible moves from the given position.
-        :raise: IndexError if the position is not valid.
+        Args:
+            position: The position to start from.
+            team_enum: A list of all possible moves from the given position.
+
+        Returns:
+            List[Move]: List of all possible moves that can be made from the given index, for the given team_enum
+
+        Raises:
+            IndexError: If the Index is out of range.
         """
         if not self.is_valid(position):
             raise IndexError(f"Index out of range: [x={position.x}, y={position.y}]")
-        moves = []
-        for direction in Vector().directions:
-            moves.extend(self.get_moves_in_direction(position, direction))
-        return moves
+        if not self.get_field(position).penguin or self.get_field(position).penguin.team_enum != team_enum:
+            return []
+        return [move for direction in Vector().directions for move in
+                self.get_moves_in_direction(position, direction, team_enum)]
 
-    def get_penguins(self) -> List[Field]:
+    def get_penguins(self) -> List[Penguin]:
         """
         Searches the board for all penguins.
 
         :return: A list of all Fields that are occupied by a penguin.
         """
-        return [field for field in self.get_all_fields() if field.is_occupied()]
+        return [field.penguin for field in self.get_all_fields() if field.is_occupied()]
 
-    def get_teams_penguins(self, team: Team) -> List[HexCoordinate]:
+    def get_teams_penguins(self, team: TeamEnum) -> List[Penguin]:
         """
-        Searches the board for all penguins of the given team.
+        Searches the board for all penguins of the given team_enum.
 
-        :param team: The team to search for.
-        :return: A list of all coordinates that are occupied by a penguin of the given team.
+        :param team: The team_enum to search for.
+        :return: A list of all coordinates that are occupied by a penguin of the given team_enum.
         """
-        teams_penguins = []
-        for x in range(self.width()):
-            for y in range(self.height()):
-                current_field = self.get_field(CartesianCoordinate(x, y).to_hex())
-                if current_field.is_occupied() and current_field.get_team().team() == team:
-                    coordinates = CartesianCoordinate(x, y).to_hex()
-                    teams_penguins.append(coordinates)
-        return teams_penguins
+        penguins = []
+        for row in self.board:
+            for field in row:
+                if field.penguin and field.penguin.team_enum == team:
+                    penguins.append(field.penguin)
+        return penguins
 
     def get_most_fish(self) -> List[Field]:
         """
@@ -700,69 +781,55 @@ class Board:
         return [field for field in self.get_all_fields() if field in other]
 
     def _move(self, move: Move) -> 'Board':
+        warnings.warn("'_move' is deprecated and will be removed in a future version. Use 'move' instead.",
+                      DeprecationWarning)
+        return self.move(move)
+
+    def move(self, move: Move) -> 'Board':
         """
         Moves the penguin from the origin to the destination.
+        **Please make sure that the move is correct, because this method will not check that.**
+        If there is no Penguin to move, than this method will return the current state unchanged.
 
         :param move: The move to execute.
         :return: The new board with the moved penguin.
         """
-        new_board = Board(self._game_field)
-        to_field = new_board.get_field(move.to_value)
-        to_field_coo = move.to_value.to_cartesian()
-        new_board._game_field[to_field_coo.x][to_field_coo.y] = Field(coordinate=move.to_value, field=to_field.field)
+        board_state = copy.deepcopy(self.board)
+        updated_board = Board(board_state)
+        moving_penguin = Penguin(team_enum=move.team_enum, coordinate=move.to_value)
         if move.from_value:
-            from_field_coo = move.from_value.to_cartesian()
-            new_board._game_field[from_field_coo.x][from_field_coo.y] = Field(coordinate=move.from_value, field=0)
-        return new_board
-
-    @staticmethod
-    def _fillUpString(placeholder: str, string: str) -> str:
-        len_placeholder = len(placeholder)
-        len_string = len(string)
-        difference = len_placeholder - len_string
-        rest = difference - int(difference / 2) * 2
-        return "\xA0" * int(difference / 2) + string + "\xA0" * int(difference / 2) + "\xA0" * rest
+            if not self.get_field(move.from_value).penguin:
+                logging.error(f"There is no penguin to move. Origin was: {self.get_field(move.from_value)}")
+                return self
+            origin_field_coordinate = move.from_value.to_cartesian()
+            moving_penguin = board_state[origin_field_coordinate.y][origin_field_coordinate.x].penguin
+            moving_penguin.coordinate = move.to_value
+            board_state[origin_field_coordinate.y][origin_field_coordinate.x] = Field(coordinate=move.from_value,
+                                                                                      penguin=None, fish=0)
+        destination_field = updated_board.get_field(move.to_value)
+        destination_field.penguin = moving_penguin
+        destination_field.fish = 0
+        return updated_board
 
     def pretty_print(self):
-        """
-        Prints the board in a pretty way.
-        """
-        result = ""
-        for i, column in enumerate(self._game_field):
-            for row in _hexagonTemplate:
-                result += _emptyHexagonPlaceholder if i % 2 != 0 else ""
-                for field in column:
-                    if field.is_empty():
-                        hexagon = " " * len(row)
-                    elif "XXXXXXXXX" in row:
-                        hexagon = row.replace("XXXXXXXXX", self._fillUpString("XXXXXXXXX", str(field.coordinate)))
-                    else:
-                        hexagon = row.replace("YYYYYYYYY", self._fillUpString("YYYYYYYYY", str(field.field)))
-                    result += hexagon
-                result += "\n"
-        print(result)
+        print()
+        for i, row in enumerate(self.board):
+            if (i + 1) % 2 == 0:
+                print(" ", end="")
+            for field in row:
+                if field.is_empty():
+                    print("~", end=" ")
+                elif field.is_occupied():
+                    print(field.get_team().value[0], end=" ")
+                else:
+                    print(field.get_fish(), end=" ")
+            print()
+        print()
 
-    def __eq__(self, __o: 'Board'):
-        return self._game_field == __o._game_field
-
-
-class Fishes:
-    """
-    Represents the amount of fish each player has.
-    """
-
-    def __init__(self, fishes_one: int, fishes_two: int):
-        self.fishes_one = fishes_one
-        self.fishes_two = fishes_two
-
-    def get_fish_by_team(self, team: Team):
-        """
-        Looks up the amount of fish a team has.
-
-        :param team: A team object, that represents the team to get the fish amount of.
-        :return: The amount of fish of the given team.
-        """
-        return self.fishes_one if team.team_enum == Team("ONE").team_enum else self.fishes_two
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.board == other.board
+        return False
 
 
 class GameState:
@@ -788,28 +855,28 @@ class GameState:
        describing the then current state.
        """
 
-    def __init__(self, board: Board, turn: int, start_team: Team, fishes: Fishes, last_move: Move = None):
+    def __init__(self, board: Board, turn: int, first_team: Team, second_team: Team, last_move: Optional[Move]):
         """
         Creates a new `GameState` with the given parameters.
 
-        :param board: The board of the game.
-        :param turn: The turn number of the game.
-        :param start_team: The team that has the first turn.
-        :param fishes: The number of fishes each team has.
-        :param last_move: The last move made.
+        Args:
+            board: The board of the game.
+            turn: The turn number of the game.
+            first_team: The team_enum that has the first turn.
+            second_team: The team_enum that has the second turn.
+            last_move: The last move made.
         """
-        self.start_team = start_team
         self.board = board
         self.turn = turn
-        self.round = int((self.turn + 1) / 2)
-        self.current_team = self.current_team_from_turn()
-        self.other_team = self.current_team_from_turn().opponent()
+        self.first_team = first_team
+        self.second_team = second_team
         self.last_move = last_move
-        self.fishes = fishes
-        self.current_pieces = self.board.get_teams_penguins(self.current_team)
+        self.round = int((self.turn + 1) / 2)
+        self.current_team = self.current_team_from_turn(self.turn)
+        self.current_pieces = self.current_team.get_penguins()
         self.possible_moves = self._get_possible_moves(self.current_team)
 
-    def _get_possible_moves(self, current_team: Team = None) -> List[Move]:
+    def _get_possible_moves(self, current_team: Optional[Team]) -> List[Move]:
         """
         Gets all possible moves for the current team.
         That includes all possible moves from all Fields that are not occupied by a penguin from that team.
@@ -819,47 +886,75 @@ class GameState:
         """
         current_team = current_team or self.current_team
         moves = []
-        if len(self.board.get_teams_penguins(current_team)) < 4:
+        if len(self.board.get_teams_penguins(current_team.name)) < 4:
             for x in range(self.board.width()):
                 for y in range(self.board.height()):
                     field = self.board.get_field(CartesianCoordinate(x, y).to_hex())
                     if not field.is_occupied() and field.get_fish() == 1:
-                        moves.append(Move(from_value=None, to_value=CartesianCoordinate(x, y).to_hex()))
+                        moves.append(
+                            Move(team_enum=current_team.name, from_value=None,
+                                 to_value=CartesianCoordinate(x, y).to_hex()))
         else:
-            for piece in self.board.get_teams_penguins(current_team):
-                moves.extend(self.board.possible_moves_from(piece))
+            for piece in self.board.get_teams_penguins(current_team.name):
+                moves.extend(self.board.possible_moves_from(piece.coordinate, current_team.name))
         return moves
 
-    def current_team_from_turn(self) -> Team:
+    def current_team_from_turn(self, turn: int) -> Team:
         """
-        Calculates the current team from the turn number.
+        Calculates the current team from the turn number and available moves.
 
         :return: The team that has the current turn.
         """
-        current_team_by_turn = self.start_team if self.turn % 2 == 0 else self.start_team.opponent()
-        if not self._get_possible_moves(current_team_by_turn):
-            return current_team_by_turn.opponent()
-        return current_team_by_turn
+        current_team = self.first_team if turn % 2 == 0 else self.second_team
+        possible_moves = self._get_possible_moves(current_team)
+        if not possible_moves:
+            current_team = self.second_team if turn % 2 == 0 else self.first_team
+        return current_team
 
     def perform_move(self, move: Move) -> 'GameState':
         """
         Performs the given move on the current game state.
 
-        :param move: The move to perform.
-        :return: The new game state after the move has been performed.
+        Args:
+            move: The move that has to be performed.
+
+        Returns:
+            GameState: The new state of the game after the move.
         """
-        if self.is_valid_move(move):
-            new_board = self.board._move(move)
-            adding_fish = new_board.get_field(move.to_value).get_fish()
-            new_fishes_one = self.fishes.fishes_one + adding_fish if self.current_team == Team("ONE") else \
-                self.fishes.fishes_one
-            new_fishes_two = self.fishes.fishes_two + adding_fish if self.current_team == Team("TWO") else \
-                self.fishes.fishes_two
-            new_fishes = Fishes(new_fishes_one, new_fishes_two)
-            return GameState(board=new_board, turn=self.turn + 1, start_team=self.start_team, fishes=new_fishes,
-                             last_move=move)
-        logging.error(f"Performed invalid move while simulating: {move}")
-        raise Exception(f"Invalid move: {move}")
+        if self.is_valid_move(move) and self.current_team.name == move.team_enum:
+            new_board = self.board.move(move)
+            new_first_team = copy.deepcopy(self.first_team)
+            new_second_team = copy.deepcopy(self.second_team)
+            if self.current_team.name == TeamEnum.ONE:
+                self._update_team(new_first_team, move, new_board)
+            else:
+                self._update_team(new_second_team, move, new_board)
+            new_turn = self.turn + 1
+            new_last_move = move
+            return GameState(board=new_board, turn=new_turn, first_team=new_first_team, second_team=new_second_team,
+                             last_move=new_last_move)
+        else:
+            logging.error(f"Performed invalid move while simulating: {move}")
+            raise ValueError(f"Invalid move attempted: {move}")
+
+    def _update_team(self, team: Team, move: Move, new_board: Board) -> None:
+        """
+        Helper function to update the given team when a move is performed.
+
+        Args:
+            team: The team that will be updated.
+            move: The move that was performed.
+            new_board: The updated board.
+        """
+        team.moves.append(move)
+        adding_fish = self.board.get_field(move.to_value).get_fish()
+        new_penguin = new_board.get_field(move.to_value).penguin
+        teams_penguin = next(filter(lambda x: x.coordinate == move.from_value, team.penguins), None)
+        if teams_penguin:
+            teams_penguin.coordinate = new_penguin.coordinate
+        else:
+            team.penguins.append(new_penguin)
+        team.fish += adding_fish
 
     def is_valid_move(self, move: Move) -> bool:
         """
@@ -868,7 +963,20 @@ class GameState:
         :param move: The move to check.
         :return: True if the move is valid, False otherwise.
         """
-        for possible_move in self.possible_moves:
-            if possible_move == move:
-                return True
-        return False
+        return move in self.possible_moves
+
+    def opponent(self) -> Team:
+        """
+        Returns the opponent team of the current team.
+
+        Returns:
+            Team: The team which is the opponent of the current team.
+        """
+        if self.current_team == self.first_team:
+            return self.second_team
+        else:
+            return self.first_team
+
+    def __repr__(self):
+        return f"GameState(turn={self.turn}, round={self.round}, first_team={self.first_team}, " \
+               f"second_team={self.second_team}, last_move={self.last_move}, current_team={self.current_team})"

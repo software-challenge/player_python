@@ -5,7 +5,7 @@ import argparse
 import datetime
 import logging
 
-from socha.api.networking.player_client import _PlayerClient, IClientHandler
+from socha.api.networking.game_client import GameClient, IClientHandler
 
 
 class Starter:
@@ -16,7 +16,8 @@ class Starter:
     """
 
     def __init__(self, logic: IClientHandler, host: str = "localhost", port: int = 13050, reservation: str = None,
-                 room_id: str = None, survive: bool = False, log: bool = False, verbose: bool = False):
+                 room_id: str = None, survive: bool = False, auto_reconnect: bool = False,
+                 log: bool = False, verbose: bool = False):
         """
         All these arguments can be overwritten, when parsed via start arguments,
         or you initialize this class with the desired values.
@@ -37,6 +38,7 @@ class Starter:
         self.reservation: str = args.reservation or reservation
         self.room_id: str = args.room or room_id
         self.survive: bool = args.survive or survive
+        self.auto_reconnect: bool = args.auto_reconnect or auto_reconnect
         self.write_log: bool = args.log or log
 
         if args.verbose or verbose:
@@ -52,15 +54,16 @@ class Starter:
         else:
             logging.basicConfig(level=level, format="%(asctime)s: %(levelname)s - %(message)s")
         logging.info("Starting...")
+        logging.critical("\nDiese Version von SoCha hat einige Änderungen.\n"
+                         "Deshalb wird Code welcher mit 1.0.0 und niedriger geschrieben wurde ein paar Fehler haben.\n"
+                         "Hilfe, um seinen Code anzupassen kann man unter: \n"
+                         "https://github.com/FalconsSky/socha-python-client/blob/master/changes.md\n"
+                         "finden, oder mir eine E-Mail oder Nachricht auf Discord schreiben.")
 
-        self.client = _PlayerClient(host=self.host, port=self.port, handler=logic, survive=self.survive)
+        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
+                                 room_id=room_id, auto_reconnect=self.auto_reconnect, survive=self.survive)
 
-        if reservation:
-            self.client.join_game_with_reservation(reservation)
-        elif room_id:
-            self.client.join_game_room(room_id)
-        else:
-            self.client.join_game()
+        self.client.join()
 
         self.client.start()
 
@@ -80,4 +83,6 @@ class Starter:
         parser.add_argument('-l', '--log', action='store_true',
                             help='If present the client will write a log file to the current directory.')
         parser.add_argument('-v', '--verbose', action='store_true', help='Verbose option for logging.')
+        parser.add_argument('--auto-reconnect', action='store_true',
+                            help='Automatically reconnect to the server if the connection is lost.')
         return parser.parse_args()
