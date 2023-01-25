@@ -57,7 +57,7 @@ class Starter:
         logging.critical("\nDiese Version von SoCha hat einige Änderungen.\n"
                          "Deshalb wird Code welcher mit 1.0.0 und niedriger geschrieben wurde ein paar Fehler haben.\n"
                          "Hilfe, um seinen Code anzupassen kann man unter: \n"
-                         "https://github.com/FalconsSky/socha-python-client/blob/dev/pretty/changes.md\n"
+                         "https://github.com/FalconsSky/socha-python-client/blob/master/changes.md\n"
                          "finden, oder mir eine E-Mail oder Nachricht auf Discord schreiben.")
 
         self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
