@@ -2,6 +2,7 @@
 This module handels the communication with the api and the students logic.
 """
 import logging
+import sys
 import time
 from typing import List, Union
 
@@ -180,7 +181,7 @@ class GameClient(XMLProtocolInterface):
             if move_response.from_value:
                 from_pos = From(x=move_response.from_value.x, y=move_response.from_value.y)
             response = Data(class_value="move", from_value=from_pos, to=to_pos)
-            logging.info(f"Sent {move_response} after {time.time() - start_time} seconds.")
+            logging.info(f"Sent {move_response} after {round(time.time() - start_time, ndigits=3)} seconds.")
             self.send_message_to_room(room_id, response)
 
     def _on_state(self, message):
@@ -249,8 +250,9 @@ class GameClient(XMLProtocolInterface):
                          "Please shutdown the client manually.")
             self._game_handler.while_disconnected(player_client=self)
         if self.auto_reconnect:
-            for i in range(3):
-                logging.info(f"Try to establish a connection with the server... {i + 1}")
+            logging.info("The server left. Client tries to reconnect to the server.")
+            for _ in range(3):
+                logging.info(f"Try to establish a connection with the server...")
                 try:
                     self.connect()
                     if self.network_interface.connected:
@@ -258,6 +260,8 @@ class GameClient(XMLProtocolInterface):
                         break
                 except Exception as e:
                     logging.exception(e)
+                    logging.info("The client couldn't reconnect due to a previous error.")
+                    self.stop()
                 time.sleep(1)
             self.join()
             return
@@ -282,12 +286,13 @@ class GameClient(XMLProtocolInterface):
                     else:
                         self._on_object(response)
                 elif self.running:
-                    logging.error(f"Received object of unknown class: {response}")
+                    logging.error(f"Received a object of unknown class: {response}")
                     raise NotImplementedError("Received object of unknown class.")
             else:
                 self._game_handler.while_disconnected(player_client=self)
 
         logging.info("Done.")
+        sys.exit(0)
 
     def stop(self):
         """
