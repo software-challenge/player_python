@@ -8,8 +8,10 @@
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> Please read the [documentation for this client](https://software-challenge-python-client.readthedocs.io/en/latest/)
-> before you asking questions or opening an issue.
+> Hey there! To help you out, it's best to start by checking out the
+> [documentation for this client](https://software-challenge-python-client.readthedocs.io/en/latest/)
+> before you ask any questions or open an issue.
+> It'll provide you with some helpful information!
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
@@ -17,6 +19,15 @@ have to develop an artificial intelligence that plays and competes against other
 
 > This year it is the game
 > **[Hey, danke für den Fisch!](https://docs.software-challenge.de/spiele/penguins)**.
+
+## Table of Contents
+
+- [Installation](#installation)
+    - [Globally](#globally)
+    - [Virtual Environment](#virtual-environment)
+- [Getting Started](#getting-started)
+    - [Start Arguments](#start-arguments)
+- [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
 
 ## Installation
 
@@ -31,7 +42,7 @@ which installs the packages inside the folder.
 
 > Pleas make sure that you have at least **Python 3.6** installed.
 > Check with `$ python -V` or `$ python3 -V`.
-> 
+>
 > If not present you can install python with the following commands:
 > - Windows: `> winget install -e --id Python.Python.3.6`
 > - Debian: `$ sudo apt install python3.6`
@@ -141,46 +152,84 @@ you can of course pass start arguments.
 > Note that any arguments passed as startup parameters will override those in the code,
 > including the ones you set yourself.
 
-| argument                                         | description                                                                                  |
-|--------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `--help `                                        | Prints a help message.                                                                       |
-| `-h HOST ` ,  `--host HOST `                     | The host to connect to. The default is 'localhost'.                                          |
-| `-p PORT `,  `--port PORT `                      | The port of the host. The default is 13050.                                                  |
-| `-r RESERVATION `,  `--reservation RESERVATION ` | Reservation code for a prepared game.                                                        |
-| `-R ROOM `,  `--room ROOM `                      | Room Id the client will try to connect.                                                      |
-| `-s `,  `--survive `                             | If present the client will keep running, even if the connection to the server is terminated. |
-| `-l `,  `--log `                                 | If present the client will write a log file to the current directory.                        |
-| `-v `,  `--verbose `                             | Verbose option for logging.                                                                  |
+| **Command**           | **Description**                                                                               |
+|-----------------------|-----------------------------------------------------------------------------------------------|
+| **--help**            | Prints the help message.                                                                      |
+| **-h, --host**        | The host to connect to. The default is 'localhost'.                                           |
+| **-p, --port**        | The port of the host. The default is 13050.                                                   |
+| **-r, --reservation** | Reservation code for a prepared game.                                                         |
+| **-R, --room**        | Room Id the client will try to connect.                                                       |
+| **-s, --survive**     | If present, the client will keep running, even if the connection to the server is terminated. |
+| **-l, --log**         | If present, the client will write a log file to the current directory.                        |
+| **-v, --verbose**     | Verbose option for logging.                                                                   |
+| **--auto-reconnect**  | Automatically reconnect to the server if the connection is lost.                              |
+| **-b, --build**       | Builds this script into a package with all its dependencies.                                  |
 
-## Make your player ready to hand in
+## Preparing Your Player for the Competition
 
-To make your player usable for the competition system,
-you need to create a virtual environment,
-as described [above](#virtual-environment).
+To ensure that your player is usable for the competition system,
+you need to download all the dependencies that your client uses
+because the system will run on a docker container without access to the internet and sudo permission.
+> The package has made things easier for you! You can use it to handle almost everything by itself. 
+> All you need is a `requirements.txt` file that lists all your dependencies.
+> To start, simply run the following command in your terminal:
+> 
+> `$ python <your_main_script>.py --build <your_directory_name>`
+> 
+> This will trigger the package to do its magic and build your project.
 
-Once you have done this,
-you still need to create a shell script
-that uses the contest system as the entry point for your player.
-It **must** be named `start.sh` because otherwise it cannot be found.
-There you must enter the following and place it in the root of your directory.
+If you want to do it manually, follow the steps below to download the dependencies:
+
+1. Open your terminal or console wherever you want to create your directory that you will upload.
+2. Type `mkdir my_player` to create a new directory named `my_player`. You can name yours whatever you want.
+3. Enter the directory using `cd my_player`.
+4. Run the command: `pip download socha xsdata==22.7 -d dependencies` in the directory.
+   This command downloads the dependencies you need into the folder `dependencies`.
+5. Ensure to add all your dependencies that your client uses.
+6. After the download, create a last directory using `mkdir .pip_cache`.
+
+Once you have downloaded all the dependencies,
+you need to create a shell script that uses the contest system as the entry point for your player.
+It **must** be named `start.sh` and must be on the top level of your directory; otherwise, it cannot be found.
+Follow the steps below to create your shell script:
+
+1. Ensure that you create your shell script in a UNIX-Environment, or if you use Windows,
+   you can do this with WSL or Notepad++. If you use Notepad++,
+   you need to go to _Bearbeiten->Format Zeilenende->Unix(LF)_.
+   This step ensures that your line endings are `LS` only without `CR`, which may cause problems on the contest system.
+
+2. Ensure that your shell script has the following structure:
 
 ```shell
 #!/bin/sh
-. venv/bin/activate
-python ./logic.py "$@"
+
+# Exit immediately if any command fails
+set -e
+
+# Sets the environment variable, which specifies the location for pip to store its cache files
+export XDG_CACHE_HOME=./my_player/.pip_cache
+
+# Sets the environment variable, which adds the directory to the list of paths that Python searches for modules and packages when they are imported.
+export PYTHONPATH=./my_player/packages:$PYTHONPATH
+
+# Install the socha package
+pip install --no-index --find-links=./my_player/dependencies/ ./my_player/dependencies/socha-1.0.1-py3-none-any.whl ./my_player/dependencies/xsdata-22.7-py3-none-any.whl --target=./my_player/packages/ --cache-dir=./my_player/.pip_cache
+
+# Run the logic.py script with start arguments
+python3 ./my_player/logic.py "$@"
+```    
+
+3. Ensure that you add all your dependencies that your client is using to this script.
+
+Once you have created your shell script, you should have a directory structure that looks like this:
+
 ```
-
-When you have done this,
-you should have a directory structure that looks something like this:
-
-````
 my_player/
-├── venv/
+├── .pip_cache/
+├── dependencies/
 ├── logic.py
 └── start.sh
-````
+```
 
-The `my_player` directory,
-or whatever you named yours,
-then just needs to be packaged as a ZIP archive
-and your player is ready to be uploaded. 🥳🎉
+The `my_player` directory or whatever you named yours just needs to be packaged as a ZIP archive,
+and your player is ready to be uploaded. Congratulations! 🥳🎉

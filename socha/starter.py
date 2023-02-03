@@ -6,6 +6,7 @@ import datetime
 import logging
 
 from socha.api.networking.game_client import GameClient, IClientHandler
+from socha.utils.package_builder import SochaPackageBuilder
 
 
 class Starter:
@@ -17,7 +18,7 @@ class Starter:
 
     def __init__(self, logic: IClientHandler, host: str = "localhost", port: int = 13050, reservation: str = None,
                  room_id: str = None, survive: bool = False, auto_reconnect: bool = False,
-                 log: bool = False, verbose: bool = False):
+                 log: bool = False, verbose: bool = False, build: str = None):
         """
         All these arguments can be overwritten, when parsed via start arguments,
         or you initialize this class with the desired values.
@@ -33,15 +34,32 @@ class Starter:
         """
         args = self._handle_start_args()
 
+        self.write_log: bool = args.log or log
+        self.verbose = args.verbose or verbose
+        self._setup_debugger(self.verbose)
+
+        self.build: str = args.build or build
+        if self.build:
+            builder = SochaPackageBuilder(self.build)
+            builder.build_package()
+            exit(0)
+
         self.host: str = args.host or host
         self.port: int = args.port or port
         self.reservation: str = args.reservation or reservation
         self.room_id: str = args.room or room_id
         self.survive: bool = args.survive or survive
         self.auto_reconnect: bool = args.auto_reconnect or auto_reconnect
-        self.write_log: bool = args.log or log
 
-        if args.verbose or verbose:
+        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
+                                 room_id=room_id, auto_reconnect=self.auto_reconnect, survive=self.survive)
+
+        self.client.join()
+
+        self.client.start()
+
+    def _setup_debugger(self, verbose: bool):
+        if verbose:
             level: int = logging.DEBUG
         else:
             level: int = logging.INFO
@@ -59,13 +77,6 @@ class Starter:
                          "Hilfe, um seinen Code anzupassen kann man unter: \n"
                          "https://github.com/FalconsSky/socha-python-client/blob/master/changes.md\n"
                          "finden, oder mir eine E-Mail oder Nachricht auf Discord schreiben.")
-
-        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
-                                 room_id=room_id, auto_reconnect=self.auto_reconnect, survive=self.survive)
-
-        self.client.join()
-
-        self.client.start()
 
     @staticmethod
     def _handle_start_args():
@@ -85,4 +96,5 @@ class Starter:
         parser.add_argument('-v', '--verbose', action='store_true', help='Verbose option for logging.')
         parser.add_argument('--auto-reconnect', action='store_true',
                             help='Automatically reconnect to the server if the connection is lost.')
+        parser.add_argument('-b', '--build', help='Builds the this script into a package with all its dependencies.')
         return parser.parse_args()
