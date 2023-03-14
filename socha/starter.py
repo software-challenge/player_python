@@ -51,7 +51,7 @@ class Starter:
         self.survive: bool = args.survive or survive
         self.auto_reconnect: bool = args.auto_reconnect or auto_reconnect
 
-        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=reservation,
+        self.client = GameClient(host=self.host, port=self.port, handler=logic, reservation=self.reservation,
                                  room_id=room_id, auto_reconnect=self.auto_reconnect, survive=self.survive)
 
         self.client.join()

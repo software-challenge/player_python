@@ -8,6 +8,47 @@ from socha.api.protocol.room_message import RoomOrchestrationMessage, RoomMessag
 
 
 @dataclass
+class OriginalRequest(ProtocolPacket):
+    class Meta:
+        name = "originalRequest"
+
+    class_value: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "class",
+            "type": "Attribute",
+        }
+    )
+    reservation_code: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "reservationCode",
+            "type": "Attribute",
+        }
+    )
+
+
+@dataclass
+class Errorpacket(ProtocolPacket):
+    class Meta:
+        name = "errorpacket"
+
+    message: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    original_request: Optional[OriginalRequest] = field(
+        default=None,
+        metadata={
+            "name": "originalRequest",
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
 class Left(ProtocolPacket):
     """
     If the game is over the server will _send this message to the clients and closes the connection afterwards.

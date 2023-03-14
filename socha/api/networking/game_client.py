@@ -10,7 +10,7 @@ from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
 from socha.api.plugin import penguins
 from socha.api.plugin.penguins import Field, GameState, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
 from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left
+    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left, Errorpacket
 from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
@@ -157,20 +157,25 @@ class GameClient(XMLProtocolInterface):
         Returns:
             None
         """
-        room_id = message.room_id
-        if isinstance(message, Joined):
-            self._game_handler.on_game_joined(room_id=room_id)
-        elif isinstance(message, Left):
-            self._game_handler.on_game_left()
-        elif isinstance(message.data.class_binding, MoveRequest):
-            self._on_move_request(room_id)
-        elif isinstance(message.data.class_binding, State):
-            self._on_state(message)
-        elif isinstance(message.data.class_binding, Result):
-            self._game_handler.history[-1].append(message.data.class_binding)
-            self._game_handler.on_game_over(message.data.class_binding)
-        elif isinstance(message, Room):
-            self._game_handler.on_room_message(message.data.class_binding)
+        if isinstance(message, Errorpacket):
+            logging.error(f"An error occurred while handling the request: {message}")
+            self._game_handler.on_error(str(message))
+            self.stop()
+        else:
+            room_id = message.room_id
+            if isinstance(message, Joined):
+                self._game_handler.on_game_joined(room_id=room_id)
+            elif isinstance(message, Left):
+                self._game_handler.on_game_left()
+            elif isinstance(message.data.class_binding, MoveRequest):
+                self._on_move_request(room_id)
+            elif isinstance(message.data.class_binding, State):
+                self._on_state(message)
+            elif isinstance(message.data.class_binding, Result):
+                self._game_handler.history[-1].append(message.data.class_binding)
+                self._game_handler.on_game_over(message.data.class_binding)
+            elif isinstance(message, Room):
+                self._game_handler.on_room_message(message.data.class_binding)
 
     def _on_move_request(self, room_id):
         start_time = time.time()

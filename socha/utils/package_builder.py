@@ -1,5 +1,7 @@
+import ast
 import logging
 import os
+import shutil
 import subprocess
 import sys
 import zipfile
@@ -13,11 +15,9 @@ class SochaPackageBuilder:
         self.packages_dir = 'packages'
         self.cache_dir = '.pip_cache'
 
-    def download_dependencies(self):
+    def _download_dependencies(self):
         current_dir = os.getcwd()
 
-        # Try to find requirements.txt in the current directory if it not exists in the same directory as the script,
-        # than quit the program with an error message
         req_file = os.path.join(current_dir, 'requirements.txt')
         try:
             with open(req_file, 'r') as f:
@@ -26,7 +26,6 @@ class SochaPackageBuilder:
             logging.error(f"Error reading requirements file: {str(e)}")
             sys.exit(1)
 
-        # Log the packages that will be downloaded
         logging.info(f'Downloading the following packages: {requirements}')
 
         # Download all dependencies to the dependencies directory
@@ -38,25 +37,21 @@ class SochaPackageBuilder:
             logging.error(f"Error downloading dependencies: {str(e)}")
             sys.exit(1)
 
-    def create_directory_structure(self):
+    def _create_directory_structure(self):
         try:
-            # Create the package directory if it does not exist
             if not os.path.exists(self.package_name):
                 logging.info(f'Creating directory {self.package_name}')
                 os.mkdir(self.package_name)
 
             logging.info(f'Creating directory {self.dependencies_dir}')
-            # Create the dependencies directory if it does not exist
             if not os.path.exists(f'{self.package_name}/{self.dependencies_dir}'):
                 os.mkdir(f'{self.package_name}/{self.dependencies_dir}')
 
             logging.info(f'Creating directory {self.packages_dir}')
-            # Create the packages directory if it does not exist
             if not os.path.exists(f'{self.package_name}/{self.packages_dir}'):
                 os.mkdir(f'{self.package_name}/{self.packages_dir}')
 
             logging.info(f'Creating directory {self.cache_dir}')
-            # Create the pip cache directory if it does not exist
             if not os.path.exists(f'{self.package_name}/{self.cache_dir}'):
                 os.mkdir(f'{self.package_name}/{self.cache_dir}')
 
@@ -64,10 +59,25 @@ class SochaPackageBuilder:
             logging.error(f"Error creating directory: {e}")
             sys.exit(1)
 
-    def create_shell_script(self):
+    def _copy_scripts(self):
+        """
+        Recursively searches for the given python file in the current working directory and its subdirectories,
+        and copies all python files with their directory structure to the target_folder.
+        """
+        logging.info(f'Copying python files to {self.package_name}')
+        source_folder = os.getcwd()
+        for root, dirs, files in os.walk(source_folder):
+            for file in files:
+                if file.endswith('.py'):
+                    source_file_path = os.path.join(root, file)
+                    target_file_path = os.path.join(self.package_name, os.path.relpath(source_file_path, source_folder))
+                    os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+                    shutil.copy2(source_file_path, target_file_path)
+                    logging.info(f'Copying {source_file_path} to {target_file_path}')
+
+    def _create_shell_script(self):
         logging.info(f'Creating shell script {self.package_name}/start.sh')
-        # Create the shell script
-        with open(f'{self.package_name}/start.sh', 'w') as f:
+        with open(f'{self.package_name}/start.sh', 'w', newline='\n') as f:
             f.write('#!/bin/sh\n')
             f.write('\n')
             f.write('# Exit immediately if any command fails\n')
@@ -94,23 +104,15 @@ class SochaPackageBuilder:
             f.write(f'# Run the {os.path.basename(sys.argv[0])} script with start arguments\n')
             f.write(f'python3 ./{self.package_name}/{os.path.basename(sys.argv[0])} "$@"\n')
 
-    def zipdir(self):
+    def _zipdir(self):
         logging.info(f'Zipping directory {self.package_name}')
         try:
             zipf = zipfile.ZipFile(f'{self.package_name}.zip', 'w', zipfile.ZIP_DEFLATED)
             for root, dirs, files in os.walk(self.package_name):
                 for file in files:
-                    file_path = os.path.join(root, file)
-                    # get the relative path of the file with respect to the parent directory
-                    relative_path = os.path.relpath(file_path, self.package_name)
-                    # add the file to the zip file with the relative path
-                    zipf.write(file_path, arcname=relative_path)
+                    zipf.write(os.path.join(root, file))
                 for _dir in dirs:
-                    dir_path = os.path.join(root, _dir)
-                    # get the relative path of the directory with respect to the parent directory
-                    relative_path = os.path.relpath(dir_path, self.package_name)
-                    # add the directory to the zip file with the relative path
-                    zipf.write(dir_path, arcname=relative_path)
+                    zipf.write(os.path.join(root, _dir))
             zipf.close()
             logging.info(f'{self.package_name}.zip successfully created!')
         except Exception as e:
@@ -121,16 +123,19 @@ class SochaPackageBuilder:
         logging.info('Building package...')
 
         # Create the directory structure
-        self.create_directory_structure()
+        self._create_directory_structure()
+
+        # Copy the scripts
+        self._copy_scripts()
 
         # Download all dependencies
-        self.download_dependencies()
+        self._download_dependencies()
 
         # Create the shell script
-        self.create_shell_script()
+        self._create_shell_script()
 
         # Zip the directory
-        self.zipdir()
+        self._zipdir()
 
         # Log a success message
         logging.info(f'{self.package_name} package successfully built!')
