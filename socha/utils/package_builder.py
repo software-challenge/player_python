@@ -4,6 +4,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import zipfile
 
 
@@ -14,6 +15,7 @@ class SochaPackageBuilder:
         self.dependencies_dir = 'dependencies'
         self.packages_dir = 'packages'
         self.cache_dir = '.pip_cache'
+        self.start_time = time.time_ns()
 
     def _download_dependencies(self):
         current_dir = os.getcwd()
@@ -66,14 +68,21 @@ class SochaPackageBuilder:
         """
         logging.info(f'Copying python files to {self.package_name}')
         source_folder = os.getcwd()
+        start_files = set()  # Set of file paths that exist at the beginning of the copying process
+        for root, dirs, files in os.walk(source_folder):
+            for file in files:
+                if file.endswith('.py'):
+                    source_file_path = os.path.join(root, file)
+                    start_files.add(source_file_path)  # Add the file path to the set
         for root, dirs, files in os.walk(source_folder):
             for file in files:
                 if file.endswith('.py'):
                     source_file_path = os.path.join(root, file)
                     target_file_path = os.path.join(self.package_name, os.path.relpath(source_file_path, source_folder))
-                    os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
-                    shutil.copy2(source_file_path, target_file_path)
-                    logging.info(f'Copying {source_file_path} to {target_file_path}')
+                    if source_file_path in start_files:  # Only copy files that exist at the beginning
+                        os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+                        shutil.copy2(source_file_path, target_file_path)
+                        logging.info(f'Copying {source_file_path} to {target_file_path}')
 
     def _create_shell_script(self):
         logging.info(f'Creating shell script {self.package_name}/start.sh')
