@@ -676,7 +676,7 @@ class Board:
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: TeamEnum) -> List[Move]:
+    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: Optional[TeamEnum] = None) -> List[Move]:
         """
         Gets all moves in the given direction from the given origin.
 
@@ -689,6 +689,8 @@ class Board:
                 List[Move]: List of moves that can be made in the given direction from the given index,
                             for the given team_enum
         """
+        if team_enum is None:
+            team_enum = self.get_field(origin).penguin.team_enum
         if not self.get_field(origin).penguin or self.get_field(origin).penguin.team_enum != team_enum:
             return []
 
@@ -705,7 +707,7 @@ class Board:
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
 
-    def possible_moves_from(self, position: HexCoordinate, team_enum: TeamEnum) -> List[Move]:
+    def possible_moves_from(self, position: HexCoordinate, team_enum: Optional[TeamEnum] = None) -> List[Move]:
         """
         Returns a list of all possible moves from the given position. That are all moves in all hexagonal directions.
 
@@ -721,6 +723,8 @@ class Board:
         """
         if not self.is_valid(position):
             raise IndexError(f"Index out of range: [x={position.x}, y={position.y}]")
+        if team_enum is None:
+            team_enum = self.get_field(position).penguin.team_enum
         if not self.get_field(position).penguin or self.get_field(position).penguin.team_enum != team_enum:
             return []
         return [move for direction in Vector().directions for move in
