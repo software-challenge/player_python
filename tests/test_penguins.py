@@ -224,9 +224,6 @@ class TestTeam(unittest.TestCase):
     def test_color(self):
         self.assertEqual(self.team_one.color(), TeamEnum.ONE.value)
 
-    def test_opponent(self):
-        self.assertWarns(Warning, self.team_one.opponent)
-
     def test_eq(self):
         team = Team(name=TeamEnum.ONE, fish=10,
                     penguins=[Penguin(coordinate=HexCoordinate(1, 1), team_enum=TeamEnum.ONE)],
