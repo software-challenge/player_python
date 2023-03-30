@@ -723,9 +723,7 @@ class Board:
         """
         if not self.is_valid(position):
             raise IndexError(f"Index out of range: [x={position.x}, y={position.y}]")
-        if team_enum is None:
-            team_enum = self.get_field(position).penguin.team_enum
-        if not self.get_field(position).penguin or self.get_field(position).penguin.team_enum != team_enum:
+        if not self.get_field(position).penguin or (team_enum != None and self.get_field(position).penguin.team_enum != team_enum):
             return []
         return [move for direction in Vector().directions for move in
                 self.get_moves_in_direction(position, direction, team_enum)]
