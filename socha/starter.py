@@ -5,6 +5,10 @@ import argparse
 import datetime
 import logging
 
+import pkg_resources
+import urllib.request
+import json
+
 from socha.api.networking.game_client import GameClient, IClientHandler
 from socha.utils.package_builder import SochaPackageBuilder
 
@@ -37,6 +41,8 @@ class Starter:
         self.write_log: bool = args.log or log
         self.verbose = args.verbose or verbose
         self._setup_debugger(self.verbose)
+
+        self.check_socha_version()
 
         self.build: str = args.build or build
         if self.build:
@@ -77,6 +83,24 @@ class Starter:
                          "Hilfe, um seinen Code anzupassen kann man unter: \n"
                          "https://github.com/FalconsSky/socha-python-client/blob/master/changes.md\n"
                          "finden, oder mir eine E-Mail oder Nachricht auf Discord schreiben.")
+
+    @staticmethod
+    def check_socha_version():
+        package_name = 'socha'
+        try:
+            installed_version = pkg_resources.get_distribution(package_name).version
+            response = urllib.request.urlopen(f"https://pypi.org/pypi/{package_name}/json")
+            json_data = json.loads(response.read())
+            latest_version = json_data['info']['version']
+            if installed_version != latest_version:
+                logging.warning(
+                    f"A newer version ({latest_version}) of {package_name} is available. You have version "
+                    f"{installed_version}.")
+        except pkg_resources.DistributionNotFound:
+            logging.error(f"{package_name} is not installed.")
+        except urllib.error.URLError as e:
+            logging.warning(
+                f"Could not check the latest version of {package_name} due to {type(e).__name__}: {e}")
 
     @staticmethod
     def _handle_start_args():
