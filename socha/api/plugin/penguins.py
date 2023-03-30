@@ -480,11 +480,13 @@ class Team:
     easily create objects for each team_enum, keep track of their attributes, and compare them to their opponents.
     """
 
-    def __init__(self, name: TeamEnum, fish: int, penguins: List[Penguin], moves: List[Move]):
+    def __init__(self, name: TeamEnum, fish: int, penguins: List[Penguin], moves: List[Move],
+                 opponent: Optional['Team'] = None):
         self.name = name
         self.fish = fish
         self.penguins = penguins
         self.moves = moves
+        self.opponent = opponent
 
     def team(self) -> TeamEnum:
         """
@@ -506,11 +508,6 @@ class Team:
             return TeamEnum.ONE.value
         else:
             return TeamEnum.TWO.value
-
-    @staticmethod
-    def opponent() -> None:
-        warnings.warn("Use the opponent method in GameState.")
-        return None
 
     def __repr__(self) -> str:
         return f"Team(name={self.name}, fish={self.fish}, penguins={len(self.penguins)}, moves={len(self.moves)})"
@@ -676,7 +673,8 @@ class Board:
                 return False
         return True
 
-    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: Optional[TeamEnum] = None) -> List[Move]:
+    def get_moves_in_direction(self, origin: HexCoordinate, direction: Vector, team_enum: Optional[TeamEnum] = None) \
+            -> List[Move]:
         """
         Gets all moves in the given direction from the given origin.
 
@@ -723,7 +721,8 @@ class Board:
         """
         if not self.is_valid(position):
             raise IndexError(f"Index out of range: [x={position.x}, y={position.y}]")
-        if not self.get_field(position).penguin or (team_enum != None and self.get_field(position).penguin.team_enum != team_enum):
+        if not self.get_field(position).penguin or (
+                team_enum and self.get_field(position).penguin.team_enum != team_enum):
             return []
         return [move for direction in Vector().directions for move in
                 self.get_moves_in_direction(position, direction, team_enum)]
@@ -873,10 +872,26 @@ class GameState:
         self.first_team = first_team
         self.second_team = second_team
         self.last_move = last_move
-        self.round = int((self.turn + 1) / 2)
-        self.current_team = self.current_team_from_turn(self.turn)
-        self.current_pieces = self.current_team.get_penguins()
-        self.possible_moves = self._get_possible_moves(self.current_team)
+
+    @property
+    def round(self):
+        return int((self.turn + 1) / 2)
+
+    @property
+    def current_team(self):
+        return self.current_team_from_turn(self.turn)
+
+    @property
+    def other_team(self):
+        return self.current_team.opponent
+
+    @property
+    def current_pieces(self):
+        return self.current_team.get_penguins()
+
+    @property
+    def possible_moves(self):
+        return self._get_possible_moves(self.current_team)
 
     def _get_possible_moves(self, current_team: Optional[Team]) -> List[Move]:
         """
@@ -888,6 +903,10 @@ class GameState:
         """
         current_team = current_team or self.current_team
         moves = []
+
+        if not current_team:
+            return moves
+
         if len(self.board.get_teams_penguins(current_team.name)) < 4:
             for x in range(self.board.width()):
                 for y in range(self.board.height()):
@@ -907,11 +926,12 @@ class GameState:
 
         :return: The team that has the current turn.
         """
-        current_team = self.first_team if turn % 2 == 0 else self.second_team
-        possible_moves = self._get_possible_moves(current_team)
-        if not possible_moves:
-            current_team = self.second_team if turn % 2 == 0 else self.first_team
-        return current_team
+        possible_moves_first = self._get_possible_moves(self.first_team)
+        possible_moves_second = self._get_possible_moves(self.second_team)
+        if turn % 2 == 0:
+            return self.first_team if possible_moves_first else self.second_team if possible_moves_second else None
+        else:
+            return self.second_team if possible_moves_second else self.first_team if possible_moves_first else None
 
     def perform_move(self, move: Move) -> 'GameState':
         """
@@ -967,17 +987,15 @@ class GameState:
         """
         return move in self.possible_moves
 
-    def opponent(self) -> Team:
+    def opponent(self, team: Optional[Team] = None) -> Team:
         """
         Returns the opponent team of the current team.
 
         Returns:
             Team: The team which is the opponent of the current team.
         """
-        if self.current_team == self.first_team:
-            return self.second_team
-        else:
-            return self.first_team
+        team = team or self.current_team
+        return team.opponent
 
     def __repr__(self):
         return f"GameState(turn={self.turn}, round={self.round}, first_team={self.first_team}, " \

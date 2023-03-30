@@ -214,6 +214,8 @@ class GameClient(XMLProtocolInterface):
                                0 if not last_game_state else last_game_state.second_team.fish,
                                penguins=[] if not last_game_state else last_game_state.second_team.penguins,
                                moves=[] if not last_game_state else last_game_state.second_team.moves)
+            first_team.opponent = second_team
+            second_team.opponent = first_team
 
             game_state = GameState(
                 board=_convert_board(message.data.class_binding.board),
