@@ -1,6 +1,7 @@
 """
 This module handels the communication with the api and the students logic.
 """
+import gc
 import logging
 import sys
 import time
@@ -281,7 +282,6 @@ class GameClient(XMLProtocolInterface):
         The client loop is the main loop, where the client waits for messages from the server
         and handles them accordingly.
         """
-
         while self.running:
             if self.network_interface.connected:
                 response = self._receive()
@@ -293,6 +293,7 @@ class GameClient(XMLProtocolInterface):
                         self._handle_left()
                     else:
                         self._on_object(response)
+                    gc.collect()
                 elif self.running:
                     logging.error(f"Received a object of unknown class: {response}")
                     raise NotImplementedError("Received object of unknown class.")
