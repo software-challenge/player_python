@@ -1,7 +1,7 @@
 """
 This is the plugin for this year's game `Penguins`.
 """
-import copy
+import _pickle as pickle
 import logging
 import math
 import warnings
@@ -795,7 +795,7 @@ class Board:
         :param move: The move to execute.
         :return: The new board with the moved penguin.
         """
-        board_state = copy.deepcopy(self.board)
+        board_state = pickle.loads(pickle.dumps(self.board, protocol=-1))
         updated_board = Board(board_state)
         moving_penguin = Penguin(team_enum=move.team_enum, coordinate=move.to_value)
         if move.from_value:
@@ -945,8 +945,8 @@ class GameState:
         """
         if self.is_valid_move(move) and self.current_team.name == move.team_enum:
             new_board = self.board.move(move)
-            new_first_team = copy.deepcopy(self.first_team)
-            new_second_team = copy.deepcopy(self.second_team)
+            new_first_team = pickle.loads(pickle.dumps(self.first_team, protocol=-1))
+            new_second_team = pickle.loads(pickle.dumps(self.second_team, protocol=-1))
             if self.current_team.name == TeamEnum.ONE:
                 self._update_team(new_first_team, move, new_board)
             else:
