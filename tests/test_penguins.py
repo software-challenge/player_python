@@ -1,6 +1,9 @@
+import copy
 import unittest
 
-from socha.api.plugin.penguins import *
+from socha.api.plugin.penguins.board import *
+from socha.api.plugin.penguins.coordinate import *
+from socha.api.plugin.penguins.game_state import *
 
 
 class TestVector(unittest.TestCase):
