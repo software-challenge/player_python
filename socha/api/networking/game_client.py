@@ -1,20 +1,22 @@
 """
 This module handels the communication with the api and the students logic.
 """
+import gc
 import logging
 import sys
 import time
 from typing import List, Union
 
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
-from socha.api.plugin import penguins
-from socha.api.plugin.penguins import Field, GameState, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
+from socha.api.plugin.penguins import game_state
+from socha.api.plugin.penguins.board import Field, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
+from socha.api.plugin.penguins.game_state import GameState
 from socha.api.protocol.protocol import State, Board, Data, \
     Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left, Errorpacket
 from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
-def _convert_board(protocol_board: Board) -> penguins.Board:
+def _convert_board(protocol_board: Board) -> game_state.Board:
     """
     Converts a protocol Board to a usable game board for using in the logic.
     :param protocol_board: A Board object in protocol format
@@ -39,7 +41,7 @@ def _convert_board(protocol_board: Board) -> penguins.Board:
             else:
                 raise ValueError(f"Invalid field value {fields_value} at coordinates {coordinate}")
 
-    return penguins.Board(board_list)
+    return game_state.Board(board_list)
 
 
 class IClientHandler:
@@ -204,7 +206,7 @@ class GameClient(XMLProtocolInterface):
             last_move = Move(team_enum=last_game_state.current_team.name,
                              from_value=from_value,
                              to_value=to_value)
-            game_state = last_game_state.perform_move(last_move)
+            _game_state = last_game_state.perform_move(last_move)
         else:
             first_team = Team(TeamEnum.ONE,
                               fish=0 if not last_game_state else last_game_state.first_team.fish,
@@ -214,16 +216,18 @@ class GameClient(XMLProtocolInterface):
                                0 if not last_game_state else last_game_state.second_team.fish,
                                penguins=[] if not last_game_state else last_game_state.second_team.penguins,
                                moves=[] if not last_game_state else last_game_state.second_team.moves)
+            first_team.opponent = second_team
+            second_team.opponent = first_team
 
-            game_state = GameState(
+            _game_state = GameState(
                 board=_convert_board(message.data.class_binding.board),
                 turn=message.data.class_binding.turn,
                 first_team=first_team,
                 second_team=second_team,
                 last_move=None,
             )
-        self._game_handler.history[-1].append(game_state)
-        self._game_handler.on_update(game_state)
+        self._game_handler.history[-1].append(_game_state)
+        self._game_handler.on_update(_game_state)
 
     def start(self):
         """
@@ -278,7 +282,6 @@ class GameClient(XMLProtocolInterface):
         The client loop is the main loop, where the client waits for messages from the server
         and handles them accordingly.
         """
-
         while self.running:
             if self.network_interface.connected:
                 response = self._receive()
@@ -290,6 +293,7 @@ class GameClient(XMLProtocolInterface):
                         self._handle_left()
                     else:
                         self._on_object(response)
+                    gc.collect()
                 elif self.running:
                     logging.error(f"Received a object of unknown class: {response}")
                     raise NotImplementedError("Received object of unknown class.")

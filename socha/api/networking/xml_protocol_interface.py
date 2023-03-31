@@ -13,7 +13,7 @@ from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
 from socha.api.networking.network_socket import NetworkSocket
-from socha.api.plugin.penguins import Move, TeamEnum
+from socha.api.plugin.penguins.team import TeamEnum, Move
 from socha.api.protocol.protocol import *
 
 
