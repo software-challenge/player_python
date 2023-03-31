@@ -395,3 +395,91 @@ class TestBoard(unittest.TestCase):
     def test_get_most_fish(self):
         self.assertEqual(len(self.board.get_most_fish()), 2)
         self.assertEqual(self.board.board[2][0].fish, self.board.get_most_fish()[0].fish)
+
+
+class TestGameState(unittest.TestCase):
+    def setUp(self):
+        self.coord1 = CartesianCoordinate(0, 0).to_hex()
+        self.coord2 = CartesianCoordinate(1, 0).to_hex()
+        self.coord3 = CartesianCoordinate(0, 1).to_hex()
+        self.coord4 = CartesianCoordinate(1, 1).to_hex()
+        self.coord5 = CartesianCoordinate(0, 2).to_hex()
+        self.coord6 = CartesianCoordinate(1, 2).to_hex()
+        self.coord7 = CartesianCoordinate(0, 3).to_hex()
+        self.coord8 = CartesianCoordinate(1, 3).to_hex()
+        self.coord9 = CartesianCoordinate(0, 4).to_hex()
+        self.coord10 = CartesianCoordinate(1, 4).to_hex()
+        self.penguin1 = Penguin(self.coord2, TeamEnum.ONE)
+        self.penguin2 = Penguin(self.coord7, TeamEnum.TWO)
+        self.field1 = Field(self.coord1, None, 1)
+        self.field2 = Field(self.coord2, self.penguin1, 1)
+        self.field3 = Field(self.coord3, None, 2)
+        self.field4 = Field(self.coord4, None, 3)
+        self.field5 = Field(self.coord5, None, 4)
+        self.field6 = Field(self.coord6, None, 1)
+        self.field7 = Field(self.coord7, self.penguin2, 1)
+        self.field8 = Field(self.coord8, None, 2)
+        self.field9 = Field(self.coord9, None, 3)
+        self.field10 = Field(self.coord10, None, 4)
+        self.game_field = [[self.field1, self.field2],
+                           [self.field3, self.field4],
+                           [self.field5, self.field6],
+                           [self.field7, self.field8],
+                           [self.field9, self.field10]]
+        self.board = Board(self.game_field)
+        self.first_team = Team(TeamEnum.ONE, 0, [], [])
+        self.second_team = Team(TeamEnum.TWO, 0, [], [])
+        self.first_team.opponent = self.second_team
+        self.second_team.opponent = self.first_team
+        self.game_state = GameState(self.board, 0, self.first_team, self.second_team, None)
+
+    def test_round(self):
+        self.assertEqual(self.game_state.round, 0)
+
+        move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
+        new_game_state = self.game_state.perform_move(move)
+        self.assertEqual(new_game_state.round, 1)
+
+        move = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2))
+        new_game_state = new_game_state.perform_move(move)
+        self.assertEqual(new_game_state.round, 1)
+
+    def test_current_team(self):
+        self.assertEqual(self.game_state.current_team, self.first_team)
+
+        move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
+        new_game_state = self.game_state.perform_move(move)
+        self.assertEqual(new_game_state.current_team, self.second_team)
+
+        move = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2))
+        new_game_state = new_game_state.perform_move(move)
+        self.assertIsNone(new_game_state.current_team)
+
+    def test_other_team(self):
+        self.assertEqual(self.game_state.other_team, self.second_team)
+
+        move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
+        new_game_state = self.game_state.perform_move(move)
+        self.assertEqual(new_game_state.other_team, self.first_team)
+
+        move = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2))
+        new_game_state = new_game_state.perform_move(move)
+        self.assertIsNone(new_game_state.current_team)
+
+    def test_possible_moves(self):
+        moves = self.game_state.possible_moves
+        self.assertEqual(len(moves), 2)
+        expected_moves = [
+            Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(0, 0)),
+            Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(2, 2)),
+        ]
+        self.assertEqual(moves, expected_moves)
+
+        move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
+        new_game_state = self.game_state.perform_move(move)
+        moves = new_game_state.possible_moves
+        self.assertEqual(len(moves), 1)
+        expected_moves = [
+            Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2)),
+        ]
+        self.assertEqual(moves, expected_moves)
