@@ -5,6 +5,7 @@ import contextlib
 import logging
 from typing import Iterator, Callable, Any
 
+from socha.api.plugin.penguins.team import Team, TeamEnum, Move
 from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.parsers.config import ParserConfig
@@ -13,7 +14,6 @@ from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
 from socha.api.networking.network_socket import NetworkSocket
-from socha.api.plugin.penguins import Move, TeamEnum
 from socha.api.protocol.protocol import *
 
 
