@@ -1,5 +1,6 @@
 import _pickle as pickle
 import logging
+from dataclasses import dataclass
 from typing import List, Optional
 
 from socha.api.plugin.penguins.board import Board
@@ -119,12 +120,14 @@ class GameState:
         """
         if self.is_valid_move(move) and self.current_team.name == move.team_enum:
             new_board = self.board.move(move)
-            new_first_team = pickle.loads(pickle.dumps(self.first_team, protocol=-1))
-            new_second_team = pickle.loads(pickle.dumps(self.second_team, protocol=-1))
+            new_first_team: Team = pickle.loads(pickle.dumps(self.first_team, protocol=-1))
+            new_second_team: Team = pickle.loads(pickle.dumps(self.second_team, protocol=-1))
             if self.current_team.name == TeamEnum.ONE:
                 self._update_team(new_first_team, move, new_board)
             else:
                 self._update_team(new_second_team, move, new_board)
+            new_first_team.opponent = new_second_team
+            new_second_team.opponent = new_first_team
             new_turn = self.turn + 1
             new_last_move = move
             return GameState(board=new_board, turn=new_turn, first_team=new_first_team, second_team=new_second_team,
