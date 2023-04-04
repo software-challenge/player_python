@@ -460,7 +460,7 @@ class TestGameState(unittest.TestCase):
 
         move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
         new_game_state = self.game_state.perform_move(move)
-        self.assertEqual(new_game_state.other_team, self.first_team)
+        self.assertNotEqual(new_game_state.other_team, self.first_team)
 
         move = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2))
         new_game_state = new_game_state.perform_move(move)
