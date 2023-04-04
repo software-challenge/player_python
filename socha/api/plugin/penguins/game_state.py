@@ -1,6 +1,5 @@
 import _pickle as pickle
 import logging
-from dataclasses import dataclass
 from typing import List, Optional
 
 from socha.api.plugin.penguins.board import Board
