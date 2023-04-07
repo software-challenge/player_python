@@ -160,9 +160,13 @@ class SochaPackageBuilder:
             zipf = zipfile.ZipFile(f'{self.build_dir}/{self.package_name}.zip', 'w', zipfile.ZIP_DEFLATED)
             for root, dirs, files in os.walk(f'{self.build_dir}/{self.package_name}'):
                 for file in files:
-                    zipf.write(os.path.join(root, file))
+                    file_path = os.path.join(root, file)
+                    arc_name = os.path.relpath(file_path, self.build_dir)
+                    zipf.write(file_path, arcname=arc_name)
                 for _dir in dirs:
-                    zipf.write(os.path.join(root, _dir))
+                    dir_path = os.path.join(root, _dir)
+                    arc_name = os.path.relpath(dir_path, self.build_dir)
+                    zipf.write(dir_path, arcname=arc_name)
             zipf.close()
             logging.info(f'{self.package_name}.zip successfully created!')
         except Exception as e:
