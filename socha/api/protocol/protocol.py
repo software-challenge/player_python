@@ -841,7 +841,7 @@ class Protocol:
     """
     This is the root element of the protocol.
     Even it's in here it will never be called,
-    because the children of this root element have to be handelt separately.
+    because the children of this root element have to be handled separately.
     """
 
     class Meta:
