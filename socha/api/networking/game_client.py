@@ -1,47 +1,20 @@
 """
-This module handels the communication with the api and the students logic.
+This module handles the communication with the api and the students' logic.
 """
 import gc
 import logging
 import sys
+import threading
 import time
 from typing import List, Union
 
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
-from socha.api.plugin.penguins import game_state
-from socha.api.plugin.penguins.board import Field, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
+from socha.api.plugin.penguins.board import Move
 from socha.api.plugin.penguins.game_state import GameState
-from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left, Errorpacket
+from socha.api.plugin.penguins.utils import handle_move, if_last_game_state, if_not_last_game_state
+from socha.api.protocol.protocol import State, Error, Join, Joined, JoinPrepared, JoinRoom, Room, Result, MoveRequest, \
+    Left, Errorpacket, Authenticate, Prepared, Slot, Prepare, Observe, Cancel, Observed, Step, Pause
 from socha.api.protocol.protocol_packet import ProtocolPacket
-
-
-def _convert_board(protocol_board: Board) -> game_state.Board:
-    """
-    Converts a protocol Board to a usable game board for using in the logic.
-    :param protocol_board: A Board object in protocol format
-    :type protocol_board: Board
-    :return: A Board object in the format used by the game logic
-    :rtype: penguins.Board
-    """
-    if not isinstance(protocol_board, Board):
-        raise TypeError("The input must be a Board object in protocol format")
-
-    board_list = []
-    for y, row in enumerate(protocol_board.list_value):
-        board_list.append([])
-        for x, fields_value in enumerate(row.field_value):
-            coordinate = CartesianCoordinate(x, y).to_hex()
-            if type(fields_value) is int:
-                board_list[y].append(Field(coordinate, penguin=None, fish=fields_value))
-            elif fields_value == "ONE":
-                board_list[y].append(Field(coordinate, penguin=Penguin(coordinate, TeamEnum.ONE), fish=0))
-            elif fields_value == "TWO":
-                board_list[y].append(Field(coordinate, penguin=Penguin(coordinate, TeamEnum.TWO), fish=0))
-            else:
-                raise ValueError(f"Invalid field value {fields_value} at coordinates {coordinate}")
-
-    return game_state.Board(board_list)
 
 
 class IClientHandler:
@@ -52,21 +25,21 @@ class IClientHandler:
         Calculates a move that the logic wants the server to perform in the game room.
         """
 
-    def on_update(self, state: GameState):
+    def on_update(self, state: GameState) -> None:
         """
-        If the server _send a update on the current state of the game this method is called.
+        If the server _send an update on the current state of the game this method is called.
         :param state: The current state that server sent.
         """
 
-    def on_game_over(self, roomMessage: Result):
+    def on_game_over(self, roomMessage: Result) -> None:
         """
         If the game has ended the server will _send a result message.
-        This method will called if this happens.
+        This method will call if this happens.
 
         :param roomMessage: The Result the server has sent.
         """
 
-    def on_error(self, logMessage: str):
+    def on_error(self, logMessage: str) -> None:
         """
         If error occurs,
         for instance when the logic sent a move that is not rule conform,
@@ -76,50 +49,73 @@ class IClientHandler:
         :param logMessage: The message, that server sent.
         """
 
-    def on_room_message(self, data):
+    def on_room_message(self, data) -> None:
         """
-        If the server sends a message that cannot be handelt by anny other method,
+        If the server sends a message that cannot be handheld by anny other method,
         this will be called.
 
         :param data: The data the Server sent.
         """
 
-    def on_game_prepared(self, message):
+    def on_game_prepared(self, message) -> None:
         """
         If the game has been prepared by the server this method will be called.
 
         :param message: The message that server sends with the response.
         """
 
-    def on_game_joined(self, room_id):
+    def on_game_joined(self, room_id) -> None:
         """
         If the client has successfully joined a game room this method will be called.
 
         :param room_id: The room id the client has joined.
         """
 
-    def on_game_observed(self, message):
-        """
-        If the client successfully joined as observer this method will be called.
-
-        :param message: The message that server sends with the response.
-        """
-
-    def on_game_left(self):
+    def on_game_left(self) -> None:
         """
         If the server left the room, this method will be called.
         If the client is running on survive mode it'll be running until shut downed manually.
         """
 
-    def while_disconnected(self, player_client: 'GameClient'):
+    def while_disconnected(self, player_client: 'GameClient') -> None:
         """
         The client loop will keep calling this method while there is no active connection to a game server.
         This can be used to do tasks after a game is finished and the server left.
         Please be aware, that the client has to be shut down manually if it is in survive mode.
-        The return statement is used to tell the client whether to exit or not.
 
         :type player_client: The player client in which the logic is integrated.
         :return: True if the client should shut down. False if the client should continue to run.
+        """
+
+    def on_create_game(self, game_client: 'GameClient') -> None:
+        """
+        This method will be called if the client is in admin mode and the client has authenticated with the server.
+        The client can now create a game.
+
+        :param game_client: The client that is in admin mode.
+        """
+
+    def on_prepared(self, game_client: 'GameClient', room_id: str, reservations: List[str]) -> None:
+        """
+        This method will be called if the client is in admin mode and the client has created a game.
+
+        :param game_client: The client that is in admin mode.
+        :param room_id: The room id of the game.
+        :param reservations: The reservations of the game.
+        """
+
+    def on_observed(self, game_client: 'GameClient', room_id: str):
+        """
+        This method will be called if the client is in admin mode and the client is observing a game.
+
+        :param game_client: The client that is in admin mode.
+        :param room_id: The room id of the game.    
+        """
+
+    def while_waiting(self) -> None:
+        """
+        This method will be called while the client is waiting for the server to send a new message.
+        This method is running threaded, which will be terminated without warning if the client receives a new message.
         """
 
 
@@ -129,25 +125,55 @@ class GameClient(XMLProtocolInterface):
     """
 
     def __init__(self, host: str, port: int, handler: IClientHandler, reservation: str,
-                 room_id: str, auto_reconnect: bool, survive: bool):
+                 room_id: str, password: str, auto_reconnect: bool, survive: bool, headless: bool):
         super().__init__(host, port)
         self._game_handler = handler
         self.reservation = reservation
         self.room_id = room_id
+        self.password = password
         self.auto_reconnect = auto_reconnect
         self.survive = survive
+        self.headless = headless
 
     def join_game(self):
-        self._send(Join())
+        logging.info("Joining game")
+        self.send(Join())
 
     def join_game_room(self, room_id: str):
-        self._send(JoinRoom(room_id=room_id))
+        logging.info(f"Joining game room '{room_id}'")
+        self.send(JoinRoom(room_id=room_id))
 
     def join_game_with_reservation(self, reservation: str):
-        self._send(JoinPrepared(reservation_code=reservation))
+        logging.info(f"Joining game with reservation '{reservation}'")
+        self.send(JoinPrepared(reservation_code=reservation))
+
+    def authenticate(self, password: str):
+        logging.info(f"Authenticating with password '{password}'")
+        self.send(Authenticate(password=password))
+
+    def create_game(self, player_1: Slot, player_2: Slot, game_type: str, pause: bool):
+        logging.info(f"Creating game with {player_1}, {player_2} and game type '{game_type}'")
+        self.send(Prepare(game_type=game_type, pause=pause, slot=[player_1, player_2]))
+
+    def observe(self, room_id: str):
+        logging.info(f"Observing game room '{room_id}'")
+        self.send(Observe(room_id=room_id))
+
+    def cancel(self, room_id: str):
+        logging.info(f"Cancelling game room '{room_id}'")
+        self.send(Cancel(room_id=room_id))
+
+    def step(self, room_id: str):
+        logging.info(f"Stepping game room '{room_id}'")
+        self.send(Step(room_id=room_id))
+
+    def pause(self, room_id: str, pause: bool):
+        logging.info(f"Set pause of game room '{room_id}' to '{pause}'")
+        self.send(Pause(room_id=room_id, pause=pause))
 
     def send_message_to_room(self, room_id: str, message):
-        self._send(Room(room_id=room_id, data=message))
+        logging.log(15, f"Sending message to room '{room_id}'")
+        self.send(Room(room_id=room_id, data=message))
 
     def _on_object(self, message):
         """
@@ -163,33 +189,48 @@ class GameClient(XMLProtocolInterface):
             logging.error(f"An error occurred while handling the request: {message}")
             self._game_handler.on_error(str(message))
             self.stop()
-        else:
+        elif isinstance(message, Joined):
+            logging.log(15, f"Game joined received with room id '{message.room_id}'")
+            self._game_handler.on_game_joined(room_id=message.room_id)
+        elif isinstance(message, Left):
+            logging.log(15, f"Game left received with room id '{message.room_id}'")
+            self._game_handler.on_game_left()
+        elif isinstance(message, Prepared):
+            logging.log(15, f"Game prepared received with reservation '{message.reservation}'")
+            self._game_handler.on_prepared(game_client=self, room_id=message.room_id, reservations=message.reservation)
+        elif isinstance(message, Observed):
+            logging.log(15, f"Game observing received with room id '{message.room_id}'")
+            self._game_handler.on_observed(game_client=self, room_id=message.room_id)
+        elif isinstance(message, Room) and not self.headless:
             room_id = message.room_id
-            if isinstance(message, Joined):
-                self._game_handler.on_game_joined(room_id=room_id)
-            elif isinstance(message, Left):
-                self._game_handler.on_game_left()
-            elif isinstance(message.data.class_binding, MoveRequest):
+
+            if isinstance(message.data.class_binding, MoveRequest):
+                logging.log(15, f"Move request received for room id '{room_id}'")
                 self._on_move_request(room_id)
             elif isinstance(message.data.class_binding, State):
+                logging.log(15, f"State received for room id '{room_id}'")
                 self._on_state(message)
             elif isinstance(message.data.class_binding, Result):
+                logging.log(15, f"Result received for room id '{room_id}'")
                 self._game_handler.history[-1].append(message.data.class_binding)
                 self._game_handler.on_game_over(message.data.class_binding)
-            elif isinstance(message, Room):
+            else:
+                logging.log(15, f"Room message received for room id '{room_id}'")
                 self._game_handler.on_room_message(message.data.class_binding)
+        else:
+            room_id = message.room_id
+            logging.log(15, f"Room message received for room id '{room_id}'")
+            self._game_handler.on_room_message(message)
 
     def _on_move_request(self, room_id):
         start_time = time.time()
         move_response = self._game_handler.calculate_move()
         if move_response:
-            from_pos = None
-            to_pos = To(x=move_response.to_value.x, y=move_response.to_value.y)
-            if move_response.from_value:
-                from_pos = From(x=move_response.from_value.x, y=move_response.from_value.y)
-            response = Data(class_value="move", from_value=from_pos, to=to_pos)
+            response = handle_move(move_response)
             logging.info(f"Sent {move_response} after {round(time.time() - start_time, ndigits=3)} seconds.")
             self.send_message_to_room(room_id, response)
+        else:
+            logging.error(f"{move_response} is not a valid move.")
 
     def _on_state(self, message):
         last_game_state = None
@@ -198,34 +239,9 @@ class GameClient(XMLProtocolInterface):
                 last_game_state = item
                 break
         if last_game_state:
-            from_value = None if not message.data.class_binding.last_move.from_value else HexCoordinate(
-                x=message.data.class_binding.last_move.from_value.x,
-                y=message.data.class_binding.last_move.from_value.y)
-            to_value = HexCoordinate(x=message.data.class_binding.last_move.to.x,
-                                     y=message.data.class_binding.last_move.to.y)
-            last_move = Move(team_enum=last_game_state.current_team.name,
-                             from_value=from_value,
-                             to_value=to_value)
-            _game_state = last_game_state.perform_move(last_move)
+            _game_state = if_last_game_state(message, last_game_state)
         else:
-            first_team = Team(TeamEnum.ONE,
-                              fish=0 if not last_game_state else last_game_state.first_team.fish,
-                              penguins=[] if not last_game_state else last_game_state.first_team.penguins,
-                              moves=[] if not last_game_state else last_game_state.first_team.moves)
-            second_team = Team(TeamEnum.TWO,
-                               0 if not last_game_state else last_game_state.second_team.fish,
-                               penguins=[] if not last_game_state else last_game_state.second_team.penguins,
-                               moves=[] if not last_game_state else last_game_state.second_team.moves)
-            first_team.opponent = second_team
-            second_team.opponent = first_team
-
-            _game_state = GameState(
-                board=_convert_board(message.data.class_binding.board),
-                turn=message.data.class_binding.turn,
-                first_team=first_team,
-                second_team=second_team,
-                last_move=None,
-            )
+            _game_state = if_not_last_game_state(message)
         self._game_handler.history[-1].append(_game_state)
         self._game_handler.on_update(_game_state)
 
@@ -239,12 +255,16 @@ class GameClient(XMLProtocolInterface):
     def join(self) -> None:
         """
         Tries to join a game with a connected server. It uses the reservation, or room id to join.
-        If their are not present it joins just without, as fallback.
+        If they are not present it joins just without, as fallback.
         """
         if self.reservation:
             self.join_game_with_reservation(self.reservation)
         elif self.room_id:
             self.join_game_room(self.room_id)
+        elif self.password:
+            self.authenticate(self.password)
+            self.first_time = False
+            self._game_handler.on_create_game(game_client=self)
         else:
             self.join_game()
 
@@ -253,7 +273,7 @@ class GameClient(XMLProtocolInterface):
 
     def _handle_left(self):
         self.first_time = True
-        self.disconnect()
+        self.network_interface.close()
         if self.survive:
             logging.info("The server left. Client is in survive mode and keeps running.\n"
                          "Please shutdown the client manually.")
@@ -282,6 +302,7 @@ class GameClient(XMLProtocolInterface):
         The client loop is the main loop, where the client waits for messages from the server
         and handles them accordingly.
         """
+        while_waiting = None
         while self.running:
             if self.network_interface.connected:
                 response = self._receive()
@@ -289,10 +310,15 @@ class GameClient(XMLProtocolInterface):
                     continue
                 elif isinstance(response, ProtocolPacket):
                     logging.debug(f"Received new object: {response}")
+                    if while_waiting:
+                        while_waiting.join(timeout=0.0)
                     if isinstance(response, Left):
+                        self._game_handler.on_game_left()
                         self._handle_left()
                     else:
                         self._on_object(response)
+                    while_waiting = threading.Thread(target=self._game_handler.while_waiting)
+                    while_waiting.start()
                     gc.collect()
                 elif self.running:
                     logging.error(f"Received a object of unknown class: {response}")
