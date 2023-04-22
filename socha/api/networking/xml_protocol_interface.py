@@ -147,10 +147,4 @@ class XMLProtocolInterface:
         :param object_class: The ProtocolPacket child to serialize.
         :return: The serialized byte stream.
         """
-        if isinstance(object_class, Move):
-            from_value = From(x=object_class.from_value.x, y=object_class.from_value.y)
-            to_value = To(x=object_class.to_value.x, y=object_class.to_value.y)
-            data = Data(class_value="move", from_value=from_value, to=to_value)
-            return self.serializer.render(data).encode("utf-8")
-
         return self.serializer.render(object_class).encode("utf-8")
