@@ -1,10 +1,10 @@
-from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
+from typing import Union
+
 from socha.api.plugin.penguins import game_state
 from socha.api.plugin.penguins.board import Field, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
 from socha.api.plugin.penguins.game_state import GameState
-from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left, Errorpacket
-from socha.api.protocol.protocol_packet import ProtocolPacket
+from socha.api.protocol.protocol import Board, Data, \
+    From, To, Team
 
 
 def _convert_board(protocol_board: Board) -> game_state.Board:
@@ -18,20 +18,19 @@ def _convert_board(protocol_board: Board) -> game_state.Board:
     if not isinstance(protocol_board, Board):
         raise TypeError("The input must be a Board object in protocol format")
 
-    board_list = []
-    for y, row in enumerate(protocol_board.list_value):
-        board_list.append([])
-        for x, fields_value in enumerate(row.field_value):
-            coordinate = CartesianCoordinate(x, y).to_hex()
-            if type(fields_value) is int:
-                board_list[y].append(Field(coordinate, penguin=None, fish=fields_value))
-            elif fields_value == "ONE":
-                board_list[y].append(Field(coordinate, penguin=Penguin(coordinate, TeamEnum.ONE), fish=0))
-            elif fields_value == "TWO":
-                board_list[y].append(Field(coordinate, penguin=Penguin(coordinate, TeamEnum.TWO), fish=0))
-            else:
-                raise ValueError(f"Invalid field value {fields_value} at coordinates {coordinate}")
+    def create_field(y: int, x: int, fields_value: Union[int, str]) -> Field:
+        coordinate = CartesianCoordinate(x, y).to_hex()
+        if isinstance(fields_value, int):
+            return Field(coordinate, penguin=None, fish=fields_value)
+        elif fields_value == "ONE":
+            return Field(coordinate, penguin=Penguin(coordinate, TeamEnum.ONE), fish=0)
+        elif fields_value == "TWO":
+            return Field(coordinate, penguin=Penguin(coordinate, TeamEnum.TWO), fish=0)
+        else:
+            raise ValueError(f"Invalid field value {fields_value} at coordinates {coordinate}")
 
+    board_list = [[create_field(y, x, fields_value) for x, fields_value in enumerate(row.field_value)] for y, row in
+                  enumerate(protocol_board.list_value)]
     return game_state.Board(board_list)
 
 
@@ -41,3 +40,36 @@ def handle_move(move_response) -> Data:
     if move_response.from_value:
         from_pos = From(x=move_response.from_value.x, y=move_response.from_value.y)
     return Data(class_value="move", from_value=from_pos, to=to_pos)
+
+
+def if_last_game_state(message, last_game_state: GameState) -> GameState:
+    from_value = None if not message.data.class_binding.last_move.from_value else HexCoordinate(
+        x=message.data.class_binding.last_move.from_value.x,
+        y=message.data.class_binding.last_move.from_value.y)
+    to_value = HexCoordinate(x=message.data.class_binding.last_move.to.x,
+                             y=message.data.class_binding.last_move.to.y)
+    last_move = Move(team_enum=last_game_state.current_team.name,
+                     from_value=from_value,
+                     to_value=to_value)
+    return last_game_state.perform_move(last_move)
+
+
+def if_not_last_game_state(message) -> GameState:
+    first_team = Team(TeamEnum.ONE,
+                      fish=0,
+                      penguins=[],
+                      moves=[])
+    second_team = Team(TeamEnum.TWO,
+                       0,
+                       penguins=[],
+                       moves=[])
+    first_team.opponent = second_team
+    second_team.opponent = first_team
+
+    return GameState(
+        board=_convert_board(message.data.class_binding.board),
+        turn=message.data.class_binding.turn,
+        first_team=first_team,
+        second_team=second_team,
+        last_move=None,
+    )

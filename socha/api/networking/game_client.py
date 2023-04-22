@@ -8,12 +8,11 @@ import time
 from typing import List, Union
 
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
-from socha.api.plugin.penguins import game_state
-from socha.api.plugin.penguins.board import Field, Move, CartesianCoordinate, TeamEnum, Penguin, HexCoordinate
+from socha.api.plugin.penguins.board import Move
 from socha.api.plugin.penguins.game_state import GameState
-from socha.api.plugin.penguins.utils import handle_move
-from socha.api.protocol.protocol import State, Board, Data, \
-    Error, From, Join, Joined, JoinPrepared, JoinRoom, To, Team, Room, Result, MoveRequest, Left, Errorpacket
+from socha.api.plugin.penguins.utils import handle_move, if_last_game_state, if_not_last_game_state
+from socha.api.protocol.protocol import State, Error, Join, Joined, JoinPrepared, JoinRoom, Room, Result, MoveRequest, \
+    Left, Errorpacket
 from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
@@ -169,34 +168,9 @@ class GameClient(XMLProtocolInterface):
                 last_game_state = item
                 break
         if last_game_state:
-            from_value = None if not message.data.class_binding.last_move.from_value else HexCoordinate(
-                x=message.data.class_binding.last_move.from_value.x,
-                y=message.data.class_binding.last_move.from_value.y)
-            to_value = HexCoordinate(x=message.data.class_binding.last_move.to.x,
-                                     y=message.data.class_binding.last_move.to.y)
-            last_move = Move(team_enum=last_game_state.current_team.name,
-                             from_value=from_value,
-                             to_value=to_value)
-            _game_state = last_game_state.perform_move(last_move)
+            _game_state = if_last_game_state(message, last_game_state)
         else:
-            first_team = Team(TeamEnum.ONE,
-                              fish=0 if not last_game_state else last_game_state.first_team.fish,
-                              penguins=[] if not last_game_state else last_game_state.first_team.penguins,
-                              moves=[] if not last_game_state else last_game_state.first_team.moves)
-            second_team = Team(TeamEnum.TWO,
-                               0 if not last_game_state else last_game_state.second_team.fish,
-                               penguins=[] if not last_game_state else last_game_state.second_team.penguins,
-                               moves=[] if not last_game_state else last_game_state.second_team.moves)
-            first_team.opponent = second_team
-            second_team.opponent = first_team
-
-            _game_state = GameState(
-                board=_convert_board(message.data.class_binding.board),
-                turn=message.data.class_binding.turn,
-                first_team=first_team,
-                second_team=second_team,
-                last_move=None,
-            )
+            _game_state = if_not_last_game_state(message)
         self._game_handler.history[-1].append(_game_state)
         self._game_handler.on_update(_game_state)
 
@@ -261,6 +235,7 @@ class GameClient(XMLProtocolInterface):
                 elif isinstance(response, ProtocolPacket):
                     logging.debug(f"Received new object: {response}")
                     if isinstance(response, Left):
+                        self._game_handler.on_game_left()
                         self._handle_left()
                     else:
                         self._on_object(response)
