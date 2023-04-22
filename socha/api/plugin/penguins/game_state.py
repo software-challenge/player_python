@@ -1,6 +1,5 @@
 import _pickle as pickle
 import logging
-from dataclasses import dataclass
 from typing import List, Optional
 
 from socha.api.plugin.penguins.board import Board
@@ -47,6 +46,7 @@ class GameState:
         self.first_team = first_team
         self.second_team = second_team
         self.last_move = last_move
+        self.possible_moves = self._get_possible_moves(self.current_team)
 
     @property
     def round(self):
@@ -64,10 +64,6 @@ class GameState:
     def current_pieces(self):
         return self.current_team.get_penguins()
 
-    @property
-    def possible_moves(self):
-        return self._get_possible_moves(self.current_team)
-
     def _get_possible_moves(self, current_team: Optional[Team]) -> List[Move]:
         """
         Gets all possible moves for the current team.
@@ -77,23 +73,22 @@ class GameState:
         :return: A list of all possible moves from the current player's turn.
         """
         current_team = current_team or self.current_team
-        moves = []
-
         if not current_team:
-            return moves
+            return []
 
         if len(self.board.get_teams_penguins(current_team.name)) < 4:
-            for x in range(self.board.width()):
-                for y in range(self.board.height()):
-                    field = self.board.get_field(CartesianCoordinate(x, y).to_hex())
-                    if not field.is_occupied() and field.get_fish() == 1:
-                        moves.append(
-                            Move(team_enum=current_team.name, from_value=None,
-                                 to_value=CartesianCoordinate(x, y).to_hex()))
+            moves = [(x, y) for x in range(self.board.width()) for y in range(self.board.height())]
+            moves = filter(lambda pos: not self.board.get_field(
+                CartesianCoordinate(*pos).to_hex()).is_occupied() and self.board.get_field(
+                CartesianCoordinate(*pos).to_hex()).get_fish() == 1, moves)
+            moves = map(lambda pos: Move(team_enum=current_team.name, from_value=None,
+                                         to_value=CartesianCoordinate(*pos).to_hex()), moves)
+            return list(moves)
         else:
-            for piece in self.board.get_teams_penguins(current_team.name):
-                moves.extend(self.board.possible_moves_from(piece.coordinate, current_team.name))
-        return moves
+            pieces = self.board.get_teams_penguins(current_team.name)
+            moves = map(lambda piece: self.board.possible_moves_from(piece.coordinate, current_team.name), pieces)
+            moves = [item for sublist in moves for item in sublist]
+            return moves
 
     def current_team_from_turn(self, turn: int) -> Team:
         """
