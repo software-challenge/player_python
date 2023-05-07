@@ -120,6 +120,10 @@ class SochaPackageBuilder:
                     source_file_path = os.path.join(root, file)
                     target_file_path = os.path.join(self.build_dir, self.package_name,
                                                     os.path.relpath(source_file_path, source_folder))
+                    if file in sys.argv[0]:
+                        os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
+                        shutil.copy2(source_file_path, target_file_path)
+                        logging.info(f'Copying {source_file_path} to {target_file_path}')
                     if source_file_path in main_modules:  # Only copy files that were imported in the main script
                         os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                         shutil.copy2(source_file_path, target_file_path)
