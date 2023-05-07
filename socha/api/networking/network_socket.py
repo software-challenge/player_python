@@ -18,7 +18,7 @@ class NetworkSocket:
             host (str): The hostname or IP address of the server to connect to. Defaults to "localhost".
             port (int): The port number to connect to on the server. Defaults to 13050.
             timeout (float): The timeout for socket operations, in seconds. Defaults to 0.1.
-            connected (bool): Whether or not the socket is currently connected to the server.
+            connected (bool): Whether the socket is currently connected to the server.
             socket (socket.socket): The underlying socket object.
             buffer (bytes): A buffer for storing received data.
         """
@@ -60,7 +60,8 @@ class NetworkSocket:
 
         If a timeout occurs or a connection reset error is encountered, the socket is closed and None is returned.
         """
-        regex = re.compile(br"<((room[\s\S]+?</room>)|errorpacket[\s\S]+?</errorpacket>|.*?/>)")
+        regex = re.compile(
+            br"<((room[\s\S]+?</room>)|errorpacket[\s\S]+?</errorpacket>|prepared[\s\S]+?</prepared>|.*?/>)")
         while True:
             try:
                 chunk = self.socket.recv(16129)
