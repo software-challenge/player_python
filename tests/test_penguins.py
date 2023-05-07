@@ -138,8 +138,8 @@ class TestHexCoordinate(unittest.TestCase):
 class TestMove(unittest.TestCase):
     def setUp(self):
         self.move1 = Move(team_enum=TeamEnum.ONE, from_value=HexCoordinate(3, 4), to_value=HexCoordinate(5, 12))
-        self.move2 = Move(team_enum=TeamEnum.TWO, from_value=HexCoordinate(5, 12), to_value=HexCoordinate(3, 4))
-        self.move3 = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(5, 12))
+        self.move2 = Move(team_enum=TeamEnum.ONE, from_value=HexCoordinate(5, 12), to_value=HexCoordinate(3, 4))
+        self.move3 = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(5, 12))
         self.move4 = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(3, 4))
 
     def test_get_delta(self):
@@ -152,7 +152,7 @@ class TestMove(unittest.TestCase):
         self.assertEqual(self.move1.reversed(), self.move2)
         self.assertEqual(self.move2.reversed(), self.move1)
         self.assertEqual(self.move3.reversed(),
-                         Move(team_enum=TeamEnum.ONE, from_value=None, to_value=HexCoordinate(5, 12)))
+                         Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(5, 12)))
         self.assertEqual(self.move4.reversed(),
                          Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(3, 4)))
 
@@ -171,9 +171,12 @@ class TestPenguin(unittest.TestCase):
         self.assertNotEqual(self.penguin1, self.penguin4)
 
     def test_repr(self):
-        self.assertEqual(repr(self.penguin1), "Penguin(HexCoordinate(3, 4), ONE)")
-        self.assertEqual(repr(self.penguin2), "Penguin(HexCoordinate(3, 4), TWO)")
-        self.assertEqual(repr(self.penguin3), "Penguin(HexCoordinate(5, 12), ONE)")
+        self.assertEqual(repr(self.penguin1),
+                         "Penguin(coordinate=HexCoordinate(x=3, y=4), team_enum=<TeamEnum.ONE: 'ONE'>)")
+        self.assertEqual(repr(self.penguin2),
+                         "Penguin(coordinate=HexCoordinate(x=3, y=4), team_enum=<TeamEnum.TWO: 'TWO'>)")
+        self.assertEqual(repr(self.penguin3),
+                         "Penguin(coordinate=HexCoordinate(x=5, y=12), team_enum=<TeamEnum.ONE: 'ONE'>)")
 
 
 class TestField(unittest.TestCase):
@@ -332,7 +335,7 @@ class TestBoard(unittest.TestCase):
         board2.board[0][0] = Field(self.coord1, None, 5)
         self.assertNotEqual(len(board1.compare_to(board2)), 0)
 
-        board1.board[0][0].penguin = Penguin(HexCoordinate(0, 0), TeamEnum.ONE)
+        board1.board[0][0] = Field(HexCoordinate(0, 0), Penguin(HexCoordinate(0, 0), TeamEnum.ONE), 0)
         self.assertNotEqual(len(board1.compare_to(board2)), 0)
 
     def test_contains(self):
@@ -396,6 +399,76 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(len(self.board.get_most_fish()), 2)
         self.assertEqual(self.board.board[2][0].fish, self.board.get_most_fish()[0].fish)
 
+    def test_get_neighbor_fields(self):
+        # Get neighbor fields for a field
+        neighbor_fields = list(self.board.get_neighbor_fields(self.field2))
+
+        # Check that the neighbor fields are as expected
+        expected_neighbor_fields = [self.field1, self.field3, self.field4]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
+        # Get neighbor fields for a field at the border of the board
+        neighbor_fields = list(self.board.get_neighbor_fields(self.field1))
+
+        # Check that the neighbor fields are as expected
+        expected_neighbor_fields = [self.field2, self.field3]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
+    def test_get_neighbor_fields_coordinate(self):
+        # Get neighbor fields for a coordinate
+        neighbor_fields = list(self.board.get_neighbor_fields_coordinate(self.coord2))
+
+        # Check that the neighbor fields are as expected
+        expected_neighbor_fields = [self.field1, self.field3, self.field4]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
+        # Get neighbor fields for a coordinate at the border of the board
+        neighbor_fields = list(self.board.get_neighbor_fields_coordinate(self.coord1))
+
+        # Check that the neighbor fields are as expected
+        expected_neighbor_fields = [self.field2, self.field3]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
+    def test_get_valid_neighbor_fields(self):
+        # Get valid neighbor fields for a field with no neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields(self.field5))
+
+        # Check that there are no valid neighbor fields
+        self.assertCountEqual(neighbor_fields, [self.field3])
+
+        # Get valid neighbor fields for a field with only invalid neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields(self.field4))
+
+        # Check that there are no valid neighbor fields
+        self.assertCountEqual(neighbor_fields, [self.field3])
+
+        # Get valid neighbor fields for a field with some valid neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields(self.field2))
+
+        # Check that the valid neighbor fields are as expected
+        expected_neighbor_fields = [self.field3, self.field4]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
+    def test_get_valid_neighbor_fields_coordinate(self):
+        # Get valid neighbor fields for a coordinate with no neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields_coordinate(self.coord5))
+
+        # Check that there are no valid neighbor fields
+        self.assertCountEqual(neighbor_fields, [self.field3])
+
+        # Get valid neighbor fields for a coordinate with only invalid neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields_coordinate(self.coord4))
+
+        # Check that there are no valid neighbor fields
+        self.assertCountEqual(neighbor_fields, [self.field3])
+
+        # Get valid neighbor fields for a coordinate with some valid neighbors
+        neighbor_fields = list(self.board.get_valid_neighbor_fields_coordinate(self.coord2))
+
+        # Check that the valid neighbor fields are as expected
+        expected_neighbor_fields = [self.field3, self.field4]
+        self.assertCountEqual(neighbor_fields, expected_neighbor_fields)
+
 
 class TestGameState(unittest.TestCase):
     def setUp(self):
@@ -449,7 +522,7 @@ class TestGameState(unittest.TestCase):
 
         move = Move(team_enum=TeamEnum.ONE, from_value=None, to_value=CartesianCoordinate(0, 0).to_hex())
         new_game_state = self.game_state.perform_move(move)
-        self.assertEqual(new_game_state.current_team, self.second_team)
+        self.assertEqual(new_game_state.current_team, new_game_state.second_team)
 
         move = Move(team_enum=TeamEnum.TWO, from_value=None, to_value=HexCoordinate(2, 2))
         new_game_state = new_game_state.perform_move(move)
