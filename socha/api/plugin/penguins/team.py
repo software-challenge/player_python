@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 from typing import List, Optional
 
@@ -9,21 +10,15 @@ class TeamEnum(Enum):
     TWO = "TWO"
 
 
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Move:
     """
     Represents a move in the game.
     """
 
-    def __init__(self, team_enum: TeamEnum, to_value: HexCoordinate, from_value: Optional[HexCoordinate]):
-        """
-        Args:
-            team_enum: The team_enum that performs the move.
-            to_value: The destination of the move.
-            from_value: The origin of the move.
-        """
-        self.team_enum = team_enum
-        self.from_value = from_value
-        self.to_value = to_value
+    team_enum: TeamEnum
+    from_value: Optional[HexCoordinate]
+    to_value: HexCoordinate
 
     def get_delta(self) -> float:
         """
@@ -45,27 +40,15 @@ class Move:
         return self if not self.from_value else Move(team_enum=self.team_enum, to_value=self.from_value,
                                                      from_value=self.to_value)
 
-    def __repr__(self):
-        return f"Move(team={self.team_enum.value}, from={self.from_value}, to={self.to_value})"
 
-    def __eq__(self, __o: object) -> bool:
-        return isinstance(__o, Move) and self.to_value == __o.to_value and \
-               (self.from_value is None or self.from_value == __o.from_value)
-
-
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Penguin:
     """
        The Penguin class represents a penguin object with a coordinate and a team_enum.
     """
 
-    def __init__(self, coordinate: HexCoordinate, team_enum: TeamEnum):
-        """
-        Args:
-           coordinate (HexCoordinate): The coordinate of the penguin on the game board.
-           team_enum (TeamEnum): The team_enum that the penguin belongs to.
-        """
-        self.coordinate = coordinate
-        self.team_enum = team_enum
+    coordinate: HexCoordinate
+    team_enum: TeamEnum
 
     def get_distance(self, destination: HexCoordinate) -> float:
         """
@@ -91,28 +74,19 @@ class Penguin:
         """
         return destination.subtract_vector(self.coordinate.to_vector()).to_vector()
 
-    def __eq__(self, other):
-        if not isinstance(other, Penguin):
-            return False
-        return self.coordinate == other.coordinate and self.team_enum == other.team_enum
 
-    def __repr__(self):
-        return f'Penguin({self.coordinate}, {self.team_enum.value})'
-
-
+@dataclass(order=True, unsafe_hash=True)
 class Team:
     """
     The Team class is useful for storing and manipulating information about teams in the game. It allows you to
     easily create objects for each team_enum, keep track of their attributes, and compare them to their opponents.
     """
 
-    def __init__(self, name: TeamEnum, fish: int, penguins: List[Penguin], moves: List[Move],
-                 opponent: Optional['Team'] = None):
-        self.name = name
-        self.fish = fish
-        self.penguins = penguins
-        self.moves = moves
-        self.opponent = opponent
+    name: TeamEnum
+    fish: int
+    penguins: List[Penguin]
+    moves: List[Move]
+    opponent: Optional['Team'] = None
 
     def team(self) -> TeamEnum:
         """
@@ -136,10 +110,5 @@ class Team:
             return TeamEnum.TWO.value
 
     def __repr__(self) -> str:
-        return f"Team(name={self.name}, fish={self.fish}, penguins={len(self.penguins)}, moves={len(self.moves)})"
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.name == other.name and self.fish == other.fish and self.penguins == other.penguins and \
-                   self.moves == other.moves
-        return False
+        return f'Team(name={self.name.value}, fish={self.fish}, penguins={len(self.penguins)}, ' \
+               f'moves={len(self.moves)}, opponent={None if not self.opponent else self.opponent.name})'
