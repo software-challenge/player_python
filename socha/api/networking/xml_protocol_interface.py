@@ -1,5 +1,5 @@
 """
-Here are all incoming byte streams and all outgoing protocol objects handelt.
+Here are all incoming byte streams and all outgoing protocol objects handheld.
 """
 import contextlib
 import logging
@@ -13,11 +13,11 @@ from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
 from socha.api.networking.network_socket import NetworkSocket
-from socha.api.plugin.penguins.team import TeamEnum, Move
+from socha.api.plugin.penguins.team import TeamEnum
 from socha.api.protocol.protocol import *
 
 
-def customClassFactory(clazz, params: dict):
+def custom_class_factory(clazz, params: dict):
     if clazz.__name__ == "Data":
         try:
             params.pop("class_binding")
@@ -59,7 +59,7 @@ class XMLProtocolInterface:
         self.first_time = True
 
         context = XmlContext()
-        deserialize_config = ParserConfig(class_factory=customClassFactory)
+        deserialize_config = ParserConfig(class_factory=custom_class_factory)
         self.deserializer = XmlParser(handler=XmlEventHandler, context=context, config=deserialize_config)
 
         serialize_config = SerializerConfig(pretty_print=True, xml_declaration=False)
@@ -73,9 +73,9 @@ class XMLProtocolInterface:
 
     def disconnect(self):
         """
-        Sends a closing xml to the server and closes the connection afterwards.
+        Sends a closing xml to the server and closes the connection afterward.
         """
-        self._send(Close())
+        self.send(Close())
         self.network_interface.close()
 
     def _receive(self):
@@ -102,7 +102,7 @@ class XMLProtocolInterface:
             self.running = False
             raise
 
-    def _send(self, obj: ProtocolPacket) -> None:
+    def send(self, obj: ProtocolPacket) -> None:
         """
         Sends an object to the server.
 
@@ -121,6 +121,7 @@ class XMLProtocolInterface:
             raise
         else:
             logging.debug("Sent shipment to server: %s", shipment)
+        self.first_time = False
 
     @contextlib.contextmanager
     def _encode_context(self) -> Iterator[Callable[[Any], bytes]]:
@@ -133,13 +134,13 @@ class XMLProtocolInterface:
 
         yield encode
 
-    def _deserialize_object(self, byteStream: bytes) -> ProtocolPacket:
+    def _deserialize_object(self, byte_stream: bytes) -> ProtocolPacket:
         """
         Deserialize a xml byte stream to a ProtocolPacket.
-        :param byteStream: The byte stream to deserialize.
+        :param byte_stream: The byte stream to deserialize.
         :return: The deserialized ProtocolPacket child.
         """
-        return self.deserializer.from_bytes(byteStream)
+        return self.deserializer.from_bytes(byte_stream)
 
     def _serialize_object(self, object_class: object) -> bytes:
         """
