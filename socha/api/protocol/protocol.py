@@ -51,7 +51,7 @@ class Errorpacket(ProtocolPacket):
 @dataclass
 class Left(ProtocolPacket):
     """
-    If the game is over the server will _send this message to the clients and closes the connection afterwards.
+    If the game is over the server will _send this message to the clients and closes the connection afterward.
     """
 
     class Meta:
@@ -123,7 +123,7 @@ class Cancel(AdminLobbyRequest):
 
 
 @dataclass
-class JoinedGameRoom(ResponsePacket):
+class JoinedGameRoom(ObservableRoomMessage):
     """
     Sent to all administrative clients after a player joined a GameRoom via a JoinRoomRequest.
     """
@@ -190,7 +190,7 @@ class Pause(AdminLobbyRequest):
 
 
 @dataclass
-class Slot(ProtocolPacket):
+class Slot(RoomOrchestrationMessage):
     """
     Slots for a game which contains the player's name and its attributes.
     """
@@ -221,7 +221,7 @@ class Slot(ProtocolPacket):
 
 
 @dataclass
-class Step(AdminLobbyRequest):
+class Step(RoomOrchestrationMessage):
     """
     When the client is authenticated as administrator,
     it can _send this step request to the server to advance the game for one move.
@@ -241,7 +241,7 @@ class Step(AdminLobbyRequest):
 
 
 @dataclass
-class Prepare(AdminLobbyRequest):
+class Prepare(RoomOrchestrationMessage):
     """
     When the client is authenticated as administrator,
     it can _send this request to prepare the room for the game.
@@ -522,7 +522,7 @@ class Winner:
 class Board:
     """
     The protocol representation of a board.
-    It contains a list of list of fields, which size is 7x7.
+    It contains a list of fields, which size is 7x7.
     """
 
     class Meta:
@@ -675,7 +675,7 @@ class State(ObservableRoomMessage):
 class OriginalMessage:
     """
     The original message that was sent by the client.
-    Is sent by the server if a error occurs.
+    Is sent by the server if an error occurs.
     """
 
     class Meta:
@@ -830,10 +830,44 @@ class Result(ObservableRoomMessage):
 @dataclass
 class Error:
     """
-    This sends the server when the client sent a erroneous message.
+    This sends the server when the client sent an erroneous message.
     """
     message: str
     originalMessage: OriginalMessage
+
+
+@dataclass
+class Prepared(RoomOrchestrationMessage):
+    class Meta:
+        name = "prepared"
+
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "roomId",
+            "type": "Attribute",
+        }
+    )
+    reservation: List[str] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Observed(RoomOrchestrationMessage):
+    class Meta:
+        name = "observed"
+
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "roomId",
+            "type": "Attribute",
+        }
+    )
 
 
 @dataclass
@@ -908,4 +942,18 @@ class Protocol:
             "type": "Element",
         }
 
+    )
+
+    prepared: Optional[Prepared] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+
+    observed: Optional[Observed] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
     )
