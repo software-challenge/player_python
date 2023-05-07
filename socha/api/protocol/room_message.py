@@ -1,4 +1,7 @@
-class RoomMessage:
+from socha.api.protocol.protocol_packet import ProtocolPacket
+
+
+class RoomMessage(ProtocolPacket):
     """
     For all communication within a GameRoom.
     """
