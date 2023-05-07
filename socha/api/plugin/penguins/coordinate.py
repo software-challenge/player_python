@@ -1,21 +1,15 @@
 import math
+from dataclasses import dataclass
 from typing import List, Optional
 
 
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Vector:
     """
     Represents a vector in the hexagonal grid. It can calculate various vector operations.
     """
-
-    def __init__(self, d_x: int = 0, d_y: int = 0):
-        """
-        Constructor for the Vector class.
-
-        :param d_x: The x-coordinate of the vector.
-        :param d_y: The y-coordinate of the vector.
-        """
-        self.d_x = d_x
-        self.d_y = d_y
+    d_x: int = 0
+    d_y: int = 0
 
     def magnitude(self) -> float:
         """
@@ -120,30 +114,11 @@ class Vector:
         """
         return abs(self.d_x) == abs(self.d_y) or (self.d_x % 2 == 0 and self.d_y == 0)
 
-    def __repr__(self) -> str:
-        """
-        Returns the string representation of the vector.
 
-        :return: The string representation of the vector.
-        """
-        return f"Vector({self.d_x}, {self.d_y})"
-
-    def __eq__(self, other):
-        """
-        Overrides the default equality operator to check if two Vector objects are equal.
-
-        :param other: The other Vector object to compare to.
-        :return: True if the two Vector objects are equal, False otherwise.
-        """
-        if isinstance(other, Vector):
-            return self.d_x == other.d_x and self.d_y == other.d_y
-        return False
-
-
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Coordinate:
-    def __init__(self, x: int, y: int):
-        self.x = x
-        self.y = y
+    x: int
+    y: int
 
     def to_vector(self) -> Vector:
         """
@@ -165,6 +140,7 @@ class Coordinate:
     def subtract_vector(self, vector: Vector): ...
 
 
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class CartesianCoordinate(Coordinate):
     """
     Represents a coordinate in a normal cartesian coordinate system, that has been taught in school.
@@ -229,13 +205,8 @@ class CartesianCoordinate(Coordinate):
         y = index // width
         return CartesianCoordinate(x, y)
 
-    def __repr__(self) -> str:
-        return f"CartesianCoordinate({self.x}, {self.y})"
 
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, CartesianCoordinate) and self.x == other.x and self.y == other.y
-
-
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class HexCoordinate(Coordinate):
     """
     Represents a coordinate in a hexagonal coordinate system, that differs from the normal cartesian one.
@@ -277,9 +248,3 @@ class HexCoordinate(Coordinate):
         :return: The list of neighbors.
         """
         return [self.add_vector(vector) for vector in self.to_vector().directions]
-
-    def __repr__(self) -> str:
-        return f"HexCoordinate({self.x}, {self.y})"
-
-    def __eq__(self, other: object) -> bool:
-        return isinstance(other, HexCoordinate) and self.x == other.x and self.y == other.y
