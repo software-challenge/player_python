@@ -1,32 +1,24 @@
 import _pickle as pickle
+import dataclasses
 import logging
-import warnings
+from dataclasses import dataclass
 from itertools import chain, takewhile
 from operator import attrgetter
-from typing import List, Union, Optional
+from typing import List, Union, Optional, Generator, Iterator
 
 from socha.api.plugin.penguins.coordinate import HexCoordinate, Vector, CartesianCoordinate
 from socha.api.plugin.penguins.team import Penguin, TeamEnum, Move
 
 
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Field:
     """
     Represents a field in the game.
     """
 
-    def __init__(self, coordinate: HexCoordinate, penguin: Optional[Penguin], fish: int):
-        """
-        The Field represents a field on the game board.
-        It says what state itself it has and where it is on the board.
-
-        Args:
-            coordinate:
-            penguin:
-            fish:
-        """
-        self.coordinate = coordinate
-        self.penguin = penguin
-        self.fish = fish
+    coordinate: HexCoordinate
+    penguin: Optional[Penguin]
+    fish: int
 
     def is_empty(self) -> bool:
         """
@@ -86,27 +78,14 @@ class Field:
         """
         return destination.subtract_vector(self.coordinate.to_vector()).to_vector()
 
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.coordinate == other.coordinate and self.penguin == other.penguin and self.fish == other.fish
-        return False
 
-    def __repr__(self):
-        return f"Field({self.coordinate}, {self.penguin}, Fish({self.fish}))"
-
-
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class Board:
     """
     Class which represents a game board. Consisting of a two-dimensional array of fields.
     """
 
-    def __init__(self, board: List[List[Field]]):
-        """
-        The Board shows the state where each field is, how many fish and which team is on each field.
-
-        :param board: The game field as a two-dimensional array of fields.
-        """
-        self.board = board
+    board: List[List[Field]]
 
     def get_empty_fields(self) -> List[Field]:
         """
@@ -128,8 +107,8 @@ class Board:
         :param coordinates: The coordinates of the field.
         :return: True if the field is valid, false otherwise.
         """
-        arrayCoordinates = coordinates.to_cartesian()
-        return 0 <= arrayCoordinates.x < self.width() and 0 <= arrayCoordinates.y < self.height()
+        array_coordinates = coordinates.to_cartesian()
+        return 0 <= array_coordinates.x < self.width() and 0 <= array_coordinates.y < self.height()
 
     def width(self) -> int:
         """
@@ -206,7 +185,7 @@ class Board:
         Compares two boards and returns a list of the Fields that are different.
 
         :param other: The other board to compare to.
-        :return: A list of Fields that are different or a empty list if the boards are equal.
+        :return: A list of Fields that are different or an empty list if the boards are equal.
         """
         if not isinstance(other, Board):
             raise TypeError("Can only compare to another Board object")
@@ -254,16 +233,29 @@ class Board:
 
         def valid_destination(i):
             destination = origin.add_vector(direction.scalar_product(i))
-            return self._is_destination_valid(destination)
+            return self.is_destination_valid(destination)
 
         moves = [Move(team_enum=team_enum, from_value=origin, to_value=origin.add_vector(direction.scalar_product(i)))
                  for i in takewhile(valid_destination, range(1, self.width()))]
 
         return moves
 
-    def _is_destination_valid(self, field: HexCoordinate) -> bool:
+    def is_destination_valid(self, field: HexCoordinate) -> bool:
+        """
+        Checks if the given field is a valid destination for a move.
+        It checks if the destination is on the board, if it is not occupied and if it is not empty.
+
+        Args:
+            field: The field to check for.
+
+        Returns:
+            bool: True if the field is a valid destination, False otherwise.
+        """
         return self.is_valid(field) and not self.is_occupied(field) and not \
             self.get_field(field).is_empty()
+
+    def _is_destination_valid(self, field: HexCoordinate) -> bool:
+        return self.is_destination_valid(field)
 
     def possible_moves_from(self, position: HexCoordinate, team_enum: Optional[TeamEnum] = None) -> List[Move]:
         """
@@ -302,8 +294,8 @@ class Board:
         :param team: The team_enum to search for.
         :return: A list of all coordinates that are occupied by a penguin of the given team_enum.
         """
-        is_team_penguin = lambda field: field.penguin and field.penguin.team_enum == team
-        penguins = filter(is_team_penguin, (field for row in self.board for field in row))
+        penguins = filter(lambda field: field.penguin and field.penguin.team_enum == team,
+                          (field for row in self.board for field in row))
         return list(map(attrgetter('penguin'), penguins))
 
     def get_most_fish(self) -> List[Field]:
@@ -334,10 +326,53 @@ class Board:
         """
         return [field for field in self.get_all_fields() if field in other]
 
-    def _move(self, move: Move) -> 'Board':
-        warnings.warn("'_move' is deprecated and will be removed in a future version. Use 'move' instead.",
-                      DeprecationWarning)
-        return self.move(move)
+    def get_neighbor_fields(self, field: Field) -> Iterator[Field]:
+        """
+        Returns a generator of all neighbor fields of the given field.
+
+        Args:
+            field: The field to get the neighbors of.
+
+        Returns:
+            Generator[Field, None, None]: A generator of all neighbor fields of the given field.
+        """
+        return (self.get_field(each) for each in field.coordinate.get_neighbors() if self.is_valid(each))
+
+    def get_neighbor_fields_coordinate(self, coordinate: HexCoordinate) -> Iterator[Field]:
+        """
+        Returns a generator of all neighbor fields of the given coordinate.
+
+        Args:
+            coordinate: The coordinate to get the neighbors of.
+
+        Returns:
+            Generator[Field, None, None]: A generator of all neighbor fields of the given coordinate.
+        """
+        return (self.get_field(each) for each in coordinate.get_neighbors() if self.is_valid(each))
+
+    def get_valid_neighbor_fields(self, field: Field) -> Iterator[Field]:
+        """
+        Returns a generator of all neighbor fields of the given field.
+
+        Args:
+            field: The field to get the neighbors of.
+
+        Returns:
+            Generator[Field, None, None]: A generator of all neighbor fields of the given field.
+        """
+        return (self.get_field(each) for each in field.coordinate.get_neighbors() if self.is_destination_valid(each))
+
+    def get_valid_neighbor_fields_coordinate(self, coordinate: HexCoordinate) -> Iterator[Field]:
+        """
+        Returns a generator of all neighbor fields of the given coordinate.
+
+        Args:
+            coordinate: The coordinate to get the neighbors of.
+
+        Returns:
+            Generator[Field, None, None]: A generator of all neighbor fields of the given coordinate.
+        """
+        return (self.get_field(each) for each in coordinate.get_neighbors() if self.is_destination_valid(each))
 
     def move(self, move: Move) -> 'Board':
         """
@@ -349,7 +384,6 @@ class Board:
         :return: The new board with the moved penguin.
         """
         board_state = pickle.loads(pickle.dumps(self.board, protocol=-1))
-        updated_board = Board(board_state)
         moving_penguin = Penguin(team_enum=move.team_enum, coordinate=move.to_value)
         if move.from_value:
             if not self.get_field(move.from_value).penguin:
@@ -357,13 +391,13 @@ class Board:
                 return self
             origin_field_coordinate = move.from_value.to_cartesian()
             moving_penguin = board_state[origin_field_coordinate.y][origin_field_coordinate.x].penguin
-            moving_penguin.coordinate = move.to_value
+            moving_penguin = dataclasses.replace(moving_penguin, coordinate=move.to_value)
             board_state[origin_field_coordinate.y][origin_field_coordinate.x] = Field(coordinate=move.from_value,
                                                                                       penguin=None, fish=0)
-        destination_field = updated_board.get_field(move.to_value)
-        destination_field.penguin = moving_penguin
-        destination_field.fish = 0
-        return updated_board
+
+        destination_field = Field(coordinate=move.to_value, penguin=moving_penguin, fish=0)
+        board_state[move.to_value.to_cartesian().y][move.to_value.to_cartesian().x] = destination_field
+        return Board(board_state)
 
     def pretty_print(self):
         print()
@@ -376,8 +410,3 @@ class Board:
                                  for field in row])
             print(row_str)
         print()
-
-    def __eq__(self, other):
-        if isinstance(other, self.__class__):
-            return self.board == other.board
-        return False
