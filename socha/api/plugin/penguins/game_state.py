@@ -1,12 +1,14 @@
 import _pickle as pickle
 import logging
+from dataclasses import dataclass
 from typing import List, Optional
 
 from socha.api.plugin.penguins.board import Board
 from socha.api.plugin.penguins.coordinate import CartesianCoordinate
-from socha.api.plugin.penguins.team import TeamEnum, Team, Move
+from socha.api.plugin.penguins.team import TeamEnum, Team, Move, Penguin
 
 
+@dataclass(frozen=True, order=True, unsafe_hash=True)
 class GameState:
     """
        A `GameState` contains all information, that describes the game state at a given time, that is, between two game
@@ -30,23 +32,15 @@ class GameState:
        describing the then current state.
        """
 
-    def __init__(self, board: Board, turn: int, first_team: Team, second_team: Team, last_move: Optional[Move]):
-        """
-        Creates a new `GameState` with the given parameters.
+    board: Board
+    turn: int
+    first_team: Team
+    second_team: Team
+    last_move: Optional[Move]
 
-        Args:
-            board: The board of the game.
-            turn: The turn number of the game.
-            first_team: The team_enum that has the first turn.
-            second_team: The team_enum that has the second turn.
-            last_move: The last move made.
-        """
-        self.board = board
-        self.turn = turn
-        self.first_team = first_team
-        self.second_team = second_team
-        self.last_move = last_move
-        self.possible_moves = self._get_possible_moves(self.current_team)
+    @property
+    def possible_moves(self):
+        return self._get_possible_moves(self.current_team)
 
     @property
     def round(self):
@@ -76,7 +70,7 @@ class GameState:
         if not current_team:
             return []
 
-        if len(self.board.get_teams_penguins(current_team.name)) < 4:
+        if self.turn < 8:
             moves = [(x, y) for x in range(self.board.width()) for y in range(self.board.height())]
             moves = filter(lambda pos: not self.board.get_field(
                 CartesianCoordinate(*pos).to_hex()).is_occupied() and self.board.get_field(
@@ -118,9 +112,9 @@ class GameState:
             new_first_team: Team = pickle.loads(pickle.dumps(self.first_team, protocol=-1))
             new_second_team: Team = pickle.loads(pickle.dumps(self.second_team, protocol=-1))
             if self.current_team.name == TeamEnum.ONE:
-                self._update_team(new_first_team, move, new_board)
+                new_first_team = self._update_team(new_first_team, move, new_board)
             else:
-                self._update_team(new_second_team, move, new_board)
+                new_second_team = self._update_team(new_second_team, move, new_board)
             new_first_team.opponent = new_second_team
             new_second_team.opponent = new_first_team
             new_turn = self.turn + 1
@@ -131,7 +125,7 @@ class GameState:
             logging.error(f"Performed invalid move while simulating: {move}")
             raise ValueError(f"Invalid move attempted: {move}")
 
-    def _update_team(self, team: Team, move: Move, new_board: Board) -> None:
+    def _update_team(self, team: Team, move: Move, new_board: Board) -> Team:
         """
         Helper function to update the given team when a move is performed.
 
@@ -140,15 +134,11 @@ class GameState:
             move: The move that was performed.
             new_board: The updated board.
         """
-        team.moves.append(move)
-        adding_fish = self.board.get_field(move.to_value).get_fish()
-        new_penguin = new_board.get_field(move.to_value).penguin
-        teams_penguin = next(filter(lambda x: x.coordinate == move.from_value, team.penguins), None)
-        if teams_penguin:
-            teams_penguin.coordinate = new_penguin.coordinate
-        else:
-            team.penguins.append(new_penguin)
-        team.fish += adding_fish
+        new_moves: List[Move] = team.moves + [move]
+        new_fish: int = team.fish + self.board.get_field(move.to_value).get_fish()
+        new_penguins: List[Penguin] = list(filter(lambda x: x.coordinate != move.from_value, team.penguins)) + [
+            new_board.get_field(move.to_value).penguin]
+        return Team(name=team.name, fish=new_fish, penguins=new_penguins, moves=new_moves, opponent=team.opponent)
 
     def is_valid_move(self, move: Move) -> bool:
         """
@@ -168,7 +158,3 @@ class GameState:
         """
         team = team or self.current_team
         return team.opponent
-
-    def __repr__(self):
-        return f"GameState(turn={self.turn}, round={self.round}, first_team={self.first_team}, " \
-               f"second_team={self.second_team}, last_move={self.last_move}, current_team={self.current_team})"
