@@ -172,7 +172,7 @@ class GameClient(XMLProtocolInterface):
         self.send(Pause(room_id=room_id, pause=pause))
 
     def send_message_to_room(self, room_id: str, message):
-        logging.info(f"Sending message to room '{room_id}'")
+        logging.log(15, f"Sending message to room '{room_id}'")
         self.send(Room(room_id=room_id, data=message))
 
     def _on_object(self, message):
@@ -190,37 +190,36 @@ class GameClient(XMLProtocolInterface):
             self._game_handler.on_error(str(message))
             self.stop()
         elif isinstance(message, Joined):
-            logging.info(f"Game joined received with room id '{message.room_id}'")
+            logging.log(15, f"Game joined received with room id '{message.room_id}'")
             self._game_handler.on_game_joined(room_id=message.room_id)
         elif isinstance(message, Left):
-            logging.info(f"Game left received with room id '{message.room_id}'")
+            logging.log(15, f"Game left received with room id '{message.room_id}'")
             self._game_handler.on_game_left()
         elif isinstance(message, Prepared):
-            logging.info(f"Game prepared received with reservation '{message.reservation}'")
+            logging.log(15, f"Game prepared received with reservation '{message.reservation}'")
             self._game_handler.on_prepared(game_client=self, room_id=message.room_id, reservations=message.reservation)
         elif isinstance(message, Observed):
-            logging.info(f"Game observing received with room id '{message.room_id}'")
+            logging.log(15, f"Game observing received with room id '{message.room_id}'")
             self._game_handler.on_observed(game_client=self, room_id=message.room_id)
-        elif isinstance(message, Room) and self.headless is False:
+        elif isinstance(message, Room) and not self.headless:
             room_id = message.room_id
 
             if isinstance(message.data.class_binding, MoveRequest):
-                logging.info(f"Move request received for room id '{room_id}'")
+                logging.log(15, f"Move request received for room id '{room_id}'")
                 self._on_move_request(room_id)
             elif isinstance(message.data.class_binding, State):
-                logging.info(f"State received for room id '{room_id}'")
+                logging.log(15, f"State received for room id '{room_id}'")
                 self._on_state(message)
             elif isinstance(message.data.class_binding, Result):
-                logging.info(f"Result received for room id '{room_id}'")
+                logging.log(15, f"Result received for room id '{room_id}'")
                 self._game_handler.history[-1].append(message.data.class_binding)
                 self._game_handler.on_game_over(message.data.class_binding)
             else:
-                logging.info(f"Room message received for room id '{room_id}'")
+                logging.log(15, f"Room message received for room id '{room_id}'")
                 self._game_handler.on_room_message(message.data.class_binding)
         else:
-            print(type(message))
             room_id = message.room_id
-            logging.info(f"Room message received for room id '{room_id}'")
+            logging.log(15, f"Room message received for room id '{room_id}'")
             self._game_handler.on_room_message(message)
 
     def _on_move_request(self, room_id):

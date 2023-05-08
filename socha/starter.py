@@ -22,7 +22,8 @@ class Starter:
 
     def __init__(self, logic: IClientHandler, host: str = "localhost", port: int = 13050, reservation: str = None,
                  room_id: str = None, password: str = None, survive: bool = False, auto_reconnect: bool = False,
-                 headless: bool = False, log: bool = False, verbose: bool = False, build: str = None):
+                 headless: bool = False, log: bool = False, verbose: bool = False, build: str = None,
+                 log_level: int = logging.INFO):
         """
         All these arguments can be overwritten, when parsed via start arguments,
         or you initialize this class with the desired values.
@@ -41,11 +42,15 @@ class Starter:
             verbose: Verbose option for logging.
             build: If set, the client will build a zip package with the given name.
         """
+        VERBOSE = 15
+        logging.addLevelName(VERBOSE, "VERBOSE")
+
         args = self._handle_start_args()
 
         self.write_log: bool = args.log or log
         self.verbose = args.verbose or verbose
-        self._setup_debugger(self.verbose)
+        self.log_level = args.log_level or log_level
+        self._setup_debugger(self.verbose, self.log_level)
 
         self.check_socha_version()
 
@@ -76,11 +81,11 @@ class Starter:
 
         self.client.start()
 
-    def _setup_debugger(self, verbose: bool):
+    def _setup_debugger(self, verbose: bool, log_level: int):
         if verbose:
             level: int = logging.DEBUG
         else:
-            level: int = logging.INFO
+            level: int = log_level
 
         if self.write_log:
             now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -133,7 +138,9 @@ class Starter:
                                  'terminated.')
         parser.add_argument('-l', '--log', action='store_true',
                             help='If present the client will write a log file to the current directory.')
-        parser.add_argument('-v', '--verbose', action='store_true', help='Verbose option for logging.')
+        parser.add_argument('-v', '--verbose', action='store_true', help='Verbose option for logging.  '
+                                                                         'This cancels out the log-level argument.')
+        parser.add_argument('-L', '--log_level', help='Sets the log level.', type=int)
         parser.add_argument('--auto-reconnect', action='store_true',
                             help='Automatically reconnect to the server if the connection is lost.')
         parser.add_argument('--headless', action='store_true', help='Starts the client without the penguin plugin.')
