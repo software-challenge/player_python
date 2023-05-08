@@ -113,8 +113,10 @@ class SochaPackageBuilder:
         """
         logging.info(f'Copying python files to {self.package_name}')
         source_folder = os.getcwd()
-        main_modules = self._get_modules()  # Get the set of module names
+        main_modules = self._get_modules()
         for root, dirs, files in os.walk(source_folder):
+            if "socha_builds" in dirs:
+                dirs.remove("socha_builds")
             for file in files:
                 if file.endswith('.py'):
                     source_file_path = os.path.join(root, file)
@@ -124,7 +126,7 @@ class SochaPackageBuilder:
                         os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                         shutil.copy2(source_file_path, target_file_path)
                         logging.info(f'Copying {source_file_path} to {target_file_path}')
-                    if source_file_path in main_modules:  # Only copy files that were imported in the main script
+                    if source_file_path in main_modules:
                         os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                         shutil.copy2(source_file_path, target_file_path)
                         logging.info(f'Copying {source_file_path} to {target_file_path}')
