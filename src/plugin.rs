@@ -1,9 +1,10 @@
 pub mod game_state;
-pub mod vector;
 pub mod coordinate;
 pub mod r#move;
-pub mod team;
-pub mod penguin;
 pub mod field;
 pub mod board;
-pub mod bitboard;
+pub mod actions;
+pub mod errors;
+pub mod constants;
+pub mod ship;
+pub mod segment;

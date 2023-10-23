@@ -1,62 +1,48 @@
-// The Field represents a field on the game board.
-// It says where the itself is located and if there is a penguin or fish on it.
+use pyo3::{pyclass, pymethods};
 
-use pyo3::prelude::*;
+use super::coordinate::CubeDirection;
 
-use crate::plugin::coordinate::HexCoordinate;
-use crate::plugin::penguin::Penguin;
-use super::team::TeamEnum;
-
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 #[pyclass]
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Debug, Hash)]
+pub struct Passenger {
+    pub direction: CubeDirection,
+    pub passenger: i32,
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[pyclass]
+pub enum FieldType {
+    Water,
+    Island,
+    Passenger,
+    Goal,
+    Sandbank,
+}
+
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[pyclass]
 pub struct Field {
-    #[pyo3(get, set)]
-    pub coordinate: HexCoordinate,
-    #[pyo3(get, set)]
-    pub penguin: Option<Penguin>,
-    #[pyo3(get, set)]
-    pub fish: i32,
+    pub field_type: FieldType,
+    pub passenger: Option<Passenger>,
 }
 
 #[pymethods]
 impl Field {
     #[new]
-    pub fn new(coordinate: HexCoordinate, penguin: Option<Penguin>, fish: i32) -> Self {
+    pub fn new(field_type: FieldType, passenger: Option<Passenger>) -> Self {
         Field {
-            coordinate,
-            penguin,
-            fish,
+            field_type,
+            passenger,
         }
     }
 
     pub fn is_empty(&self) -> bool {
-        self.fish == 0 && self.penguin.is_none()
+        self.field_type == FieldType::Sandbank
+            || self.field_type == FieldType::Water
+            || self.field_type == FieldType::Goal
     }
 
-    pub fn has_penguin(&self) -> bool {
-        self.penguin.is_some()
-    }
-
-    pub fn get_team(&self) -> Option<TeamEnum> {
-        match &self.penguin {
-            Some(penguin) => Some(penguin.team.clone()),
-            None => None,
-        }
-    }
-
-    pub fn __repr__(&self) -> String {
-        format!(
-            "Field(coordinate={}, penguin={:?}, fish={})",
-            self.coordinate, self.penguin, self.fish
-        )
+    pub fn is_field_type(&self, field_type: FieldType) -> bool {
+        self.field_type == field_type
     }
 }
-
-impl std::fmt::Display for Field {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f,"Field(coordinate={}, penguin={:?}, fish={})",
-               self.coordinate, self.penguin, self.fish ).
-            map_err(|_e| core::fmt::Error)
-    }
-}
-

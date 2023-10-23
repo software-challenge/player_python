@@ -19,7 +19,7 @@ class Starter:
                  room_id: str = None, survive: bool = False, log: bool = False, verbose: bool = False):
         """
         All these arguments can be overwritten, when parsed via start arguments,
-        or you initialize this class with the desired values.
+        or you initialize this class with the desired VALUES.
 
         :param logic: Your logic the client will call, if moves are requested.
         :param host: The host that the client should connect to.
