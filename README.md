@@ -1,24 +1,28 @@
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
-# Python Client for the Software-Challenge Germany 2023
+# Python Client for the Software-Challenge Germany 2024
 
-[![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/latest/)
-[![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
-[![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> Hey there! To help you out, it's best to start by checking out the
-> [documentation for this client](https://software-challenge-python-client.readthedocs.io/en/latest/)
-> before you ask any questions or open an issue.
-> It'll provide you with some helpful information!
+> **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
+
+> *Besides that is this README not completely up to date and will be edited in the next few days.*
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
 have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
 
 > This year it is the game
-> **[Hey, danke für den Fisch!](https://docs.software-challenge.de/spiele/penguins)**.
+> **[Mississippi Queen](https://docs.software-challenge.de/spiele/mississippi-queen)**.
+
+## Table of Contents
+
+- [Installation](#installation)
+  - [Globally](#globally)
+  - [Virtual Environment](#virtual-environment)
+- [Getting Started](#getting-started)
+  - [Start Arguments](#start-arguments)
+- [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
 
 ## Table of Contents
 
@@ -31,6 +35,13 @@ have to develop an artificial intelligence that plays and competes against other
 
 ## Installation
 
+> Currently the installation works by picking the correct version in the `dist` directory here in the repository and then installing it via `pip`.You need to look after your python version, os and computer architecture. This is due to the bindings written in Rust, which are compiled by nature.
+```shell
+pip install socha-[PACKAGE_VERSION]-[PYTHON_VERSION]-[OS]-[ARCHITECTURE].whl
+```
+
+---
+### THE FOLLOWING IS CURRENTLY OUTDATED!
 Two methods are presented here to install the `socha` client.
 The first one is the fastest to get started right away.
 However,
@@ -44,6 +55,7 @@ which installs the packages inside the folder.
 > Check with `$ python -V` or `$ python3 -V`.
 >
 > If not present you can install python with the following commands:
+>
 > - Windows: `> winget install -e --id Python.Python.3.6`
 > - Debian: `$ sudo apt install python3.6`
 > - Arch: `$ sudo pacman -S python`
@@ -82,7 +94,7 @@ Now you can create the virtual environment (venv).
 $ python -m venv venv/
 ```
 
-This takes a moment. After the *venv* is created, you can open it.
+This takes a moment. After the _venv_ is created, you can open it.
 
 On Linux:
 
@@ -97,7 +109,7 @@ On Windows:
 > .\venv\Scripts\activate
 ```
 
-It should open the *venv* and you can now install packages and run your scripts here.
+It should open the _venv_ and you can now install packages and run your scripts here.
 To develop your player you just have to install the package socha with `pip`.
 
 ```shell
@@ -116,13 +128,13 @@ due to changes of the `__init__.py`.
 But if you want to avoid unnecessary imports,
 you can of course import only what you actually need.
 
-````python
+```python
 from socha import *
-````
+```
 
 If you now want to develop and implement your logic, then the structure of the class should look like this.
 
-````python
+```python
 class Logic(IClientHandler):
     gameState: GameState
 
@@ -132,7 +144,7 @@ class Logic(IClientHandler):
 
     def on_update(self, state: GameState):
         self.gameState = state
-````
+```
 
 The above example is the simplest working Logic you can build. As you can see the Logic must inherit from
 the `IClientHandler`, so that you can overwrite its methods and the api knows where to find your logic.
@@ -140,20 +152,21 @@ the `IClientHandler`, so that you can overwrite its methods and the api knows wh
 If you're done with your version of an working player, than you have to finish your file with this function, where you
 call the Starter with your desired arguments. The following starts the client with the default arguments.
 
-````python
+```python
 if __name__ == "__main__":
     Starter(Logic())
-````
+```
 
 ### Start arguments
 
 If you want to run your logic from the console,
 you can of course pass start arguments.
+
 > Note that any arguments passed as startup parameters will override those in the code,
 > including the ones you set yourself.
 
 | **Command**           | **Description**                                                                               |
-|-----------------------|-----------------------------------------------------------------------------------------------|
+| --------------------- | --------------------------------------------------------------------------------------------- |
 | **--help**            | Prints the help message.                                                                      |
 | **-h, --host**        | The host to connect to. The default is 'localhost'.                                           |
 | **-p, --port**        | The port of the host. The default is 13050.                                                   |
@@ -170,12 +183,13 @@ you can of course pass start arguments.
 To ensure that your player is usable for the competition system,
 you need to download all the dependencies that your client uses
 because the system will run on a docker container without access to the internet and sudo permission.
-> The package has made things easier for you! You can use it to handle almost everything by itself. 
+
+> The package has made things easier for you! You can use it to handle almost everything by itself.
 > All you need is a `requirements.txt` file that lists all your dependencies.
 > To start, simply run the following command in your terminal:
-> 
+>
 > `$ python <your_main_script>.py --build <your_directory_name>`
-> 
+>
 > This will trigger the package to do its magic and build your project.
 
 If you want to do it manually, follow the steps below to download the dependencies:
@@ -217,7 +231,7 @@ pip install --no-index --find-links=./my_player/dependencies/ ./my_player/depend
 
 # Run the logic.py script with start arguments
 python3 ./my_player/logic.py "$@"
-```    
+```
 
 3. Ensure that you add all your dependencies that your client is using to this script.
 
