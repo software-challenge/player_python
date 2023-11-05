@@ -1,92 +1,131 @@
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
-# Python Client for the Software-Challenge Germany 2023
+# Python Client for the Software-Challenge Germany 2024
 
-[![Read the Docs](https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs)](https://software-challenge-python-client.readthedocs.io/en/latest/)
-[![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
-[![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> Please note that this is a version with Python bindings written in Rust.
-> This package is highly **experimental** and is currently released mainly for testing.
-> In addition, a few methods and classes **differ** from the pure python version, which is due to the nature of Rust.
-> Furthermore, it should be noted that at least Python **3.7** is required for this package.
+> **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
+
+> *Besides that is this README not completely up to date and will be edited in the next few days.*
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
 have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
 
-# Game
-This year, the game is Hey, danke für den Fisch!.
+> This year it is the game
+> **[Mississippi Queen](https://docs.software-challenge.de/spiele/mississippi-queen)**.
 
-Hey, danke für den Fisch is a board game in which two players compete against each other on a hexagonal field. 
-At the beginning of the game, fish are randomly distributed on the field. In the first moves, only penguins are placed. 
-Penguins can be moved in straight paths across the axes of the field, 
-but they may not slide across fields without ice floes or across other penguins. 
-If a penguin slides off a field, it collects the field's fish and destroys the ice floe. 
-The game ends when both players can no longer move. 
-The player who has collected more fish during the game wins.
+## Table of Contents
 
-# Installation
-Two methods are presented here to install the socha client. The first one is the fastest to get started right away, but will not make it possible to run your player in the competition system. The second method creates a virtual environment that installs the packages inside the folder.
+- [Installation](#installation)
+  - [Globally](#globally)
+  - [Virtual Environment](#virtual-environment)
+- [Getting Started](#getting-started)
+  - [Start Arguments](#start-arguments)
+- [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
 
-## Prerequisites
-Make sure you have at least Python 3.7 installed. Check with python -V or python3 -V. If Python is not installed, use the following commands to install it:
+## Installation
 
-- Windows: ``> winget install -e --id Python.Python.3.7``
-- Debian: ``$ sudo apt install python3.7``
-- Arch: ``$ sudo pacman -S python``
-
-To download the wheel for this package follow these steps:
-
-1. Go to the [``FalconsSky/socha-python-client``](https://github.com/FalconsSky/socha-python-client) repository
-2. Navigate to the [``rust/master``](https://github.com/FalconsSky/socha-python-client/tree/rust/master) branch where the package is located.
-3. Open the [`dist/`](https://github.com/FalconsSky/socha-python-client/tree/rust/master/dist) directory.
-4. Choose the correct package version for your Python version (3.7 to 3.11) and operating system (Linux, Windows, or Mac OS). The package name will help you identify the correct version.
-5. Download the wheel file.
-
-## Method 1: Globally
-Use pip to install the package globally. 
-The installation process should be straightforward once you have downloaded the wheel.
+> Currently the installation works by picking the correct version in the `dist` directory here in the repository and then installing it via `pip`.You need to look after your python version, os and computer architecture. This is due to the bindings written in Rust, which are compiled by nature.
 ```shell
-pip install path/to/package/wheel
+pip install socha-[PACKAGE_VERSION]-[PYTHON_VERSION]-[OS]-[ARCHITECTURE].whl
 ```
-## Method 2: Virtual Environment
-To create a virtual environment and install the socha client in it, follow these steps:
 
-1. Create a directory where you want to develop your player: ``mkdir my_player``
-2. Navigate to the directory: ``cd my_player``
-3. Create the virtual environment: ``python -m venv venv/``
-4. Open the virtual environment:
-   - On Linux:
-   ```shell
-    $ source venv/bin/activate
-   ```
-   - On Windows:
-    ```shell
-    > Set-ExecutionPolicy Unrestricted -Scope Process
-    > .\venv\Scripts\activate
-   ```
-5. Install the ``socha`` client:
-   ```shell
-    (venv) $ pip install path/to/package/wheel
-   ```
-# Getting Started
+---
+### THE FOLLOWING IS CURRENTLY OUTDATED!
+Two methods are presented here to install the `socha` client.
+The first one is the fastest to get started right away.
+However,
+this method will not make it possible to run your player in the competition system,
+since there is no Internet connection that allows you to download packages.
+Therefore,
+the possibility of a virtual environment is presented,
+which installs the packages inside the folder.
 
-In order to use the Software-Challenge Python Client, 
-you will need to import the following dependencies:
+> Pleas make sure that you have at least **Python 3.6** installed.
+> Check with `$ python -V` or `$ python3 -V`.
+>
+> If not present you can install python with the following commands:
+>
+> - Windows: `> winget install -e --id Python.Python.3.6`
+> - Debian: `$ sudo apt install python3.6`
+> - Arch: `$ sudo pacman -S python`
 
-````python
+### Globally
+
+The installation is quite simple with pip.
+
+```shell
+$ pip install socha
+```
+
+If you want to install the package manually, then you have to download the release of your choice, unpack the package
+and then run `setup.py` with Python.
+
+```shell
+$ python setup.py install --user
+```
+
+This should satisfy the dependencies and you can start right away.
+
+### Virtual Environment
+
+To create a virtual environment,
+you should first create a directory in which you want to develop your player
+and than enter that directory.
+
+```shell
+$ mkdir my_player
+$ cd my_player
+```
+
+Now you can create the virtual environment (venv).
+
+```shell
+$ python -m venv venv/
+```
+
+This takes a moment. After the _venv_ is created, you can open it.
+
+On Linux:
+
+```shell
+$ source venv/bin/activate
+```
+
+On Windows:
+
+```bash
+> Set-ExecutionPolicy Unrestricted -Scope Process
+> .\venv\Scripts\activate
+```
+
+It should open the _venv_ and you can now install packages and run your scripts here.
+To develop your player you just have to install the package socha with `pip`.
+
+```shell
+(venv) $ pip install socha
+```
+
+This should satisfy the dependencies and you can start right away.
+
+## Getting Started
+
+If you want to start with the Software-Challenge Python Client, you have to import some dependencies first.
+
+The import is kept very simple,
+since herewith all needed dependencies are imported,
+due to changes of the `__init__.py`.
+But if you want to avoid unnecessary imports,
+you can of course import only what you actually need.
+
+```python
 from socha import *
-from socha.api.networking.player_client import IClientHandler
-from socha.starter import Starter
-````
+```
 
-To develop and implement your logic, create a class that inherits from ``IClientHandler`` and overrides its methods. 
-Here is an example of the simplest working logic you can build:
+If you now want to develop and implement your logic, then the structure of the class should look like this.
 
-````python
+```python
 class Logic(IClientHandler):
     gameState: GameState
 
@@ -96,55 +135,106 @@ class Logic(IClientHandler):
 
     def on_update(self, state: GameState):
         self.gameState = state
-````
+```
 
-Once you have finished developing your player, you can run it using the Starter function. 
-The following example will start the client with the default arguments:
+The above example is the simplest working Logic you can build. As you can see the Logic must inherit from
+the `IClientHandler`, so that you can overwrite its methods and the api knows where to find your logic.
 
-````python
+If you're done with your version of an working player, than you have to finish your file with this function, where you
+call the Starter with your desired arguments. The following starts the client with the default arguments.
+
+```python
 if __name__ == "__main__":
     Starter(Logic())
-````
+```
 
-# Start arguments
+### Start arguments
 
-You can pass start arguments through the console to customize the execution of your player.
+If you want to run your logic from the console,
+you can of course pass start arguments.
+
 > Note that any arguments passed as startup parameters will override those in the code,
 > including the ones you set yourself.
 
-| argument                                         | description                                                                                  |
-|--------------------------------------------------|----------------------------------------------------------------------------------------------|
-| `--help `                                        | Prints a help message.                                                                       |
-| `-h HOST ` ,  `--host HOST `                     | The host to connect to. The default is 'localhost'.                                          |
-| `-p PORT `,  `--port PORT `                      | The port of the host. The default is 13050.                                                  |
-| `-r RESERVATION `,  `--reservation RESERVATION ` | Reservation code for a prepared game.                                                        |
-| `-R ROOM `,  `--room ROOM `                      | Room Id the client will try to connect.                                                      |
-| `-s `,  `--survive `                             | If present the client will keep running, even if the connection to the server is terminated. |
-| `-l `,  `--log `                                 | If present the client will write a log file to the current directory.                        |
-| `-v `,  `--verbose `                             | Verbose option for logging.                                                                  |
+| **Command**           | **Description**                                                                               |
+| --------------------- | --------------------------------------------------------------------------------------------- |
+| **--help**            | Prints the help message.                                                                      |
+| **-h, --host**        | The host to connect to. The default is 'localhost'.                                           |
+| **-p, --port**        | The port of the host. The default is 13050.                                                   |
+| **-r, --reservation** | Reservation code for a prepared game.                                                         |
+| **-R, --room**        | Room Id the client will try to connect.                                                       |
+| **-s, --survive**     | If present, the client will keep running, even if the connection to the server is terminated. |
+| **-l, --log**         | If present, the client will write a log file to the current directory.                        |
+| **-v, --verbose**     | Verbose option for logging.                                                                   |
+| **--auto-reconnect**  | Automatically reconnect to the server if the connection is lost.                              |
+| **-b, --build**       | Builds this script into a package with all its dependencies.                                  |
 
-# Prepare Your Player for Submission
+## Preparing Your Player for the Competition
 
-To make your player ready for submission to the competition system, you will need to do the following:
+To ensure that your player is usable for the competition system,
+you need to download all the dependencies that your client uses
+because the system will run on a docker container without access to the internet and sudo permission.
 
-1. Create a virtual environment, as described in the [previous section](#method-2:-virtual-environment).
-2. Create a shell script named start.sh in the root directory of your player. This script will be the entry point for your player and must be named start.sh for it to be found. 
-The contents of the script should be as follows:
+> The package has made things easier for you! You can use it to handle almost everything by itself.
+> All you need is a `requirements.txt` file that lists all your dependencies.
+> To start, simply run the following command in your terminal:
+>
+> `$ python <your_main_script>.py --build <your_directory_name>`
+>
+> This will trigger the package to do its magic and build your project.
+
+If you want to do it manually, follow the steps below to download the dependencies:
+
+1. Open your terminal or console wherever you want to create your directory that you will upload.
+2. Type `mkdir my_player` to create a new directory named `my_player`. You can name yours whatever you want.
+3. Enter the directory using `cd my_player`.
+4. Run the command: `pip download socha xsdata==22.7 -d dependencies` in the directory.
+   This command downloads the dependencies you need into the folder `dependencies`.
+5. Ensure to add all your dependencies that your client uses.
+6. After the download, create a last directory using `mkdir .pip_cache`.
+
+Once you have downloaded all the dependencies,
+you need to create a shell script that uses the contest system as the entry point for your player.
+It **must** be named `start.sh` and must be on the top level of your directory; otherwise, it cannot be found.
+Follow the steps below to create your shell script:
+
+1. Ensure that you create your shell script in a UNIX-Environment, or if you use Windows,
+   you can do this with WSL or Notepad++. If you use Notepad++,
+   you need to go to _Bearbeiten->Format Zeilenende->Unix(LF)_.
+   This step ensures that your line endings are `LS` only without `CR`, which may cause problems on the contest system.
+
+2. Ensure that your shell script has the following structure:
 
 ```shell
 #!/bin/sh
-. venv/bin/activate
-python ./logic.py "$@"
+
+# Exit immediately if any command fails
+set -e
+
+# Sets the environment variable, which specifies the location for pip to store its cache files
+export XDG_CACHE_HOME=./my_player/.pip_cache
+
+# Sets the environment variable, which adds the directory to the list of paths that Python searches for modules and packages when they are imported.
+export PYTHONPATH=./my_player/packages:$PYTHONPATH
+
+# Install the socha package
+pip install --no-index --find-links=./my_player/dependencies/ ./my_player/dependencies/socha-1.0.1-py3-none-any.whl ./my_player/dependencies/xsdata-22.7-py3-none-any.whl --target=./my_player/packages/ --cache-dir=./my_player/.pip_cache
+
+# Run the logic.py script with start arguments
+python3 ./my_player/logic.py "$@"
 ```
 
-Your player's directory structure should look like this:
+3. Ensure that you add all your dependencies that your client is using to this script.
 
-````
+Once you have created your shell script, you should have a directory structure that looks like this:
+
+```
 my_player/
-├── venv/
+├── .pip_cache/
+├── dependencies/
 ├── logic.py
 └── start.sh
-````
+```
 
-Once you have completed these steps, 
-you can package your player as a ZIP archive and submit it. 🥳🎉
+The `my_player` directory or whatever you named yours just needs to be packaged as a ZIP archive,
+and your player is ready to be uploaded. Congratulations! 🥳🎉
