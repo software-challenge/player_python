@@ -44,37 +44,64 @@ impl Board {
     }
 
     pub fn get_field_current_direction(&self, coords: &CubeCoordinates) -> Option<CubeDirection> {
-        let segment_index = self.segment_index(coords)?;
+        let segment_index = match self.segment_index(coords) {
+            Some(index) => index,
+            None => return None,
+        };
         let segment = &self.segments[segment_index];
-        let next_direction = self.segments.get(segment_index + 1).map_or(self.next_direction.clone(), |s| s.direction.clone());
+        let next_direction = self.segments
+            .get(segment_index + 1)
+            .map_or(self.next_direction.clone(), |s| s.direction.clone());
         let adjacent_coords = [
             segment.center.clone() + segment.direction.opposite().vector(),
             segment.center.clone(),
             segment.center.clone() + next_direction.vector(),
             segment.center.clone() + next_direction.vector() * 2,
         ];
-
-        match adjacent_coords.iter().position(|c| *c == *coords) {
+        let position = adjacent_coords.iter().position(|c| *c == *coords);
+        match position {
             Some(index) if index < 2 => Some(segment.direction.opposite()),
-            Some(_) => Some(next_direction.opposite()),
+            Some(_) => {
+                if !segment.get(coords.clone()).is_some() { None } else {
+                    match segment.get(coords.clone()) {
+                        Some(field) if field.is_empty() => None,
+                        _ => Some(next_direction.opposite()),
+                    }
+                }
+            }
             None => None,
         }
     }
 
-    pub fn get_field_in_direction(&self, direction: &CubeDirection, coords: &CubeCoordinates) -> Option<Field> {
+    pub fn get_field_in_direction(
+        &self,
+        direction: &CubeDirection,
+        coords: &CubeCoordinates,
+    ) -> Option<Field> {
         self.get(&(coords.clone() + direction.vector()))
     }
 
-    pub fn get_coordinate_by_index(&self, segment_index: usize, x_index: usize, y_index: usize) -> CubeCoordinates {
-        let coord: CubeCoordinates = CartesianCoordinate::new(x_index as i32,
-                                                              y_index as i32).to_cube();
+    pub fn get_coordinate_by_index(
+        &self,
+        segment_index: usize,
+        x_index: usize,
+        y_index: usize,
+    ) -> CubeCoordinates {
+        let coord: CubeCoordinates = CartesianCoordinate::new(
+            x_index as i32,
+            y_index as i32,
+        ).to_cube();
         self.segments[segment_index].local_to_global(coord)
     }
 
-    pub fn segment_distance(&self, coordinate1: &CubeCoordinates, coordinate2: &CubeCoordinates) -> i32 {
+    pub fn segment_distance(
+        &self,
+        coordinate1: &CubeCoordinates,
+        coordinate2: &CubeCoordinates,
+    ) -> i32 {
         let segment_index1 = self.segment_index(coordinate1).unwrap();
         let segment_index2 = self.segment_index(coordinate2).unwrap();
-        i32::abs(segment_index1 as i32 - segment_index2 as i32)
+        i32::abs((segment_index1 as i32) - (segment_index2 as i32))
     }
 
     pub fn segment_index(&self, coordinate: &CubeCoordinates) -> Option<usize> {
@@ -87,8 +114,7 @@ impl Board {
     }
 
     pub fn neighboring_fields(&self, coords: &CubeCoordinates) -> Vec<Option<Field>> {
-        CubeDirection::VALUES
-            .iter()
+        CubeDirection::VALUES.iter()
             .map(|direction| self.get_field_in_direction(&direction, coords))
             .collect()
     }
@@ -107,7 +133,9 @@ impl Board {
         let mut ship = new_state.current_ship();
         if self.effective_speed(&ship) < 2 {
             if let Some(mut field) = new_state.board.pickup_passenger_at_position(&ship.position) {
-                field.passenger.as_mut().map(|passenger| passenger.passenger -= 1);
+                field.passenger.as_mut().map(|passenger| {
+                    passenger.passenger -= 1;
+                });
                 ship.passengers += 1;
             }
         }
@@ -115,8 +143,7 @@ impl Board {
     }
 
     fn pickup_passenger_at_position(&self, pos: &CubeCoordinates) -> Option<Field> {
-        CubeDirection::VALUES
-            .iter()
+        CubeDirection::VALUES.iter()
             .filter_map(|direction| {
                 let field = self.get_field_in_direction(direction, pos)?;
                 if field.passenger.as_ref()?.passenger > 0 {
@@ -152,27 +179,43 @@ impl Board {
     /// If multiple fields of the same type are at the same minimum distance, it returns all of them.
     /// If there isn't a field of the specified type or path to it, it will return an empty Vec.
     ///
-    pub fn find_nearest_field_types(&mut self, start_coordinates: &CubeCoordinates, field_type: FieldType) -> Vec<CubeCoordinates> {
+    pub fn find_nearest_field_types(
+        &mut self,
+        start_coordinates: &CubeCoordinates,
+        field_type: FieldType,
+    ) -> Vec<CubeCoordinates> {
         let mut visited_coordinates: HashSet<CubeCoordinates> = HashSet::new();
         let mut neighbour_coordinates_queue: VecDeque<CubeCoordinates> = VecDeque::new();
         let mut nearest_field_coordinates: Vec<CubeCoordinates> = Vec::new();
 
-        let check_field_and_add_to_queue = |coordinates: &CubeCoordinates, neighbour_coordinates_queue: &mut VecDeque<CubeCoordinates>, visited_coordinates: &HashSet<CubeCoordinates>| {
+        let check_field_and_add_to_queue = |coordinates: &CubeCoordinates,
+                                            neighbour_coordinates_queue: &mut VecDeque<CubeCoordinates>,
+                                            visited_coordinates: &HashSet<CubeCoordinates>| {
             let neighbour_field = self.get(coordinates);
             if neighbour_field.is_some() && field_type == neighbour_field.unwrap().field_type {
-                if !visited_coordinates.contains(coordinates) && !neighbour_coordinates_queue.contains(coordinates) {
+                if
+                !visited_coordinates.contains(coordinates) &&
+                    !neighbour_coordinates_queue.contains(coordinates)
+                {
                     neighbour_coordinates_queue.push_back(coordinates.clone());
                 }
             }
         };
 
         for direction in CubeDirection::VALUES {
-            check_field_and_add_to_queue(&(start_coordinates.clone() + direction.vector()), &mut neighbour_coordinates_queue, &visited_coordinates);
+            check_field_and_add_to_queue(
+                &(start_coordinates.clone() + direction.vector()),
+                &mut neighbour_coordinates_queue,
+                &visited_coordinates,
+            );
         }
 
         while let Some(current_coordinates) = neighbour_coordinates_queue.pop_front() {
-            if !nearest_field_coordinates.is_empty() &&
-                start_coordinates.distance_to(&current_coordinates) > start_coordinates.distance_to(nearest_field_coordinates.last().unwrap()) {
+            if
+            !nearest_field_coordinates.is_empty() &&
+                start_coordinates.distance_to(&current_coordinates) >
+                    start_coordinates.distance_to(nearest_field_coordinates.last().unwrap())
+            {
                 break;
             }
             visited_coordinates.insert(current_coordinates.clone());
@@ -182,12 +225,20 @@ impl Board {
                     nearest_field_coordinates.push(current_coordinates.clone());
                 } else {
                     for direction in CubeDirection::VALUES {
-                        check_field_and_add_to_queue(&(current_coordinates.clone() + direction.vector()), &mut neighbour_coordinates_queue, &visited_coordinates);
+                        check_field_and_add_to_queue(
+                            &(current_coordinates.clone() + direction.vector()),
+                            &mut neighbour_coordinates_queue,
+                            &visited_coordinates,
+                        );
                     }
                 }
             }
         }
 
         nearest_field_coordinates
+    }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("Board(segments={:?}, next_direction={:?})", self.segments, self.next_direction))
     }
 }

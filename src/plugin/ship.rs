@@ -1,24 +1,21 @@
-use std::sync::{Arc, Mutex};
-
 use pyo3::prelude::*;
 
 use crate::plugin::r#move::Move;
 
-use super::{constants::PluginConstants, coordinate::{CubeCoordinates, CubeDirection}};
+use super::{ constants::PluginConstants, coordinate::{ CubeCoordinates, CubeDirection } };
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub enum TeamEnum {
-    ONE,
-    TWO,
+    One,
+    Two,
 }
 
-#[derive(Debug, Clone)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 #[pyclass]
 pub struct Ship {
     pub team: TeamEnum,
     pub moves: Vec<Move>,
-    pub opponent: Option<Arc<Mutex<Ship>>>,
     pub position: CubeCoordinates,
     pub direction: CubeDirection,
     pub speed: i32,
@@ -33,20 +30,30 @@ pub struct Ship {
 #[pymethods]
 impl Ship {
     #[new]
-    pub fn new(team: TeamEnum, position: CubeCoordinates) -> Self {
+    pub fn new(
+        position: CubeCoordinates,
+        team: TeamEnum,
+        moves: Option<Vec<Move>>,
+        direction: Option<CubeDirection>,
+        speed: Option<i32>,
+        coal: Option<i32>,
+        passengers: Option<i32>,
+        points: Option<i32>,
+        free_turns: Option<i32>,
+        movement: Option<i32>
+    ) -> Self {
         Ship {
             team,
-            moves: Vec::new(),
-            opponent: None,
+            moves: moves.unwrap_or(vec![]),
             position,
-            direction: CubeDirection::Right,
-            speed: PluginConstants::MIN_SPEED,
-            coal: PluginConstants::START_COAL,
-            passengers: 0,
-            free_turns: 0,
-            points: 0,
+            direction: direction.unwrap_or(CubeDirection::Right),
+            speed: speed.unwrap_or(PluginConstants::MIN_SPEED),
+            coal: coal.unwrap_or(PluginConstants::START_COAL),
+            passengers: passengers.unwrap_or(0),
+            free_turns: free_turns.unwrap_or(0),
+            points: points.unwrap_or(0),
             free_acc: PluginConstants::FREE_ACC,
-            movement: 0,
+            movement: movement.unwrap_or(speed.unwrap_or(PluginConstants::MIN_SPEED)),
         }
     }
 
@@ -67,6 +74,24 @@ impl Ship {
         self.free_acc = PluginConstants::FREE_ACC;
         self.movement = self.speed;
     }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(
+            format!(
+                "Ship(position: {}, team: {:?}, direction: {:?}, speed: {}, coal: {}, passengers: {}, free_turns: {}, points: {}, free_acc: {}, movement: {})",
+                self.position,
+                self.team,
+                self.direction,
+                self.speed,
+                self.coal,
+                self.passengers,
+                self.free_turns,
+                self.points,
+                self.free_acc,
+                self.movement
+            )
+        )
+    }
 }
 
 #[cfg(test)]
@@ -76,9 +101,8 @@ mod tests {
     #[test]
     fn test_can_turn() {
         let mut ship = Ship {
-            team: TeamEnum::ONE,
             moves: vec![],
-            opponent: None,
+            team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
             speed: 0,
@@ -102,9 +126,8 @@ mod tests {
     #[test]
     fn test_max_acc() {
         let mut ship = Ship {
-            team: TeamEnum::ONE,
             moves: vec![],
-            opponent: None,
+            team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
             speed: 0,
@@ -115,24 +138,23 @@ mod tests {
             free_acc: 0,
             movement: 0,
         };
-        assert_eq!(ship.max_acc(), PluginConstants::MAX_SPEED);
+        assert_eq!(ship.max_acc(), 0);
 
         ship.coal = 1;
-        assert_eq!(ship.max_acc(), PluginConstants::MAX_SPEED);
+        assert_eq!(ship.max_acc(), 1);
 
         ship.speed = PluginConstants::MAX_SPEED - 1;
         assert_eq!(ship.max_acc(), 1);
 
         ship.free_acc = 1;
-        assert_eq!(ship.max_acc(), 2);
+        assert_eq!(ship.max_acc(), 1);
     }
 
     #[test]
     fn test_accelerate_by() {
         let mut ship = Ship {
-            team: TeamEnum::ONE,
             moves: vec![],
-            opponent: None,
+            team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
             speed: 0,
@@ -155,9 +177,8 @@ mod tests {
     #[test]
     fn test_read_resolve() {
         let mut ship = Ship {
-            team: TeamEnum::ONE,
             moves: vec![],
-            opponent: None,
+            team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
             speed: 0,

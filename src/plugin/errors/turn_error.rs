@@ -11,7 +11,7 @@ pub enum TurnProblem {
 
 #[pymethods]
 impl TurnProblem {
-    fn message(&self) -> String {
+    pub fn message(&self) -> String {
         match self {
             TurnProblem::RotationOnSandbankNotAllowed => "Drehung auf Sandbank nicht erlaubt.".to_string(),
             TurnProblem::NotEnoughCoalForRotation => "Nicht genug Kohle für Drehung.".to_string(),

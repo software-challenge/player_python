@@ -12,8 +12,7 @@ pub mod advance;
 pub mod push;
 pub mod turn;
 
-#[derive(PartialEq, PartialOrd, Eq, Hash, Clone, Debug)]
-#[derive(FromPyObject)]
+#[derive(PartialEq, PartialOrd, Eq, Hash, Clone, Debug, Copy, FromPyObject)]
 pub enum Action {
     Accelerate(Accelerate),
     Advance(Advance),

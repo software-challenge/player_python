@@ -14,7 +14,7 @@ pub enum PushProblem {
 
 #[pymethods]
 impl PushProblem {
-    fn message(&self) -> String {
+    pub fn message(&self) -> String {
         match self {
             PushProblem::MovementPointsMissing => "Nicht genug Bewegungspunkte.".to_string(),
             PushProblem::SameFieldPush => "Um einen Spieler abzudrängen muss man sich auf demselben Feld wie der Spieler befinden.".to_string(),

@@ -1,15 +1,56 @@
 from dataclasses import dataclass, field
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from socha import Team
 from socha.api.protocol.protocol_packet import ProtocolPacket, AdminLobbyRequest, ResponsePacket, LobbyRequest
 from socha.api.protocol.room_message import RoomMessage, ObservableRoomMessage, RoomOrchestrationMessage
+from socha._socha import TeamEnum
+
+
+@dataclass
+class OriginalRequest(ProtocolPacket):
+    class Meta:
+        name = "originalRequest"
+
+    class_value: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "class",
+            "type": "Attribute",
+        }
+    )
+    reservation_code: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "reservationCode",
+            "type": "Attribute",
+        }
+    )
+
+
+@dataclass
+class Errorpacket(ProtocolPacket):
+    class Meta:
+        name = "errorpacket"
+
+    message: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+        }
+    )
+    original_request: Optional[OriginalRequest] = field(
+        default=None,
+        metadata={
+            "name": "originalRequest",
+            "type": "Element",
+        }
+    )
 
 
 @dataclass
 class Left(ProtocolPacket):
     """
-    If the game is over the server will _send this message to the clients and closes the connection afterwards.
+    If the game is over the server will _send this message to the clients and closes the connection afterward.
     """
 
     class Meta:
@@ -81,7 +122,7 @@ class Cancel(AdminLobbyRequest):
 
 
 @dataclass
-class JoinedGameRoom(ResponsePacket):
+class JoinedGameRoom(ObservableRoomMessage):
     """
     Sent to all administrative clients after a player joined a GameRoom via a JoinRoomRequest.
     """
@@ -148,7 +189,7 @@ class Pause(AdminLobbyRequest):
 
 
 @dataclass
-class Slot(ProtocolPacket):
+class Slot(RoomOrchestrationMessage):
     """
     Slots for a game which contains the player's name and its attributes.
     """
@@ -179,7 +220,7 @@ class Slot(ProtocolPacket):
 
 
 @dataclass
-class Step(AdminLobbyRequest):
+class Step(RoomOrchestrationMessage):
     """
     When the client is authenticated as administrator,
     it can _send this step request to the server to advance the game for one move.
@@ -199,7 +240,7 @@ class Step(AdminLobbyRequest):
 
 
 @dataclass
-class Prepare(AdminLobbyRequest):
+class Prepare(RoomOrchestrationMessage):
     """
     When the client is authenticated as administrator,
     it can _send this request to prepare the room for the game.
@@ -278,24 +319,6 @@ class JoinRoom(LobbyRequest):
 
 
 @dataclass
-class Fishes:
-    """
-    The amount of fishes a player has.
-    """
-
-    class Meta:
-        name = "fishes"
-
-    int_value: List[int] = field(
-        default_factory=list,
-        metadata={
-            "name": "int",
-            "type": "Element",
-        }
-    )
-
-
-@dataclass
 class Fragment:
     """
     This holds the fragments of a winning definition.
@@ -326,29 +349,6 @@ class Fragment:
 
 
 @dataclass
-class From:
-    """
-    The origin of a move.
-    """
-
-    class Meta:
-        name = "from"
-
-    x: Optional[int] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-    y: Optional[int] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-
-
-@dataclass
 class Joined(ResponsePacket):
     """
     Sent to all clients after a player joined a GameRoom via a Join Request.
@@ -362,24 +362,6 @@ class Joined(ResponsePacket):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
-    )
-
-
-@dataclass
-class ListType:
-    """
-    Represents a list for the game board, that contains the fields.
-    """
-
-    class Meta:
-        name = "list"
-
-    field_value: List[Union[str, int]] = field(
-        default_factory=list,
-        metadata={
-            "name": "field",
-            "type": "Element",
         }
     )
 
@@ -437,29 +419,6 @@ class Score:
 
 
 @dataclass
-class To:
-    """
-    The target of a move.
-    """
-
-    class Meta:
-        name = "to"
-
-    x: Optional[int] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-    y: Optional[int] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-
-
-@dataclass
 class Winner:
     """
     The winner of a game.
@@ -472,25 +431,6 @@ class Winner:
         default=None,
         metadata={
             "type": "Attribute",
-        }
-    )
-
-
-@dataclass
-class IBoard:
-    """
-    The protocol representation of a board.
-    It contains a list of list of fields, which size is 7x7.
-    """
-
-    class Meta:
-        name = "board"
-
-    list_value: List[ListType] = field(
-        default_factory=list,
-        metadata={
-            "name": "list",
-            "type": "Element",
         }
     )
 
@@ -539,30 +479,6 @@ class Entry:
 
 
 @dataclass
-class LastMove:
-    """
-    Last move of a player.
-    """
-
-    class Meta:
-        name = "lastMove"
-
-    from_value: Optional[From] = field(
-        default=None,
-        metadata={
-            "name": "from",
-            "type": "Element",
-        }
-    )
-    to: Optional[To] = field(
-        default=None,
-        metadata={
-            "type": "Element",
-        }
-    )
-
-
-@dataclass
 class Scores:
     """
     Then result of a game when its over.
@@ -580,51 +496,262 @@ class Scores:
 
 
 @dataclass
-class State(ObservableRoomMessage):
+class WelcomeMessage(RoomOrchestrationMessage):
     """
-    The state of the game, with the current board, score and last move.
+    Welcome message is sent to the client when the client joins the room.
+    In this message the server tells the client which team it is.
     """
+    team: TeamEnum
 
+
+@dataclass
+class Result(ObservableRoomMessage):
+    """
+    Result of a game.
+    This will the server _send after a game is finished.
+    """
+    definition: Definition
+    scores: Scores
+    winner: Winner
+
+
+@dataclass
+class Acceleration:
     class Meta:
-        name = "state"
+        name = "acceleration"
 
-    class_value: Optional[str] = field(
-        default=None,
-        metadata={
-            "name": "class",
-            "type": "Attribute",
-        }
-    )
-    turn: Optional[int] = field(
+    acc: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
+            "required": True,
         }
     )
-    start_team: Optional[str] = field(
+
+
+@dataclass
+class Advance:
+    class Meta:
+        name = "advance"
+
+    distance: Optional[int] = field(
         default=None,
         metadata={
-            "name": "startTeam",
-            "type": "Element",
+            "type": "Attribute",
+            "required": True,
         }
     )
-    board: Optional[IBoard] = field(
+
+
+@dataclass
+class Center:
+    class Meta:
+        name = "center"
+
+    q: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
+            "required": True,
         }
     )
-    last_move: Optional[LastMove] = field(
+    r: Optional[int] = field(
         default=None,
         metadata={
-            "name": "lastMove",
-            "type": "Element",
+            "type": "Attribute",
+            "required": True,
         }
     )
-    fishes: Optional[Fishes] = field(
+    s: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Fragment:
+    class Meta:
+        name = "fragment"
+
+    name: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    aggregation: Optional[str] = field(
         default=None,
         metadata={
             "type": "Element",
+            "required": True,
+        }
+    )
+    relevant_for_ranking: Optional[bool] = field(
+        default=None,
+        metadata={
+            "name": "relevantForRanking",
+            "type": "Element",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Player:
+    class Meta:
+        name = "player"
+
+    name: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    team: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Position:
+    class Meta:
+        name = "position"
+
+    q: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    r: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    s: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Push:
+    class Meta:
+        name = "push"
+
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Score:
+    class Meta:
+        name = "score"
+
+    cause: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    reason: Optional[object] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    part: List[int] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+
+
+@dataclass
+class Turn:
+    class Meta:
+        name = "turn"
+
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Winner:
+    class Meta:
+        name = "winner"
+
+    team: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Actions:
+    class Meta:
+        name = "actions"
+
+    actions: List[object] = field(
+        default_factory=list,
+        metadata={
+            "type": "Wildcard",
+            "namespace": "##any",
+            "mixed": True,
+            "choices": (
+                {
+                    "name": "acceleration",
+                    "type": Acceleration,
+                    "namespace": "",
+                },
+                {
+                    "name": "advance",
+                    "type": Advance,
+                    "namespace": "",
+                },
+                {
+                    "name": "push",
+                    "type": Push,
+                    "namespace": "",
+                },
+                {
+                    "name": "turn",
+                    "type": Turn,
+                    "namespace": "",
+                },
+            ),
         }
     )
 
@@ -646,14 +773,8 @@ class OriginalMessage:
             "type": "Attribute",
         }
     )
-    from_value: Optional[From] = field(
-        default=None,
-        metadata={
-            "name": "from",
-            "type": "Element",
-        }
-    )
-    to: Optional[To] = field(
+
+    actions: Optional[Actions] = field(
         default=None,
         metadata={
             "type": "Element",
@@ -662,12 +783,341 @@ class OriginalMessage:
 
 
 @dataclass
-class Data:
+class Error:
     """
-    This element is sent by the server to the client to notify the client of a changing state of the game.
-    It can contain a move, game state, or winning team with the reason.
+    This sends the server when the client sent a erroneous message.
     """
+    message: str
+    originalMessage: OriginalMessage
 
+
+@dataclass
+class Definition:
+    class Meta:
+        name = "definition"
+
+    fragment: List[Fragment] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+
+
+@dataclass
+class Entry:
+    class Meta:
+        name = "entry"
+
+    player: Optional[Player] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+    score: Optional[Score] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Passenger:
+    class Meta:
+        name = "passenger"
+
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    passenger: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Water:
+    class Meta:
+        name = "water"
+
+
+@dataclass
+class Goal:
+    class Meta:
+        name = "goal"
+
+
+@dataclass
+class Sandbank:
+    class Meta:
+        name = "sandbank"
+
+
+@dataclass
+class Island:
+    class Meta:
+        name = "island"
+
+
+@dataclass
+class FieldArray:
+    class Meta:
+        name = "field-array"
+
+    field: List[object] = field(
+        default_factory=list,
+        metadata={
+            "type": "Wildcard",
+            "namespace": "##any",
+            "mixed": True,
+            "min_occurs": 1,
+            "choices": (
+                {
+                    "name": "water",
+                    "type": Water,
+                    "namespace": "",
+                },
+                {
+                    "name": "sandbank",
+                    "type": Sandbank,
+                    "namespace": "",
+                },
+                {
+                    "name": "island",
+                    "type": Island,
+                    "namespace": "",
+                },
+                {
+                    "name": "passenger",
+                    "type": Passenger,
+                    "namespace": "",
+                },
+                {
+                    "name": "goal",
+                    "type": Goal,
+                    "namespace": "",
+                },
+            ),
+        }
+    )
+
+
+@dataclass
+class Ship:
+    class Meta:
+        name = "ship"
+
+    team: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    speed: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    coal: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    passengers: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    free_turns: Optional[int] = field(
+        default=None,
+        metadata={
+            "name": "freeTurns",
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    points: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    position: Optional[Position] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class LastMove:
+    class Meta:
+        name = "lastMove"
+
+    actions: Optional[Actions] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Scores:
+    class Meta:
+        name = "scores"
+
+    entry: List[Entry] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+
+
+@dataclass
+class Segment:
+    class Meta:
+        name = "segment"
+
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    center: Optional[Center] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+    field_array: List[FieldArray] = field(
+        default_factory=list,
+        metadata={
+            "name": "field-array",
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+
+
+@dataclass
+class Board:
+    class Meta:
+        name = "board"
+
+    next_direction: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "nextDirection",
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    segment: List[Segment] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+
+
+@dataclass
+class State(ObservableRoomMessage):
+    class Meta:
+        name = "state"
+
+    class_value: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "class",
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    start_team: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "startTeam",
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    turn: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    current_team: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "currentTeam",
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    board: Optional[Board] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+    ship: List[Ship] = field(
+        default_factory=list,
+        metadata={
+            "type": "Element",
+            "min_occurs": 1,
+        }
+    )
+    last_move: Optional[LastMove] = field(
+        default=None,
+        metadata={
+            "name": "lastMove",
+            "type": "Element",
+        }
+    )
+
+
+@dataclass
+class Data:
     class Meta:
         name = "data"
 
@@ -676,6 +1126,7 @@ class Data:
         metadata={
             "name": "class",
             "type": "Attribute",
+            "required": True,
         }
     )
     class_binding: Optional[object] = field(
@@ -699,22 +1150,22 @@ class Data:
             "type": "Element",
         }
     )
-    from_value: Optional[From] = field(
-        default=None,
-        metadata={
-            "name": "from",
-            "type": "Element",
-        }
-    )
-    to: Optional[To] = field(
-        default=None,
-        metadata={
-            "type": "Element",
-        }
-    )
     state: Optional[State] = field(
         default=None,
         metadata={
+            "type": "Element",
+        }
+    )
+    actions: Optional[Actions] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+    original_message: Optional[OriginalMessage] = field(
+        default=None,
+        metadata={
+            "name": "originalMessage",
             "type": "Element",
         }
     )
@@ -730,23 +1181,10 @@ class Data:
             "type": "Attribute",
         }
     )
-    original_message: Optional[OriginalMessage] = field(
-        default=None,
-        metadata={
-            "name": "originalMessage",
-            "type": "Element",
-        }
-    )
 
 
 @dataclass
 class Room(ProtocolPacket):
-    """
-    The root element of every room packet.
-    It contains a data element when _send that contains the actual data,
-    that are needed for the game to work.
-    """
-
     class Meta:
         name = "room"
 
@@ -755,10 +1193,32 @@ class Room(ProtocolPacket):
         metadata={
             "name": "roomId",
             "type": "Attribute",
+            "required": True,
         }
     )
     data: Optional[Data] = field(
         default=None,
+        metadata={
+            "type": "Element",
+            "required": True,
+        }
+    )
+
+
+@dataclass
+class Prepared(RoomOrchestrationMessage):
+    class Meta:
+        name = "prepared"
+
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "roomId",
+            "type": "Attribute",
+        }
+    )
+    reservation: List[str] = field(
+        default_factory=list,
         metadata={
             "type": "Element",
         }
@@ -766,32 +1226,17 @@ class Room(ProtocolPacket):
 
 
 @dataclass
-class IWelcomeMessage(RoomOrchestrationMessage):
-    """
-    Welcome message is sent to the client when the client joins the room.
-    In this message the server tells the client which team it is.
-    """
-    team: Team
+class Observed(RoomOrchestrationMessage):
+    class Meta:
+        name = "observed"
 
-
-@dataclass
-class Result(ObservableRoomMessage):
-    """
-    Result of a game.
-    This will the server _send after a game is finished.
-    """
-    definition: Definition
-    scores: Scores
-    winner: Winner
-
-
-@dataclass
-class Error:
-    """
-    This sends the server when the client sent a erroneous message.
-    """
-    message: str
-    originalMessage: OriginalMessage
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            "name": "roomId",
+            "type": "Attribute",
+        }
+    )
 
 
 @dataclass
@@ -799,7 +1244,7 @@ class Protocol:
     """
     This is the root element of the protocol.
     Even it's in here it will never be called,
-    because the children of this root element have to be handelt separately.
+    because the children of this root element have to be handled separately.
     """
 
     class Meta:
@@ -866,4 +1311,16 @@ class Protocol:
             "type": "Element",
         }
 
+    )
+    prepared: Optional[Prepared] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
+    )
+    observed: Optional[Observed] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
     )

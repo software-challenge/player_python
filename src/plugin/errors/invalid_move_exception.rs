@@ -15,7 +15,7 @@ pub enum InvalidMoveException {
 
 #[pymethods]
 impl InvalidMoveException {
-    fn message(&self) -> String {
+    pub fn message(&self) -> String {
         match self {
             InvalidMoveException::NoActions => "Der Zug enthält keine Aktionen".to_string(),
             InvalidMoveException::PushActionRequired => "Wenn du auf einem gegnerischen Schiff landest, muss darauf eine Abdrängaktion folgen.".to_string(),

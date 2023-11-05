@@ -1,24 +1,29 @@
-from .socha import *
-from socha.api.networking.player_client import IClientHandler
-from socha.api.protocol.protocol import Result
+from ._socha import *
+from socha.api.networking.game_client import IClientHandler
 from socha.starter import Starter
 
 __all__ = [
-    'BitBoard',
+    'Segment',
     'Board',
     'CartesianCoordinate',
+    'CubeCoordinates',
+    'PluginConstants',
+    'Accelerate',
+    'Advance',
+    'Push',
+    'Turn',
+    'AccelerationProblem',
+    'AdvanceProblem',
+    'InvalidMoveException',
+    'MoveMistake',
+    'PushProblem',
+    'TurnProblem',
     'Field',
     'GameState',
-    'HexCoordinate',
     'IClientHandler',
     'Move',
-    'Penguin',
-    'Progress',
-    'Result',
-    'Score',
+    'Ship',
     'Starter',
     'Team',
     'TeamEnum',
-    'Vector',
-    'WelcomeMessage',
 ]

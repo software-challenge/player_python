@@ -15,7 +15,7 @@ pub enum AccelerationProblem {
 
 #[pymethods]
 impl  AccelerationProblem {
-    fn message(&self) -> String {
+    pub fn message(&self) -> String {
         match self {
             AccelerationProblem::ZeroAcc => String::from("Es kann nicht um den Wert 0 beschleunigt werden."),
             AccelerationProblem::AboveMaxSpeed => {

@@ -14,7 +14,7 @@ pub enum AdvanceProblem {
 
 #[pymethods]
 impl AdvanceProblem {
-    fn message(&self) -> String {
+    pub fn message(&self) -> String {
         match self {
             AdvanceProblem::MovementPointsMissing => String::from("Nicht genug Bewegungspunkte."),
             AdvanceProblem::InsufficientPush => String::from("Nicht genug Bewegungspunkte für notwendige nachfolgende Abdrängaktion."),

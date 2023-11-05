@@ -41,7 +41,7 @@ impl CartesianCoordinate {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct CubeCoordinates {
     pub q: i32,
@@ -92,21 +92,17 @@ impl CubeCoordinates {
     }
 
     pub fn rotated_by(&self, turns: i32) -> CubeCoordinates {
-        let coords: [i32; 3] = self.coordinates();
-        let rotated_coords: [i32; 3] = [
-            coords[turns.rem_euclid(3) as usize],
-            coords[(turns as usize + 1) % 3],
-            coords[(turns + 2).rem_euclid(3) as usize],
+        let coordinates = vec![self.q, self.r, self.s];
+        let rotated = vec![
+            coordinates[((0 + turns.rem_euclid(3)) % 3) as usize],
+            coordinates[((1 + turns.rem_euclid(3)) % 3) as usize],
+            coordinates[((2 + turns.rem_euclid(3)) % 3) as usize],
         ];
-
-        let s = if turns % 2 == 1 {
-            -rotated_coords[2]
+        if turns % 2 == 1 {
+            CubeCoordinates::new(-rotated[0], -rotated[1])
         } else {
-            rotated_coords[2]
-        };
-
-        // Return a CubeCoordinates object
-        CubeCoordinates::new(self.q + rotated_coords[0], self.r + rotated_coords[1] + s)
+            CubeCoordinates::new(rotated[0], rotated[1])
+        }
     }
 
     pub fn distance_to(&self, other: &CubeCoordinates) -> i32 {
@@ -208,7 +204,7 @@ impl fmt::Display for CubeCoordinates {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Default)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Default, Copy)]
 #[pyclass]
 pub enum CubeDirection {
     #[default]
@@ -404,11 +400,11 @@ mod tests {
         assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::Left), 3);
         assert_eq!(
             CubeDirection::Right.turn_count_to(CubeDirection::UpLeft),
-            4
+            -2
         );
         assert_eq!(
             CubeDirection::Right.turn_count_to(CubeDirection::UpRight),
-            5
+            -1
         );
     }
 
@@ -428,6 +424,18 @@ mod tests {
         assert_eq!(
             CubeDirection::Right.rotated_by(5),
             CubeDirection::UpRight
+        );
+        assert_eq!(
+            CubeDirection::Right.rotated_by(-1),
+            CubeDirection::UpRight
+        );
+        assert_eq!(
+            CubeDirection::Right.rotated_by(-2),
+            CubeDirection::UpLeft
+        );
+        assert_eq!(
+            CubeDirection::Right.rotated_by(-3),
+            CubeDirection::Left
         );
     }
 
@@ -491,17 +499,27 @@ mod tests {
 
     #[test]
     fn test_cube_coordinates_rotated_by() {
-        let coords: CubeCoordinates = CubeCoordinates::new(1, 2);
+        let coords: CubeCoordinates = CubeCoordinates::new(3, 2);
         let result: CubeCoordinates = coords.rotated_by(1);
         assert_eq!(result.q, -2);
-        assert_eq!(result.r, 1);
-        assert_eq!(result.s, 1);
+        assert_eq!(result.r, 5);
+        assert_eq!(result.s, -3);
     }
 
     #[test]
     fn test_cube_coordinates_distance_to() {
-        let coords1: CubeCoordinates = CubeCoordinates::new(1, 2);
-        let coords2: CubeCoordinates = CubeCoordinates::new(3, 4);
+        let coords1: CubeCoordinates = CubeCoordinates::new(0, 0);
+        let coords2: CubeCoordinates = CubeCoordinates::new(3, 0);
+        let result = coords1.distance_to(&coords2);
+        assert_eq!(result, 3);
+
+        let coords1: CubeCoordinates = CubeCoordinates::new(-1, -1);
+        let coords2: CubeCoordinates = CubeCoordinates::new(-1, 3);
+        let result = coords1.distance_to(&coords2);
+        assert_eq!(result, 4);
+
+        let coords1: CubeCoordinates = CubeCoordinates::new(0, 0);
+        let coords2: CubeCoordinates = CubeCoordinates::new(3, -1);
         let result = coords1.distance_to(&coords2);
         assert_eq!(result, 3);
     }
