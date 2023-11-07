@@ -5,13 +5,11 @@ build-backend = "maturin"
 [project]
 name = "socha"
 version = "2.0.0"
-authors = [
-    { name = "maxblan", email = "stu222782@mail.uni-kiel.de" },
-]
+authors = [{ name = "maxblan", email = "stu222782@mail.uni-kiel.de" }]
 description = "This is the package for the Software-Challenge Germany 2023. This Season the game will be 'Hey, danke für den Fisch' a.k.a. 'Penguins' in short."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = ["xsdata==22.9"]
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
@@ -30,13 +28,7 @@ documentation = "https://software-challenge-python-client.readthedocs.io/en/late
 [tool.maturin]
 python-source = "python"
 module-name = "socha._socha"
-exclude = [
-    ".github",
-    "docs",
-    "tests",
-    "logic.py",
-    "readthedocs.yaml"
-]
+exclude = [".github", "docs", "tests", "logic.py", "readthedocs.yaml"]
 features = ["pyo3/extension-module"]
 [project.urls]
 "Bug Tracker" = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
