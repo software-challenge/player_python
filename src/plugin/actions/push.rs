@@ -5,7 +5,7 @@ use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
 use crate::plugin::errors::push_error::PushProblem;
 use crate::plugin::field::FieldType;
 use crate::plugin::game_state::GameState;
-use crate::plugin::ship::{ Ship, TeamEnum };
+use crate::plugin::ship::Ship;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
@@ -21,12 +21,15 @@ impl Push {
         Push { direction }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<GameState, PyErr> {
-        if state.current_ship().movement == 0 {
+    pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        let current_ship: Ship = state.current_ship.clone();
+        let mut other_ship: Ship = state.other_ship.clone();
+
+        if current_ship.movement == 0 {
             return Err(PyBaseException::new_err(PushProblem::MovementPointsMissing.message()));
         }
 
-        let push_from: CubeCoordinates = state.current_ship().position;
+        let push_from: CubeCoordinates = current_ship.position;
         let push_to: CubeCoordinates = push_from + self.direction.vector();
 
         let shift_to_field = match state.board.get(&push_to) {
@@ -40,7 +43,7 @@ impl Push {
             return Err(PyBaseException::new_err(PushProblem::BlockedFieldPush.message()));
         }
 
-        if push_from != state.other_ship().position {
+        if push_from != other_ship.position {
             return Err(PyBaseException::new_err(PushProblem::SameFieldPush.message()));
         }
 
@@ -48,31 +51,19 @@ impl Push {
             return Err(PyBaseException::new_err(PushProblem::SandbankPush.message()));
         }
 
-        if self.direction == state.current_ship().direction.opposite() {
+        if self.direction == current_ship.direction.opposite() {
             return Err(PyBaseException::new_err(PushProblem::BackwardPushingRestricted.message()));
         }
 
-        let new_state: &mut GameState = &mut state.clone();
-        let new_other_ship: &mut Ship = &mut new_state.other_ship();
-
         if shift_to_field.field_type == FieldType::Sandbank {
-            new_other_ship.speed = 1;
-            new_other_ship.movement = 1;
+            other_ship.speed = 1;
+            other_ship.movement = 1;
         }
 
-        new_other_ship.position = push_to;
-        new_other_ship.free_turns += 1;
+        other_ship.position = push_to;
+        other_ship.free_turns += 1;
 
-        match new_other_ship.team {
-            TeamEnum::One => {
-                new_state.team_one = new_other_ship.clone();
-            }
-            TeamEnum::Two => {
-                new_state.team_two = new_other_ship.clone();
-            }
-        }
-
-        Ok(new_state.clone())
+        Ok(other_ship)
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -112,7 +103,6 @@ mod tests {
             None,
             None,
             None,
-            None,
             None
         );
         team_one.speed = 5;
@@ -120,7 +110,6 @@ mod tests {
         let mut team_two: Ship = Ship::new(
             c2,
             TeamEnum::Two,
-            None,
             None,
             None,
             None,
@@ -144,15 +133,14 @@ mod tests {
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
             CubeDirection::Right
         );
-        let result: Result<GameState, PyErr> = push.perform(&state);
+        let result: Result<Ship, PyErr> = push.perform(&state);
 
         assert!(result.is_ok());
 
-        let new_state: GameState = result.unwrap();
+        let new_ship: Ship = result.unwrap();
 
-        assert_eq!(new_state.other_ship().position, CubeCoordinates::new(0, 0));
-        assert_eq!(new_state.current_ship().position, CubeCoordinates::new(1, 0));
-        assert_eq!(new_state.current_ship().free_turns, 1);
+        assert_eq!(new_ship.position, CubeCoordinates::new(1, 0));
+        assert_eq!(new_ship.free_turns, 1);
     }
 
     #[test]
@@ -196,7 +184,7 @@ mod tests {
             fields,
             CubeDirection::Right
         );
-        let result: Result<GameState, PyErr> = push.perform(&state);
+        let result: Result<Ship, PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 
@@ -216,7 +204,7 @@ mod tests {
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
             CubeDirection::Right
         );
-        let result: Result<GameState, PyErr> = push.perform(&state);
+        let result: Result<Ship, PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 
@@ -236,7 +224,7 @@ mod tests {
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
             CubeDirection::Left
         );
-        let result: Result<GameState, PyErr> = push.perform(&state);
+        let result: Result<Ship, PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 

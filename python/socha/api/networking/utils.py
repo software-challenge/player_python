@@ -109,7 +109,7 @@ def if_not_last_game_state(message) -> GameState:
     return GameState(
         board=_convert_board(message.data.class_binding.board),
         turn=message.data.class_binding.turn,
-        team_one=first_team,
-        team_two=second_team,
+        current_ship=first_team,
+        other_ship=second_team,
         last_move=None,
     )

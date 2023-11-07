@@ -6,6 +6,7 @@ use pyo3::exceptions::PyException;
 use plugin::coordinate::CubeCoordinates;
 use plugin::field::{ FieldType, Passenger };
 use plugin::game_state::TeamPoints;
+use plugin::game_state::AdvanceInfo;
 
 use crate::plugin::actions::accelerate::Accelerate;
 use crate::plugin::actions::advance::Advance;
@@ -32,7 +33,7 @@ pyo3::create_exception!(_socha, TurnProblem, PyException);
 #[pymodule]
 fn _socha(_py: Python, m: &PyModule) -> PyResult<()> {
     pyo3_log::init();
-    
+
     m.add_class::<Accelerate>()?;
     m.add_class::<Advance>()?;
     m.add_class::<Push>()?;
@@ -59,6 +60,7 @@ fn _socha(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Segment>()?;
     m.add_class::<Board>()?;
     m.add_class::<TeamPoints>()?;
+    m.add_class::<AdvanceInfo>()?;
     m.add_class::<GameState>()?;
 
     Ok(())

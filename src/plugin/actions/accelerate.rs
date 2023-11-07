@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 
 use crate::plugin::{ errors::acceleration_errors::AccelerationProblem, game_state::GameState };
 use crate::plugin::field::FieldType;
-use crate::plugin::ship::{ Ship, TeamEnum };
+use crate::plugin::ship::Ship;
 
 /// `Accelerate` is representing a ship's ability to change its speed and acceleration.
 /// It contains methods for initiating and managing the acceleration process.
@@ -35,8 +35,8 @@ impl Accelerate {
         Self { acc }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<GameState, PyErr> {
-        let mut ship: Ship = state.current_ship();
+    pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        let mut ship: Ship = state.current_ship.clone();
         let mut speed = ship.speed;
         speed += self.acc;
 
@@ -54,29 +54,19 @@ impl Accelerate {
                 if new_ship.coal < 0 {
                     Err(PyBaseException::new_err(AccelerationProblem::InsufficientCoal.message()))
                 } else {
-                    let new_state: &mut GameState = &mut state.clone();
-                    match new_ship.team {
-                        TeamEnum::One => {
-                            new_state.team_one = new_ship;
-                        }
-                        TeamEnum::Two => {
-                            new_state.team_two = new_ship;
-                        }
-                    }
-                    Ok(new_state.clone())
+                    Ok(ship)
                 }
             }
         }
     }
 
-    fn accelerate(&self, ship: &Ship) -> Ship {
-        let new_ship: &mut Ship = &mut ship.clone();
-        let used_coal: i32 = self.acc.abs() - new_ship.free_acc;
-        new_ship.coal -= used_coal.max(0);
-        new_ship.free_acc = (-used_coal).max(0);
-        new_ship.accelerate_by(self.acc);
+    fn accelerate(&self,  ship: &mut Ship) -> Ship {
+        let used_coal: i32 = self.acc.abs() - ship.free_acc;
+        ship.coal -= used_coal.max(0);
+        ship.free_acc = (-used_coal).max(0);
+        ship.accelerate_by(self.acc);
 
-        return new_ship.clone();
+        return ship.clone();
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -119,9 +109,7 @@ mod tests {
             None,
             None,
             None,
-            None,
-            None
-        );
+            None);
         let team_two: Ship = Ship::new(
             CubeCoordinates::new(-1, 1),
             TeamEnum::Two,
@@ -131,9 +119,7 @@ mod tests {
             None,
             None,
             None,
-            None,
-            None
-        );
+            None);
         let game_state: GameState = GameState::new(board, 0, team_one.clone(), team_two, None);
         (accelerate, game_state)
     }
@@ -179,8 +165,8 @@ mod tests {
         let (accelerate, game_state) = setup(2);
 
         let mute_state: &mut GameState = &mut game_state.clone();
-        mute_state.team_one.coal = 0;
-        mute_state.team_two.coal = 0;
+        mute_state.current_ship.coal = 0;
+        mute_state.other_ship.coal = 0;
 
         let result = accelerate.perform(&mute_state).unwrap_err();
 
@@ -196,8 +182,8 @@ mod tests {
     fn test_perform_success() {
         let (accelerate, game_state) = setup(2);
 
-        let result: GameState = accelerate.perform(&game_state).unwrap();
-        assert_eq!(result.current_ship().speed, 3);
+        let result: Ship = accelerate.perform(&game_state).unwrap();
+        assert_eq!(result.speed, 3);
     }
 
     #[test]
@@ -213,9 +199,7 @@ mod tests {
             None,
             None,
             None,
-            None,
-            None
-        );
+            None);
 
         assert_eq!(ship.speed, PluginConstants::MIN_SPEED);
         assert_eq!(ship.coal, PluginConstants::START_COAL);

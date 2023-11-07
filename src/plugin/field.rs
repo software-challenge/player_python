@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 
 use super::coordinate::CubeDirection;
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Passenger {
     pub direction: CubeDirection,
@@ -27,7 +27,7 @@ impl Passenger {
     }
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub enum FieldType {
     Water,
@@ -37,7 +37,7 @@ pub enum FieldType {
     Sandbank,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Field {
     pub field_type: FieldType,

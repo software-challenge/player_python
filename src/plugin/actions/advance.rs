@@ -3,11 +3,12 @@ use pyo3::prelude::*;
 
 use log::{ error, debug };
 
-use crate::plugin::ship::{ TeamEnum, Ship };
+use crate::plugin::ship::Ship;
 use crate::plugin::{
     constants::PluginConstants,
     errors::advance_errors::AdvanceProblem,
     game_state::GameState,
+    game_state::AdvanceInfo,
 };
 use crate::plugin::field::FieldType;
 
@@ -26,11 +27,16 @@ impl Advance {
         Advance { distance }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<GameState, PyErr> {
-        debug!("Performing advance action");
+    pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        debug!(
+            "Performing advance action of a distance {} with ship: {:?}",
+            self.distance,
+            state.current_ship
+        );
+        let mut current_ship: Ship = state.current_ship.clone();
         if
             (self.distance < PluginConstants::MIN_SPEED &&
-                state.board.get(&state.current_ship().position).unwrap().field_type !=
+                state.board.get(&current_ship.position).unwrap().field_type !=
                     FieldType::Sandbank) ||
             self.distance > PluginConstants::MAX_SPEED
         {
@@ -41,46 +47,40 @@ impl Advance {
             return Err(PyBaseException::new_err(AdvanceProblem::InvalidDistance.message()));
         }
 
-        if self.distance > state.current_ship().movement {
+        if self.distance > current_ship.movement {
             error!("Movement points missing: {}", self.distance);
             return Err(PyBaseException::new_err(AdvanceProblem::MovementPointsMissing.message()));
         }
 
-        let result: Vec<Advance> = state.check_advance_limit(
-            &state.current_ship().position,
-            &(match self.distance > 0 {
-                true => state.current_ship().direction,
-                false => state.current_ship().direction.opposite(),
+        let result: AdvanceInfo = state.calculate_advance_info(
+            &current_ship.position,
+            &(if self.distance < 0 {
+                current_ship.direction.opposite()
+            } else {
+                current_ship.direction
             }),
-            state.current_ship().movement
+            current_ship.movement
         );
 
-        if (result.len() as i32) < self.distance.abs() {
-            error!(
-                "Invalid distance: {}. Due to blocked field after {} fields.",
-                self.distance,
-                result.len()
-            );
-            return Err(PyBaseException::new_err(AdvanceProblem::InvalidDistance.message()));
-        }
-        let new_ship: &mut Ship = &mut state.current_ship().clone();
-        new_ship.position += new_ship.direction.vector() * self.distance;
-        new_ship.movement -= result[(self.distance.abs() as usize) - 1].distance;
+        debug!("Advance result: {:?}", result);
 
-        let new_state: &mut GameState = &mut state.clone();
-
-        match new_ship.team {
-            TeamEnum::One => {
-                new_state.team_one = new_ship.clone();
-            }
-            TeamEnum::Two => {
-                new_state.team_two = new_ship.clone();
-            }
+        if (result.distance() as i32) < self.distance.abs() {
+            debug!("Distance too long: {} for {}", result.distance(), self.distance.abs());
+            return Err(PyBaseException::new_err(result.problem.message()));
         }
 
-        debug!("Advance action performed with new ship: {:?}", new_ship);
+        current_ship.position += current_ship.direction.vector() * self.distance;
+        current_ship.movement -= result.cost_until(self.distance as usize);
 
-        Ok(new_state.clone())
+        debug!(
+            "New ship movement: {}, position: {:?}",
+            current_ship.movement,
+            current_ship.position
+        );
+
+        debug!("Advance action performed with new ship: {:?}", current_ship);
+
+        Ok(current_ship)
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -120,7 +120,6 @@ mod tests {
             None,
             None,
             None,
-            None,
             None
         );
         team_one.speed = 5;
@@ -128,7 +127,6 @@ mod tests {
         let team_two: &mut Ship = &mut Ship::new(
             CubeCoordinates::new(-1, 1),
             TeamEnum::Two,
-            None,
             None,
             None,
             None,
@@ -154,12 +152,12 @@ mod tests {
         let advance: Advance = Advance::new(2);
         let state: GameState = setup();
 
-        let result: Result<GameState, PyErr> = advance.perform(&state);
+        let result: Result<Ship, PyErr> = advance.perform(&state);
 
         assert!(result.is_ok());
-        let new_state: GameState = result.unwrap();
-        assert_eq!(new_state.current_ship().position, CubeCoordinates::new(2, -1));
-        assert_eq!(new_state.current_ship().movement, 3);
+        let new_ship: Ship = result.unwrap();
+        assert_eq!(new_ship.position, CubeCoordinates::new(2, -1));
+        assert_eq!(new_ship.movement, 3);
     }
 
     #[test]
@@ -167,7 +165,7 @@ mod tests {
         let advance: Advance = Advance::new(4);
         let state: GameState = setup();
 
-        let result: Result<GameState, PyErr> = advance.perform(&state);
+        let result: Result<Ship, PyErr> = advance.perform(&state);
 
         assert!(result.is_err());
         let error: PyErr = result.unwrap_err();
@@ -182,7 +180,7 @@ mod tests {
         let advance: Advance = Advance::new(6);
         let state: GameState = setup();
 
-        let result: Result<GameState, PyErr> = advance.perform(&state);
+        let result: Result<Ship, PyErr> = advance.perform(&state);
 
         assert!(result.is_err());
         let error: PyErr = result.unwrap_err();

@@ -1,7 +1,5 @@
 use pyo3::prelude::*;
 
-use crate::plugin::r#move::Move;
-
 use super::{ constants::PluginConstants, coordinate::{ CubeCoordinates, CubeDirection } };
 
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
@@ -11,19 +9,28 @@ pub enum TeamEnum {
     Two,
 }
 
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Ship {
+    #[pyo3(get, set)]
     pub team: TeamEnum,
-    pub moves: Vec<Move>,
+    #[pyo3(get, set)]
     pub position: CubeCoordinates,
+    #[pyo3(get, set)]
     pub direction: CubeDirection,
+    #[pyo3(get, set)]
     pub speed: i32,
+    #[pyo3(get, set)]
     pub coal: i32,
+    #[pyo3(get, set)]
     pub passengers: i32,
+    #[pyo3(get, set)]
     pub free_turns: i32,
+    #[pyo3(get, set)]
     pub points: i32,
+    #[pyo3(get, set)]
     pub free_acc: i32,
+    #[pyo3(get, set)]
     pub movement: i32,
 }
 
@@ -33,7 +40,6 @@ impl Ship {
     pub fn new(
         position: CubeCoordinates,
         team: TeamEnum,
-        moves: Option<Vec<Move>>,
         direction: Option<CubeDirection>,
         speed: Option<i32>,
         coal: Option<i32>,
@@ -44,7 +50,6 @@ impl Ship {
     ) -> Self {
         Ship {
             team,
-            moves: moves.unwrap_or(vec![]),
             position,
             direction: direction.unwrap_or(CubeDirection::Right),
             speed: speed.unwrap_or(PluginConstants::MIN_SPEED),
@@ -101,7 +106,6 @@ mod tests {
     #[test]
     fn test_can_turn() {
         let mut ship = Ship {
-            moves: vec![],
             team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
@@ -126,7 +130,6 @@ mod tests {
     #[test]
     fn test_max_acc() {
         let mut ship = Ship {
-            moves: vec![],
             team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
@@ -153,7 +156,6 @@ mod tests {
     #[test]
     fn test_accelerate_by() {
         let mut ship = Ship {
-            moves: vec![],
             team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,
@@ -177,7 +179,6 @@ mod tests {
     #[test]
     fn test_read_resolve() {
         let mut ship = Ship {
-            moves: vec![],
             team: TeamEnum::One,
             position: CubeCoordinates::new(0, 0),
             direction: CubeDirection::Right,

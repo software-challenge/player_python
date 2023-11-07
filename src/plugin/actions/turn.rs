@@ -5,7 +5,7 @@ use crate::plugin::{
     game_state::GameState,
     errors::turn_error::TurnProblem,
     field::FieldType,
-    ship::{ Ship, TeamEnum },
+    ship::Ship,
 };
 
 #[pyclass]
@@ -22,48 +22,32 @@ impl Turn {
         Turn { direction }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<GameState, PyErr> {
-        let turn_count: i32 = state.current_ship().direction.turn_count_to(self.direction.clone());
+    pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        let mut current_ship: Ship = state.current_ship.clone();
+
+        let turn_count: i32 = current_ship.direction.turn_count_to(self.direction.clone());
 
         let abs_turn_count: i32 = turn_count.abs();
-        let used_coal: i32 = abs_turn_count - state.current_ship().free_turns;
+        let used_coal: i32 = abs_turn_count - current_ship.free_turns;
 
-        state.current_ship().free_turns = std::cmp::max(
-            state.current_ship().free_turns - abs_turn_count,
-            0
-        );
+        current_ship.free_turns = std::cmp::max(current_ship.free_turns - abs_turn_count, 0);
 
-        if
-            state.board.get(&state.current_ship().position).unwrap().field_type ==
-            FieldType::Sandbank
-        {
+        if state.board.get(&current_ship.position).unwrap().field_type == FieldType::Sandbank {
             return Err(
                 PyBaseException::new_err(TurnProblem::RotationOnSandbankNotAllowed.message())
             );
         }
-        if state.current_ship().coal < used_coal {
+        if current_ship.coal < used_coal {
             return Err(PyBaseException::new_err(TurnProblem::NotEnoughCoalForRotation.message()));
         }
 
-        let new_state: &mut GameState = &mut state.clone();
-        let new_other_ship: &mut Ship = &mut new_state.current_ship();
-
         if used_coal > 0 {
-            new_other_ship.coal -= used_coal;
+            current_ship.coal -= used_coal;
         }
 
-        new_other_ship.direction = self.direction.clone();
+        current_ship.direction = self.direction.clone();
 
-        match new_other_ship.team {
-            TeamEnum::One => {
-                new_state.team_one = new_other_ship.clone();
-            }
-            TeamEnum::Two => {
-                new_state.team_two = new_other_ship.clone();
-            }
-        }
-
-        Ok(new_state.clone())
+        Ok(current_ship)
     }
 
     pub fn coal_cost(&self, ship: &Ship) -> i32 {
@@ -109,9 +93,7 @@ mod tests {
             None,
             None,
             None,
-            None,
-            None
-        );
+            None);
         team_one.speed = 5;
         team_one.movement = 5;
         team_one.coal = coal;
@@ -124,9 +106,7 @@ mod tests {
             None,
             None,
             None,
-            None,
-            None
-        );
+            None);
         team_two.speed = 5;
         team_two.movement = 5;
         team_two.coal = coal;
@@ -134,9 +114,8 @@ mod tests {
             board,
             0,
             team_one.clone(),
-            team_two.clone(),
-            None
-        );
+            team_two.clone(), 
+            None);
         game_state
     }
 
@@ -144,19 +123,19 @@ mod tests {
     fn test_turn_perform() {
         let state: GameState = setup(5);
         let turn: Turn = Turn::new(CubeDirection::Left);
-        let result: Result<GameState, PyErr> = turn.perform(&state);
+        let result: Result<Ship, PyErr> = turn.perform(&state);
 
         assert!(result.is_ok());
 
-        let new_state: GameState = result.unwrap();
-        assert_eq!(new_state.current_ship().direction, CubeDirection::Left);
+        let new_ship: Ship = result.unwrap();
+        assert_eq!(new_ship.direction, CubeDirection::Left);
     }
 
     #[test]
     fn test_turn_perform_not_enough_coal() {
         let state: GameState = setup(0);
         let turn: Turn = Turn::new(CubeDirection::Left);
-        let result: Result<GameState, PyErr> = turn.perform(&state);
+        let result: Result<Ship, PyErr> = turn.perform(&state);
 
         assert!(result.is_err());
 

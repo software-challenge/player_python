@@ -7,6 +7,7 @@ __all__ = [
     'Board',
     'CartesianCoordinate',
     'CubeCoordinates',
+    'CubeDirection,'
     'PluginConstants',
     'Accelerate',
     'Advance',
