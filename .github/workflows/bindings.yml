@@ -42,20 +42,3 @@ jobs:
         with:
           message: "commit windows packages"
           add: dist
-
-  macos:
-    runs-on: macos-latest
-    needs: windows
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          ref: "master"
-      - uses: pyo3/maturin-action@v1
-        with:
-          command: build
-          args: --release -o dist --universal2 --find-interpreter
-      - name: Commit
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: "commit macos packages"
-          add: dist
