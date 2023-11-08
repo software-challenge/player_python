@@ -49,7 +49,8 @@ impl AdvanceInfo {
         cost
     }
 
-    pub fn advances(&self, distance: usize) -> Vec<Advance> {
+    pub fn advances(&self, distance: Option<usize>) -> Vec<Advance> {
+        let distance = distance.unwrap_or(self.costs.len().saturating_sub(1));
         (1..=distance).map(|it| Advance { distance: it as i32 }).collect()
     }
 
@@ -133,30 +134,6 @@ impl GameState {
         self.board.does_field_have_stream(&self.current_ship.position)
     }
 
-    /// Performs the sequence of actions specified in the provided `Move` object.
-    ///
-    /// This method applies each `Action` in the `Move` to the current game state,
-    /// updating the state as it goes. The method ensures that the sequence of actions
-    /// adheres to the game rules by checking requirements and constraints specific to each `Action`.
-    /// If an action doesn't comply with the game rules, an error is returned.
-    ///
-    /// # Args
-    ///
-    /// * `move_: Move` - a sequence of actions to be performed.
-    ///
-    /// # Returns
-    ///
-    /// * `Ok(GameState)` - a new game state after successfully performing all actions.
-    /// * `Err(ActionProblem)` - an error occurred either because an action was unlawful
-    /// or because there was a problem applying the action to the game state.
-    ///
-    /// # Examples
-    ///
-    /// ```Python
-    /// move = Move([Accelerate(1), Advance(1), Turn(CubeDirection.Right)])
-    /// new_state = game_state.perform_move(move)
-    /// print(new_state)
-    /// ```
     fn perform_move(&self, move_: Move) -> Result<GameState, PyErr> {
         let mut new_state: GameState = self.clone();
 
@@ -309,29 +286,6 @@ impl GameState {
         }
     }
 
-    pub fn get_simple_moves(&self) -> Vec<Move> {
-        let actions = self.get_actions(0, self.current_ship.coal);
-
-        let moves = actions
-            .into_iter()
-            .map(|action| Move::new(vec![action]))
-            .collect();
-        moves
-    }
-
-    pub fn get_actions(&self, rank: i32, max_coal: i32) -> Vec<Action> {
-        let mut actions: Vec<Action> = Vec::new();
-        if rank == 0 {
-            actions.extend(self.get_accelerations(max_coal).into_iter().map(Action::Accelerate));
-        }
-        actions.extend(self.get_turns(max_coal).into_iter().map(Action::Turn));
-        actions.extend(self.get_advances().into_iter().map(Action::Advance));
-        if rank != 0 {
-            actions.extend(self.get_pushes().into_iter().map(Action::Push));
-        }
-        actions
-    }
-
     pub fn ship_advance_points(&self, ship: Ship) -> Option<i32> {
         let (i, segment) = self.board.segment_with_index_at(ship.position)?;
         Some(
@@ -350,108 +304,6 @@ impl GameState {
 
     pub fn must_push(&self) -> bool {
         &self.current_ship.position == &self.other_ship.position
-    }
-
-    pub fn get_pushes(&self) -> Vec<Push> {
-        if
-            self.board
-                .get(&self.current_ship.position)
-                .unwrap_or_else(|| {
-                    panic!(
-                        "[get_pushes] Field at position {} does not exist",
-                        self.current_ship.position
-                    )
-                }).field_type == FieldType::Sandbank ||
-            !self.must_push() ||
-            self.current_ship.movement < 1
-        {
-            Vec::new()
-        } else {
-            self.get_pushes_from(&self.current_ship.position, &self.current_ship.direction)
-        }
-    }
-
-    pub fn get_pushes_from(
-        &self,
-        position: &CubeCoordinates,
-        incoming_direction: &CubeDirection
-    ) -> Vec<Push> {
-        CubeDirection::VALUES.iter()
-            .filter(|dir| {
-                *dir != &incoming_direction.opposite() &&
-                    self.board
-                        .get_field_in_direction(*dir, position)
-                        .map_or(false, |field| field.is_empty())
-            })
-            .map(|dir| Push::new(*dir))
-            .collect()
-    }
-
-    pub fn get_turns(&self, max_coal: i32) -> Vec<Turn> {
-        if
-            self.board
-                .get(&self.current_ship.position)
-                .unwrap_or_else(|| {
-                    panic!(
-                        "[get_turns] Field at position {} does not exist",
-                        self.current_ship.position
-                    )
-                }).field_type == FieldType::Sandbank ||
-            self.must_push()
-        {
-            Vec::new()
-        } else {
-            let max_turn_count = (max_coal + self.current_ship.free_turns).min(3).max(0);
-
-            (1..=max_turn_count)
-                .flat_map(|i| {
-                    vec![
-                        Turn::new(self.current_ship.direction.rotated_by(i)),
-                        Turn::new(self.current_ship.direction.rotated_by(-i))
-                    ]
-                })
-                .take(5)
-                .collect()
-        }
-    }
-
-    pub fn get_advances(&self) -> Vec<Advance> {
-        if self.current_ship.movement < 1 || self.must_push() {
-            return Vec::new();
-        }
-
-        let sandbank: Vec<Advance> = self.check_sandbank_advances(&self.current_ship);
-
-        if !sandbank.is_empty() {
-            return sandbank;
-        }
-        let ship = self.current_ship;
-        return self.check_ship_advance_limit(&ship).advances(ship.movement.try_into().unwrap());
-    }
-
-    pub fn check_sandbank_advances(&self, ship: &Ship) -> Vec<Advance> {
-        let mut advances = Vec::new();
-        if
-            self.board
-                .get(&ship.position)
-                .unwrap_or_else(|| {
-                    panic!(
-                        "[check_sandbank_advances] Field at position {} does not exist",
-                        ship.position
-                    )
-                }).field_type == FieldType::Sandbank
-        {
-            if self.check_ship_advance_limit(ship).distance() > 1 {
-                let advance1 = Advance::new(1);
-                advances.push(advance1);
-            }
-
-            if self.check_ship_advance_limit(ship).distance() > 1 {
-                let advance_minus1 = Advance::new(-1);
-                advances.push(advance_minus1);
-            }
-        }
-        advances
     }
 
     pub fn check_ship_advance_limit(&self, ship: &Ship) -> AdvanceInfo {
@@ -477,11 +329,14 @@ impl GameState {
         }
 
         while total_cost < max_movement {
-            current_position = current_position + direction.vector();
+            current_position += direction.vector();
+            debug!("Current Position: {:?}", current_position);
+            debug!("Vector: {:?}", direction.vector());
             total_cost += 1;
             let current_field_option: Option<Field> = self.board.get(&current_position);
 
             if current_field_option.is_none() {
+                debug!("Current Position: {:?}", current_position);
                 return result!(AdvanceProblem::FieldIsBlocked);
             }
 
@@ -490,6 +345,7 @@ impl GameState {
                 if total_cost < max_movement {
                     total_cost += 1;
                 } else {
+                    debug!("Movement points missing due to stream");
                     break;
                 }
             }
@@ -515,84 +371,127 @@ impl GameState {
         result!(AdvanceProblem::MovementPointsMissing)
     }
 
-    /// Returns a vector of possible accelerations regards to the current ship and plugin constants.
-    ///
-    /// The function calculates the lower and upper bound of possible accelerations, taking into account
-    /// the ship's current speed and free accelerations, as well as the maximum allowable speed provided by
-    /// `PluginConstants`. It then generates a set of accelerations within this range.
-    ///
-    /// # Arguments
-    ///
-    /// * `max_coal` - The maximum amount of coal that can be consumed to produce an acceleration.
-    ///
-    /// # Returns
-    ///
-    /// * `Vec<Accelerate>` - A vector of `Accelerate` objects representing the possible accelerations.
-    ///   If the ship must push (determined by `self.must_push()`), it will return an empty vector.
-    pub fn get_accelerations(&self, max_coal: i32) -> Vec<Accelerate> {
+    pub fn possible_accelerations(&self) -> Vec<Accelerate> {
         if self.must_push() {
             return Vec::new();
         }
 
-        let current_ship: Ship = self.current_ship;
+        let ship = self.current_ship;
+        return (1..=self.current_ship.coal + ship.free_acc)
+            .flat_map(|i| [i, -i])
+            .filter(|&i| (
+                if i > 0 {
+                    PluginConstants::MAX_SPEED >= ship.speed + i
+                } else {
+                    PluginConstants::MIN_SPEED <= ship.speed - i
+                }
+            ))
+            .map(Accelerate::new)
+            .collect();
+    }
 
-        (1..=max_coal + current_ship.free_acc)
-            .flat_map(|i|
-                vec![
-                    if PluginConstants::MAX_SPEED >= current_ship.speed + i {
-                        Some(Accelerate::new(i))
-                    } else {
-                        None
-                    },
-                    if PluginConstants::MIN_SPEED <= current_ship.speed - i {
-                        Some(Accelerate::new(-i))
-                    } else {
-                        None
-                    }
-                ]
+    pub fn possible_pushes(&self) -> Vec<Push> {
+        let ship = self.current_ship;
+        if !self.must_push() || self.board.is_sandbank(&ship.position) || ship.movement < 1 {
+            return Vec::new();
+        }
+
+        CubeDirection::VALUES.into_iter()
+            .filter(
+                |&d|
+                    d != ship.direction.opposite() &&
+                    self.board.get(&(ship.position + d.vector())).is_some() &&
+                    self.board
+                        .get(&(ship.position + d.vector()))
+                        .unwrap()
+                        .is_empty()
             )
-            .filter_map(|x| x)
+            .map(Push::new)
             .collect()
     }
 
-    /// This is a function to check the movement possibilities for the current and another ship.
-    /// It determines whether either ship can perform any of the following actions:
-    /// 1. Advancing
-    /// 2. Turning
-    /// 3. Accelerating
-    ///
-    /// # Returns
-    ///
-    /// `true` if either the current ship or the other ship can do any of the actions.
-    /// `false` if neither of the ships can perform any action.
+    pub fn possible_turns(&self) -> Vec<Turn> {
+        let ship = self.current_ship;
+        if self.must_push() || self.board.is_sandbank(&ship.position) {
+            return Vec::new();
+        }
+        let max_turn_count = (ship.coal + ship.free_turns).min(3) as i32;
+        (1..=max_turn_count)
+            .flat_map(|i| [i, -i])
+            .map(|turns| Turn::new(ship.direction.rotated_by(turns)))
+            .take(5)
+            .collect()
+    }
+
+    pub fn possible_advances(&self) -> Vec<Advance> {
+        let ship = self.current_ship;
+        if ship.movement < 1 || self.must_push() {
+            return Vec::new();
+        }
+
+        self.sandbank_advances_for(&ship).unwrap_or_else(||
+            self.check_ship_advance_limit(&ship).advances(None)
+        )
+    }
+
+    pub fn sandbank_advances_for(&self, ship: &Ship) -> Option<Vec<Advance>> {
+        if self.board.is_sandbank(&ship.position) {
+            Some(
+                [-1, 1]
+                    .into_iter()
+                    .map(Advance::new)
+                    .filter(|a| {
+                        let direction = if a.distance < 0 {
+                            ship.direction.opposite()
+                        } else {
+                            ship.direction
+                        };
+
+                        let advanced_ship: Ship = Ship::new(
+                            ship.position,
+                            ship.team,
+                            Some(direction),
+                            Some(1),
+                            Some(1),
+                            Some(ship.coal),
+                            Some(ship.points),
+                            Some(ship.passengers),
+                            Some(ship.free_turns)
+                        );
+                        self.check_ship_advance_limit(&advanced_ship).distance() > 1
+                    })
+                    .collect()
+            )
+        } else {
+            None
+        }
+    }
+
+    pub fn possible_actions(&self, rank: i32) -> Vec<Action> {
+        let mut actions: Vec<Action> = Vec::new();
+
+        if rank == 0 {
+            actions.extend(self.possible_accelerations().into_iter().map(Action::Accelerate));
+        }
+        actions.extend(self.possible_turns().into_iter().map(Action::Turn));
+        actions.extend(self.possible_advances().into_iter().map(Action::Advance));
+        if rank != 0 {
+            actions.extend(self.possible_pushes().into_iter().map(Action::Push));
+        }
+
+        actions
+    }
+
     pub fn can_move(&self) -> bool {
-        let current_ship: Ship = self.current_ship;
+        let current_ship_can_advance: bool = !self.possible_advances().is_empty();
 
-        let current_ship_can_advance: bool = !self.get_advances().is_empty();
+        let current_ship_can_turn: bool = !self.possible_turns().is_empty();
 
-        let current_ship_can_turn: bool = !self.get_turns(current_ship.coal).is_empty();
-
-        let current_ship_can_accelerate: bool = !self
-            .get_accelerations(current_ship.coal)
-            .is_empty();
+        let current_ship_can_accelerate: bool = !self.possible_accelerations().is_empty();
 
         current_ship_can_advance || current_ship_can_turn || current_ship_can_accelerate
     }
 
-    /// Checks if the game is over based on a set of conditions.
-    ///
-    /// This function checks for the following end game scenarios:
-    ///
-    /// 1. Condition 1: A ship with 2 passengers reaches a goal field with speed 1
-    /// 2. Condition 2: A player makes an invalid move. This is handled by an InvalidMoveException during the game.
-    /// 3. Condition 3: At the end of a round, a ship is more than 3 game segments behind
-    /// 4. Condition 4: The round limit of 30 rounds is reached
-    /// 5. Condition 5: Both players cannot move anymore
-    ///
-    /// If any of the above conditions are met, the game is considered over.
-    ///
-    /// # Returns
-    /// * `bool` - Returns `true` if any of the conditions are met, signifying the end of the game. Otherwise, it returns `false`.
     pub fn is_over(&self) -> bool {
         // Bedingung 1: ein Dampfer mit 2 Passagieren erreicht ein Zielfeld mit Geschwindigkeit 1
         let condition1 =
@@ -617,23 +516,6 @@ impl GameState {
         condition1 || condition3 || condition4 || condition5
     }
 
-    /// `is_winner` is a function that checks if a specific ship wins the game.
-    ///
-    /// The function takes a reference to a ship. A ship is considered a winner if:
-    /// - it has more than one passenger,
-    /// - its effective speed on the board is less than 2,
-    /// - it is in a field of type Goal.
-    ///
-    /// Arguments:
-    /// * `ship`: A reference to the `Ship` object.
-    ///
-    /// Returns:
-    /// `bool` - Returns `true` if the ship meets all the win conditions, `false` otherwise.
-    ///
-    /// Examples:
-    /// ```
-    /// assert_eq!(game.is_winner(&ship), true);
-    /// ```
     pub fn is_winner(&self, ship: &Ship) -> bool {
         ship.passengers > 1 &&
             self.board.effective_speed(ship) < 2 &&
@@ -644,31 +526,6 @@ impl GameState {
                 }).field_type == FieldType::Goal
     }
 
-    /// This function calculates and returns the total points for a specific team.
-    /// The `get_points_for_team` function accepts two parameters: a reference to the team's ship structure
-    /// and a reference to self.
-    ///
-    /// It calculates the team's points as follows:
-    /// - Ship points which are directly derived from the ship's point field.
-    /// - Coal points which are calculated by multiplying the ship's coal field by 2.
-    /// - Finish points which are calculated based on if the ship is the winning team or not.
-    /// The result is encapsulated into a TeamPoints structure and returned.
-    ///
-    /// # Arguments
-    ///
-    /// * `ship` - A reference to a ship object from the team.
-    ///
-    /// # Returns
-    ///
-    /// * `TeamPoints` - A structure that contains information about the points of the team.
-    ///
-    /// # Example
-    ///
-    /// ```Rust
-    /// // Assuming ship1 is an instance of Ship with appropriate values
-    /// let team_points = game.get_points_for_team(&ship1);
-    /// println!("Ship Points: {}, Coal Points: {}, Finish Points: {}", team_points.ship_points, team_points.coal_points, team_points.finish_points);
-    /// ```
     pub fn get_points_for_team(&self, ship: &Ship) -> TeamPoints {
         let finish_points = PluginConstants::FINISH_POINTS * (self.is_winner(ship) as i32);
         TeamPoints {
@@ -851,7 +708,7 @@ mod tests {
             None
         );
 
-        let accelerations: Vec<Accelerate> = game_state.get_accelerations(5);
+        let accelerations: Vec<Accelerate> = game_state.possible_accelerations();
         assert_eq!(accelerations.len(), 5);
         assert_eq!(accelerations[4].acc, -4);
     }
@@ -929,7 +786,7 @@ mod tests {
             None
         );
 
-        let turns: Vec<Turn> = game_state.get_turns(5);
+        let turns: Vec<Turn> = game_state.possible_turns();
         assert_eq!(turns.len(), 5);
         assert_eq!(turns[4].direction, CubeDirection::Left);
     }
@@ -1007,7 +864,7 @@ mod tests {
             None
         );
 
-        let advances: Vec<Advance> = game_state.get_advances();
+        let advances: Vec<Advance> = game_state.possible_advances();
         assert_eq!(advances.len(), 3);
         assert_eq!(advances[2].distance, 2);
     }
@@ -1085,7 +942,7 @@ mod tests {
             None
         );
 
-        let pushes: Vec<Push> = game_state.get_pushes();
+        let pushes: Vec<Push> = game_state.possible_pushes();
         assert_eq!(pushes.len(), 5);
         assert_eq!(pushes[0].direction, CubeDirection::Right);
     }

@@ -119,6 +119,12 @@ impl Board {
         }
     }
 
+    pub fn is_sandbank(&self, coords: &CubeCoordinates) -> bool {
+        self.get(coords)
+            .map(|field| field.field_type == FieldType::Sandbank)
+            .unwrap_or(false)
+    }
+
     pub fn pickup_passenger(&self, state: &GameState) -> GameState {
         let new_state: GameState = state.clone();
         let mut ship = new_state.current_ship;
@@ -247,8 +253,8 @@ mod tests {
     fn test_get() {}
 
     #[test]
-    fn test_does_field_have_current() {
-        let segment: Vec<Segment> = vec![Segment {
+    fn test_does_field_have_stream() {
+        let mut segment: Vec<Segment> = vec![Segment {
             direction: CubeDirection::Right,
             center: CubeCoordinates::new(0, 0),
             fields: vec![
@@ -284,12 +290,56 @@ mod tests {
                 ]
             ],
         }];
-        let board: Board = Board::new(segment, CubeDirection::Right);
+        let mut board: Board = Board::new(segment, CubeDirection::DownRight);
 
         assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(2, 0)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(1, -1)), false);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, -1)), false);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)), true);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(-1, 1)), false);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(1, 1)), false);
+
+        segment = vec![Segment {
+            direction: CubeDirection::DownRight,
+            center: CubeCoordinates::new(0, 0),
+            fields: vec![
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ]
+            ],
+        }];
+
+        board = Board::new(segment, CubeDirection::DownRight);
+
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)), true);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)), true);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(-1, 1)), false);
+        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(1, 1)), false);
     }
 
     #[test]

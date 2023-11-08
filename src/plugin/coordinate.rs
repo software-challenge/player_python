@@ -1,5 +1,5 @@
 use std::{ fmt, ops::Sub };
-use std::ops::{ Add, AddAssign, Mul, SubAssign };
+use std::ops::{ Add, AddAssign, Mul, SubAssign, Neg, DivAssign, Div, MulAssign };
 
 use pyo3::{ pyclass, pymethods };
 
@@ -96,102 +96,101 @@ impl CubeCoordinates {
     }
 
     pub fn rotated_by(&self, turns: i32) -> CubeCoordinates {
-        let coordinates = vec![self.q, self.r, self.s];
-        let rotated = vec![
-            coordinates[((0 + turns.rem_euclid(3)) % 3) as usize],
-            coordinates[((1 + turns.rem_euclid(3)) % 3) as usize],
-            coordinates[((2 + turns.rem_euclid(3)) % 3) as usize]
-        ];
-        if turns % 2 == 1 {
-            CubeCoordinates::new(-rotated[0], -rotated[1])
+        let components: [i32; 3] = [self.q, self.r, self.s];
+        let vec = CubeCoordinates {
+            q: components[turns.rem_euclid(3) as usize],
+            r: components[(turns + 1).rem_euclid(3) as usize],
+            s: components[(turns + 2).rem_euclid(3) as usize],
+        };
+        if turns % 2 == 0 {
+            vec
         } else {
-            CubeCoordinates::new(rotated[0], rotated[1])
+            -vec
         }
     }
 
     pub fn distance_to(&self, other: &CubeCoordinates) -> i32 {
         ((self.q - other.q).abs() + (self.r - other.r).abs() + (self.s - other.s).abs()) / 2
     }
-
-    pub fn turn_count_to(&self, target: &CubeDirection) -> i32 {
-        let mut current: CubeDirection = CubeDirection::Right;
-        let mut count: i32 = 0;
-        while current != *target {
-            current = current.rotated_by(1);
-            count += 1;
-        }
-        count
-    }
 }
 
-impl Add<CubeCoordinates> for CubeCoordinates {
+impl Add for CubeCoordinates {
     type Output = Self;
 
-    fn add(self, other: CubeCoordinates) -> CubeCoordinates {
-        CubeCoordinates::new(self.q + other.q, self.r + other.r)
+    fn add(self, rhs: Self) -> Self {
+        Self::new(self.q + rhs.q, self.r + rhs.r)
     }
 }
 
-impl Add<i32> for CubeCoordinates {
+impl AddAssign<CubeCoordinates> for CubeCoordinates {
+    fn add_assign(&mut self, rhs: Self) {
+        self.q += rhs.q;
+        self.r += rhs.r;
+        self.s += rhs.s;
+    }
+}
+
+impl Sub for CubeCoordinates {
     type Output = Self;
 
-    fn add(self, other: i32) -> CubeCoordinates {
-        CubeCoordinates::new(self.q + other, self.r + other)
+    fn sub(self, rhs: Self) -> Self {
+        Self::new(self.q - rhs.q, self.r - rhs.r)
     }
 }
 
-impl AddAssign for CubeCoordinates {
-    fn add_assign(&mut self, other: Self) {
-        self.q += other.q;
-        self.r += other.r;
-        self.s = -self.q - self.r;
-    }
-}
-
-impl Sub<CubeCoordinates> for CubeCoordinates {
-    type Output = Self;
-
-    fn sub(self, other: CubeCoordinates) -> CubeCoordinates {
-        CubeCoordinates::new(self.q - other.q, self.r - other.r)
-    }
-}
-
-impl Sub<i32> for CubeCoordinates {
-    type Output = Self;
-
-    fn sub(self, other: i32) -> CubeCoordinates {
-        CubeCoordinates::new(self.q - other, self.r - other)
-    }
-}
-
-impl SubAssign for CubeCoordinates {
-    fn sub_assign(&mut self, other: Self) {
-        self.q -= other.q;
-        self.r -= other.r;
-        self.s = -self.q - self.r;
-    }
-}
-
-impl Mul for CubeCoordinates {
-    type Output = Self;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        CubeCoordinates {
-            q: self.q * rhs.q,
-            r: self.r * rhs.r,
-            s: self.s * rhs.s,
-        }
+impl SubAssign<CubeCoordinates> for CubeCoordinates {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.q -= rhs.q;
+        self.r -= rhs.r;
+        self.s -= rhs.s;
     }
 }
 
 impl Mul<i32> for CubeCoordinates {
+    type Output = Self;
+
+    fn mul(self, rhs: i32) -> Self {
+        Self::new(self.q * rhs, self.r * rhs)
+    }
+}
+
+impl Mul<CubeCoordinates> for i32 {
     type Output = CubeCoordinates;
-    fn mul(self, rhs: i32) -> CubeCoordinates {
-        CubeCoordinates {
-            q: rhs * self.q,
-            r: rhs * self.r,
-            s: rhs * self.s,
-        }
+
+    fn mul(self, rhs: CubeCoordinates) -> CubeCoordinates {
+        CubeCoordinates::new(self * rhs.q, self * rhs.r)
+    }
+}
+
+impl MulAssign<i32> for CubeCoordinates {
+    fn mul_assign(&mut self, rhs: i32) {
+        self.q *= rhs;
+        self.r *= rhs;
+        self.s *= rhs;
+    }
+}
+
+impl Div<i32> for CubeCoordinates {
+    type Output = Self;
+
+    fn div(self, rhs: i32) -> Self {
+        Self::new(self.q / rhs, self.r / rhs)
+    }
+}
+
+impl DivAssign<i32> for CubeCoordinates {
+    fn div_assign(&mut self, rhs: i32) {
+        self.q /= rhs;
+        self.r /= rhs;
+        self.s /= rhs;
+    }
+}
+
+impl Neg for CubeCoordinates {
+    type Output = Self;
+
+    fn neg(self) -> Self {
+        Self::new(-self.q, -self.r)
     }
 }
 
@@ -262,25 +261,14 @@ impl CubeDirection {
     pub fn turn_count_to(&self, target: CubeDirection) -> i32 {
         let diff = ((target as i32) - (self.clone() as i32)).rem_euclid(6);
         if diff > 3 {
-            diff - 6
+            diff - (6 as i32)
         } else {
             diff
         }
     }
 
     pub fn rotated_by(&self, turns: i32) -> CubeDirection {
-        let directions: [CubeDirection; 6] = [
-            CubeDirection::Right,
-            CubeDirection::DownRight,
-            CubeDirection::DownLeft,
-            CubeDirection::Left,
-            CubeDirection::UpLeft,
-            CubeDirection::UpRight,
-        ];
-
-        directions[
-            ((self.clone() as i32) + turns).rem_euclid(directions.len() as i32) as usize
-        ].clone()
+        Self::VALUES[((self.clone() as i32) + (turns as i32)).rem_euclid(6) as usize]
     }
 
     pub fn ordinal(&self) -> i32 {
@@ -472,21 +460,5 @@ mod tests {
         let coords2: CubeCoordinates = CubeCoordinates::new(3, -1);
         let result = coords1.distance_to(&coords2);
         assert_eq!(result, 3);
-    }
-
-    #[test]
-    fn test_cube_coordinates_turn_count_to() {
-        let coords: CubeCoordinates = CubeCoordinates::new(1, 2);
-        let result: i32 = coords.turn_count_to(&CubeDirection::DownRight);
-        assert_eq!(result, 1);
-    }
-
-    #[test]
-    fn test_cube_coordinates_sub_i32() {
-        let coords: CubeCoordinates = CubeCoordinates::new(1, 2);
-        let result: CubeCoordinates = coords - 10;
-        assert_eq!(result.q, -9);
-        assert_eq!(result.r, -8);
-        assert_eq!(result.s, 17);
     }
 }
