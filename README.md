@@ -6,8 +6,6 @@
 
 > **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
 
-> *Besides that is this README not completely up to date and will be edited in the next few days.*
-
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
 have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
@@ -23,25 +21,10 @@ have to develop an artificial intelligence that plays and competes against other
 - [Getting Started](#getting-started)
   - [Start Arguments](#start-arguments)
 - [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
-
-## Table of Contents
-
-- [Installation](#installation)
-    - [Globally](#globally)
-    - [Virtual Environment](#virtual-environment)
-- [Getting Started](#getting-started)
-    - [Start Arguments](#start-arguments)
-- [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
+- [Local Development](#local-development)
 
 ## Installation
 
-> Currently the installation works by picking the correct version in the `dist` directory here in the repository and then installing it via `pip`.You need to look after your python version, os and computer architecture. This is due to the bindings written in Rust, which are compiled by nature.
-```shell
-pip install socha-[PACKAGE_VERSION]-[PYTHON_VERSION]-[OS]-[ARCHITECTURE].whl
-```
-
----
-### THE FOLLOWING IS CURRENTLY OUTDATED!
 Two methods are presented here to install the `socha` client.
 The first one is the fastest to get started right away.
 However,
@@ -51,13 +34,13 @@ Therefore,
 the possibility of a virtual environment is presented,
 which installs the packages inside the folder.
 
-> Pleas make sure that you have at least **Python 3.6** installed.
+> Pleas make sure that you have at least **Python 3.10** installed.
 > Check with `$ python -V` or `$ python3 -V`.
 >
 > If not present you can install python with the following commands:
 >
-> - Windows: `> winget install -e --id Python.Python.3.6`
-> - Debian: `$ sudo apt install python3.6`
+> - Windows: `> winget install -e --id Python.Python.3.10`
+> - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
 ### Globally
@@ -247,3 +230,18 @@ my_player/
 
 The `my_player` directory or whatever you named yours just needs to be packaged as a ZIP archive,
 and your player is ready to be uploaded. Congratulations! 🥳🎉
+
+
+## Local Development
+> 🏗️ This part is currently still unfinished and subject to change.
+
+This package was mostly written in Rust, which gives a significant performance boost compared to a natural Python program.
+However, this leads to considerable effort, as so-called bindings have to be created. These allow Python to access the functions in Rust. To realize this, [PyO3](https://github.com/PyO3/pyo3) is used here with the help of [Maturin](https://github.com/PyO3/maturin). 
+
+If local development is desired, the following things must be installed beforehand:
+- [Rust Compiler with Cargo](https://www.rust-lang.org/tools/install),
+- [Python 3.10 or later](https://www.python.org/downloads/),
+- and [Maturin](https://github.com/PyO3/maturin) in a virtual environment in this repository.
+
+If everything has been installed successfully, then the command `maturin develop` must be executed in a virtual environment.
+Now you can use a logic written in Python and make changes in the Rust code. Each time a change is made, `maturin develop` must be executed again to make the change visible to the Python code.
