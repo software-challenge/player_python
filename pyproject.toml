@@ -11,24 +11,29 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["xsdata==22.9"]
 classifiers = [
-    "Programming Language :: Rust",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
-    "Programming Language :: Python",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)",
-    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python",
+    "Programming Language :: Rust",
+    "Typing :: Typed",
 ]
 homepage = "https://software-challenge.de/"
 repository = "https://github.com/FalconsSky/socha-python-client"
 documentation = "https://software-challenge-python-client.readthedocs.io/en/latest/"
+
+[project.urls]
+"Bug Tracker" = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
 
 [tool.maturin]
 python-source = "python"
 module-name = "socha._socha"
 exclude = [".github", "docs", "tests", "logic.py", "readthedocs.yaml"]
 features = ["pyo3/extension-module"]
-[project.urls]
-"Bug Tracker" = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
