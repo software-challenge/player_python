@@ -24,3 +24,5 @@ class Logic(IClientHandler):
 
 if __name__ == "__main__":
     Starter(logic=Logic())
+    # if u wanna have more insights, u can set the logging level to debug:
+    # Starter(logic=Logic(), log_level=logging.DEBUG)

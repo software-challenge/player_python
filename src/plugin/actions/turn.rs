@@ -1,10 +1,11 @@
-use pyo3::{ prelude::*, exceptions::PyBaseException };
+use log::debug;
+use pyo3::{exceptions::PyBaseException, prelude::*};
 
 use crate::plugin::{
     coordinate::CubeDirection,
-    game_state::GameState,
     errors::turn_error::TurnProblem,
     field::FieldType,
+    game_state::GameState,
     ship::Ship,
 };
 
@@ -19,10 +20,12 @@ pub struct Turn {
 impl Turn {
     #[new]
     pub fn new(direction: CubeDirection) -> Self {
+        debug!("Creating Turn with direction: {}", direction);
         Turn { direction }
     }
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        debug!("Performing turn with direction: {}", self.direction);
         let mut current_ship: Ship = state.current_ship.clone();
 
         let turn_count: i32 = current_ship.direction.turn_count_to(self.direction.clone());
@@ -33,11 +36,13 @@ impl Turn {
         current_ship.free_turns = std::cmp::max(current_ship.free_turns - abs_turn_count, 0);
 
         if state.board.get(&current_ship.position).unwrap().field_type == FieldType::Sandbank {
+            debug!("Rotation on sandbank not allowed. Position: {}", current_ship.position);
             return Err(
                 PyBaseException::new_err(TurnProblem::RotationOnSandbankNotAllowed.message())
             );
         }
         if current_ship.coal < used_coal {
+            debug!("Not enough coal for rotation. Coal: {}", current_ship.coal);
             return Err(PyBaseException::new_err(TurnProblem::NotEnoughCoalForRotation.message()));
         }
 
@@ -47,6 +52,7 @@ impl Turn {
 
         current_ship.direction = self.direction.clone();
 
+        debug!("Turn completed and ship status: {:?}", current_ship);
         Ok(current_ship)
     }
 
@@ -62,11 +68,11 @@ impl Turn {
 #[cfg(test)]
 mod tests {
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
-    use crate::plugin::field::{ Field, FieldType };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+    use crate::plugin::field::{Field, FieldType};
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{ Ship, TeamEnum };
+    use crate::plugin::ship::{Ship, TeamEnum};
 
     use super::*;
 
@@ -93,7 +99,8 @@ mod tests {
             None,
             None,
             None,
-            None);
+            None,
+        );
         team_one.speed = 5;
         team_one.movement = 5;
         team_one.coal = coal;
@@ -106,7 +113,8 @@ mod tests {
             None,
             None,
             None,
-            None);
+            None,
+        );
         team_two.speed = 5;
         team_two.movement = 5;
         team_two.coal = coal;
@@ -114,8 +122,9 @@ mod tests {
             board,
             0,
             team_one.clone(),
-            team_two.clone(), 
-            None);
+            team_two.clone(),
+            None,
+        );
         game_state
     }
 

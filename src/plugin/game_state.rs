@@ -45,7 +45,6 @@ pub struct AdvanceInfo {
 impl AdvanceInfo {
     pub fn cost_until(&self, distance: usize) -> i32 {
         let cost: i32 = self.costs[distance - 1];
-        debug!("Costs: {:?} at distance {}", cost, distance);
         cost
     }
 
@@ -330,13 +329,10 @@ impl GameState {
 
         while total_cost < max_movement {
             current_position += direction.vector();
-            debug!("Current Position: {:?}", current_position);
-            debug!("Vector: {:?}", direction.vector());
             total_cost += 1;
             let current_field_option: Option<Field> = self.board.get(&current_position);
 
             if current_field_option.is_none() {
-                debug!("Current Position: {:?}", current_position);
                 return result!(AdvanceProblem::FieldIsBlocked);
             }
 
@@ -345,7 +341,6 @@ impl GameState {
                 if total_cost < max_movement {
                     total_cost += 1;
                 } else {
-                    debug!("Movement points missing due to stream");
                     break;
                 }
             }

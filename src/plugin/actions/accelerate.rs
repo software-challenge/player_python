@@ -1,6 +1,8 @@
+use log::debug;
 use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
+use crate::plugin::constants::PluginConstants;
 use crate::plugin::{ errors::acceleration_errors::AccelerationProblem, game_state::GameState };
 use crate::plugin::field::FieldType;
 use crate::plugin::ship::Ship;
@@ -32,62 +34,69 @@ pub struct Accelerate {
 impl Accelerate {
     #[new]
     pub fn new(acc: i32) -> Self {
+        debug!("Creating Accelerate with acc: {}", acc);
         Self { acc }
     }
-
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        debug!("perform() called with acc: {} and game state: {:?}", self.acc, state);
         let mut ship: Ship = state.current_ship.clone();
         let mut speed = ship.speed;
         speed += self.acc;
-
         match () {
             _ if self.acc == 0 => {
+                debug!("Zero acceleration is not allowed");
                 return Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message()));
             }
-            _ if speed > 6 => {
+            _ if speed > PluginConstants::MAX_SPEED => {
+                debug!("Acceleration would exceed max speed but was {}", speed);
                 return Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message()));
             }
-            _ if speed < 1 => {
+            _ if speed < PluginConstants::MIN_SPEED => {
+                debug!("Acceleration would go below min speed but was {}", speed);
                 return Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message()));
             }
             _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
+                debug!("Cannot accelerate on sandbank. Ship position: {}", ship.position);
                 return Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message()));
             }
             _ => {
                 let new_ship: Ship = self.accelerate(&mut ship);
                 if new_ship.coal < 0 {
+                    debug!("Insufficient coal for acceleration was {}", new_ship.coal);
                     Err(PyBaseException::new_err(AccelerationProblem::InsufficientCoal.message()))
                 } else {
+                    debug!("Ship accelerated successfully");
                     Ok(ship)
                 }
             }
         }
     }
-
     fn accelerate(&self, ship: &mut Ship) -> Ship {
+        debug!("accelerate() called with ship: {:?}", ship);
         let used_coal: i32 = self.acc.abs() - ship.free_acc;
         ship.coal -= used_coal.max(0);
         ship.free_acc = (-used_coal).max(0);
         ship.accelerate_by(self.acc);
-
+        debug!("Acceleration completed and ship status: {:?}", ship);
         return ship.clone();
     }
-
     fn __repr__(&self) -> PyResult<String> {
+        debug!("__repr__ method called for Accelerate with acc: {}", self.acc);
         Ok(format!("Accelerate({})", self.acc))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::plugin::board::Board;
     use crate::plugin::constants::PluginConstants;
+    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::field::Field;
     use crate::plugin::game_state::GameState;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::segment::Segment;
     use crate::plugin::ship::{ Ship, TeamEnum };
+
+    use super::*;
 
     #[test]
     fn test_new() {

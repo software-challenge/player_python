@@ -1,16 +1,15 @@
+use log::debug;
 use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
-use log::{ error, debug };
-
-use crate::plugin::ship::Ship;
 use crate::plugin::{
     constants::PluginConstants,
     errors::advance_errors::AdvanceProblem,
-    game_state::GameState,
     game_state::AdvanceInfo,
+    game_state::GameState,
 };
 use crate::plugin::field::FieldType;
+use crate::plugin::ship::Ship;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
@@ -24,15 +23,11 @@ pub struct Advance {
 impl Advance {
     #[new]
     pub fn new(distance: i32) -> Self {
+        debug!("New Advance with distance: {}", distance);
         Advance { distance }
     }
-
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
-        debug!(
-            "Performing advance action of a distance {} with ship: {:?}",
-            self.distance,
-            state.current_ship
-        );
+        debug!("Performing advance with distance: {}", self.distance);
         let mut current_ship: Ship = state.current_ship.clone();
         if
             (self.distance < PluginConstants::MIN_SPEED &&
@@ -40,18 +35,17 @@ impl Advance {
                     FieldType::Sandbank) ||
             self.distance > PluginConstants::MAX_SPEED
         {
-            error!(
-                "Invalid distance: {}. Due to low speed, high speed or sandbank.",
-                self.distance
-            );
+            debug!("Invalid distance error with distance: {}", self.distance);
             return Err(PyBaseException::new_err(AdvanceProblem::InvalidDistance.message()));
         }
-
         if self.distance > current_ship.movement {
-            error!("Movement points missing: {}", self.distance);
+            debug!(
+                "Movement points missing error with distance: {} and movement: {}",
+                self.distance,
+                current_ship.movement
+            );
             return Err(PyBaseException::new_err(AdvanceProblem::MovementPointsMissing.message()));
         }
-
         let result: AdvanceInfo = state.calculate_advance_info(
             &current_ship.position,
             &(if self.distance < 0 {
@@ -61,28 +55,21 @@ impl Advance {
             }),
             current_ship.movement
         );
-
-        debug!("Advance result: {:?}", result);
-
         if (result.distance() as i32) < self.distance.abs() {
-            debug!("Distance too long: {} for {}", result.distance(), self.distance.abs());
+            debug!(
+                "Advance problem with available distance: {} and requested distance: {}",
+                result.distance(),
+                self.distance
+            );
+            debug!("Advance problem reason: {}", result.problem.message());
             return Err(PyBaseException::new_err(result.problem.message()));
         }
-
         current_ship.position += current_ship.direction.vector() * self.distance;
         current_ship.movement -= result.cost_until(self.distance as usize);
 
-        debug!(
-            "New ship movement: {}, position: {:?}",
-            current_ship.movement,
-            current_ship.position
-        );
-
-        debug!("Advance action performed with new ship: {:?}", current_ship);
-
+        debug!("Advance completed and ship status: {:?}", current_ship);
         Ok(current_ship)
     }
-
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!("Advance({})", self.distance))
     }
@@ -90,13 +77,14 @@ impl Advance {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::plugin::board::Board;
+    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::field::Field;
     use crate::plugin::game_state::GameState;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::segment::Segment;
     use crate::plugin::ship::{ Ship, TeamEnum };
+
+    use super::*;
 
     #[test]
     fn test_new_advance() {

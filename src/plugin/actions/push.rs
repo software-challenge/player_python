@@ -1,7 +1,8 @@
+use log::debug;
 use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
-use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
 use crate::plugin::errors::push_error::PushProblem;
 use crate::plugin::field::FieldType;
 use crate::plugin::game_state::GameState;
@@ -18,14 +19,17 @@ pub struct Push {
 impl Push {
     #[new]
     pub fn new(direction: CubeDirection) -> Self {
+        debug!("New Push with direction: {}", direction);
         Push { direction }
     }
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+        debug!("Performing push with direction: {}", self.direction);
         let current_ship: Ship = state.current_ship.clone();
         let mut other_ship: Ship = state.other_ship.clone();
 
         if current_ship.movement == 0 {
+            debug!("Movement points missing: {}", current_ship.movement);
             return Err(PyBaseException::new_err(PushProblem::MovementPointsMissing.message()));
         }
 
@@ -35,27 +39,41 @@ impl Push {
         let shift_to_field = match state.board.get(&push_to) {
             Some(value) => value,
             None => {
+                debug!("Invalid field push: {}", push_to);
                 return Err(PyBaseException::new_err(PushProblem::InvalidFieldPush.message()));
             }
         };
 
         if !shift_to_field.is_empty() {
+            debug!("Blocked field push to: {}", push_to);
             return Err(PyBaseException::new_err(PushProblem::BlockedFieldPush.message()));
         }
 
         if push_from != other_ship.position {
+            debug!(
+                "Same field push from: {} but other ship is at: {}",
+                push_from,
+                other_ship.position
+            );
             return Err(PyBaseException::new_err(PushProblem::SameFieldPush.message()));
         }
 
         if state.board.get(&push_from).unwrap().field_type == FieldType::Sandbank {
+            debug!("Sandbank push from: {}", push_from);
             return Err(PyBaseException::new_err(PushProblem::SandbankPush.message()));
         }
 
         if self.direction == current_ship.direction.opposite() {
+            debug!(
+                "Backward pushing restricted: {} and current ship direction: {}",
+                self.direction,
+                current_ship.direction
+            );
             return Err(PyBaseException::new_err(PushProblem::BackwardPushingRestricted.message()));
         }
 
         if shift_to_field.field_type == FieldType::Sandbank {
+            debug!("Sandbank push to: {}", push_to);
             other_ship.speed = 1;
             other_ship.movement = 1;
         }
@@ -63,6 +81,7 @@ impl Push {
         other_ship.position = push_to;
         other_ship.free_turns += 1;
 
+        debug!("Push completed and other ship status: {:?}", other_ship);
         Ok(other_ship)
     }
 
@@ -74,11 +93,11 @@ impl Push {
 #[cfg(test)]
 mod tests {
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
     use crate::plugin::field::Field;
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{ Ship, TeamEnum };
+    use crate::plugin::ship::{Ship, TeamEnum};
 
     use super::*;
 
@@ -86,7 +105,7 @@ mod tests {
         c1: CubeCoordinates,
         c2: CubeCoordinates,
         fields: Vec<Vec<Field>>,
-        dir: CubeDirection
+        dir: CubeDirection,
     ) -> (GameState, Push) {
         let segment: Vec<Segment> = vec![Segment {
             direction: CubeDirection::Right,
@@ -103,7 +122,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_one.speed = 5;
         team_one.movement = 5;
@@ -116,7 +135,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_two.speed = 5;
         team_two.movement = 5;
@@ -131,7 +150,7 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Right
+            CubeDirection::Right,
         );
         let result: Result<Ship, PyErr> = push.perform(&state);
 
@@ -150,39 +169,39 @@ mod tests {
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None)
+                Field::new(FieldType::Water, None),
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None)
+                Field::new(FieldType::Water, None),
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Island, None),
-                Field::new(FieldType::Water, None)
+                Field::new(FieldType::Water, None),
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None)
+                Field::new(FieldType::Water, None),
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None)
-            ]
+                Field::new(FieldType::Water, None),
+            ],
         ];
 
         let (state, push) = setup(
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             fields,
-            CubeDirection::Right
+            CubeDirection::Right,
         );
         let result: Result<Ship, PyErr> = push.perform(&state);
 
@@ -202,7 +221,7 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(1, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Right
+            CubeDirection::Right,
         );
         let result: Result<Ship, PyErr> = push.perform(&state);
 
@@ -222,7 +241,7 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Left
+            CubeDirection::Left,
         );
         let result: Result<Ship, PyErr> = push.perform(&state);
 
