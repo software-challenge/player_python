@@ -41,14 +41,18 @@ impl Accelerate {
         speed += self.acc;
 
         match () {
-            _ if self.acc == 0 =>
-                Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message())),
-            _ if speed > 6 =>
-                Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message())),
-            _ if speed < 1 =>
-                Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message())),
-            _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank =>
-                Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message())),
+            _ if self.acc == 0 => {
+                return Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message()));
+            }
+            _ if speed > 6 => {
+                return Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message()));
+            }
+            _ if speed < 1 => {
+                return Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message()));
+            }
+            _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
+                return Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message()));
+            }
             _ => {
                 let new_ship: Ship = self.accelerate(&mut ship);
                 if new_ship.coal < 0 {
@@ -60,7 +64,7 @@ impl Accelerate {
         }
     }
 
-    fn accelerate(&self,  ship: &mut Ship) -> Ship {
+    fn accelerate(&self, ship: &mut Ship) -> Ship {
         let used_coal: i32 = self.acc.abs() - ship.free_acc;
         ship.coal -= used_coal.max(0);
         ship.free_acc = (-used_coal).max(0);
@@ -109,7 +113,8 @@ mod tests {
             None,
             None,
             None,
-            None);
+            None
+        );
         let team_two: Ship = Ship::new(
             CubeCoordinates::new(-1, 1),
             TeamEnum::Two,
@@ -119,7 +124,8 @@ mod tests {
             None,
             None,
             None,
-            None);
+            None
+        );
         let game_state: GameState = GameState::new(board, 0, team_one.clone(), team_two, None);
         (accelerate, game_state)
     }
@@ -199,7 +205,8 @@ mod tests {
             None,
             None,
             None,
-            None);
+            None
+        );
 
         assert_eq!(ship.speed, PluginConstants::MIN_SPEED);
         assert_eq!(ship.coal, PluginConstants::START_COAL);

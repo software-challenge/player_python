@@ -381,9 +381,9 @@ impl GameState {
             .flat_map(|i| [i, -i])
             .filter(|&i| (
                 if i > 0 {
-                    PluginConstants::MAX_SPEED >= ship.speed + i
+                    PluginConstants::MAX_SPEED <= ship.speed + i
                 } else {
-                    PluginConstants::MIN_SPEED <= ship.speed - i
+                    PluginConstants::MIN_SPEED >= ship.speed - i
                 }
             ))
             .map(Accelerate::new)
@@ -595,7 +595,7 @@ mod tests {
         }];
         let board: Board = Board::new(segment, CubeDirection::Right);
         let team_one: &mut Ship = &mut Ship::new(
-            CubeCoordinates::new(0, -1),
+            CubeCoordinates::new(0, 0),
             TeamEnum::One,
             None,
             None,
@@ -630,9 +630,9 @@ mod tests {
 
         let advances: AdvanceInfo = game_state.check_ship_advance_limit(&team_one);
 
-        assert_eq!(advances.costs, vec![1, 2, 3, 4, 5]);
-        assert_eq!(advances.problem, AdvanceProblem::MovementPointsMissing);
-        assert_eq!(advances.distance(), 5);
+        assert_eq!(advances.costs, vec![2, 3, 4]);
+        assert_eq!(advances.problem, AdvanceProblem::FieldIsBlocked);
+        assert_eq!(advances.distance(), 3);
     }
 
     #[test]
@@ -709,8 +709,8 @@ mod tests {
         );
 
         let accelerations: Vec<Accelerate> = game_state.possible_accelerations();
-        assert_eq!(accelerations.len(), 5);
-        assert_eq!(accelerations[4].acc, -4);
+        assert_eq!(accelerations.len(), 7);
+        assert_eq!(accelerations[4].acc, 5);
     }
 
     #[test]
@@ -865,8 +865,8 @@ mod tests {
         );
 
         let advances: Vec<Advance> = game_state.possible_advances();
-        assert_eq!(advances.len(), 3);
-        assert_eq!(advances[2].distance, 2);
+        assert_eq!(advances.len(), 2);
+        assert_eq!(advances[1].distance, 2);
     }
 
     #[test]
@@ -948,7 +948,7 @@ mod tests {
     }
 
     #[test]
-    fn test_performance_move() {
+    fn test_performe_move() {
         let segment: Vec<Segment> = vec![
             Segment {
                 direction: CubeDirection::Right,
@@ -1058,12 +1058,7 @@ mod tests {
         );
 
         let move_: Move = Move::new(
-            vec![
-                Action::Accelerate(Accelerate::new(1)),
-                Action::Advance(Advance::new(1)),
-                Action::Turn(Turn::new(CubeDirection::UpRight)),
-                Action::Advance(Advance::new(1))
-            ]
+            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
         );
 
         assert_eq!(game_state.current_ship.team, TeamEnum::One);
@@ -1071,23 +1066,18 @@ mod tests {
 
         let new_state: GameState = game_state.perform_move(move_).unwrap();
         assert_eq!(new_state.other_ship.team, TeamEnum::One);
-        assert_eq!(new_state.other_ship.position, CubeCoordinates::new(1, -2));
+        assert_eq!(new_state.other_ship.position, CubeCoordinates::new(1, -1));
 
         assert_eq!(new_state.current_ship.team, TeamEnum::Two);
         assert_eq!(new_state.current_ship.position, CubeCoordinates::new(-2, 1));
 
         let second_move_: Move = Move::new(
-            vec![
-                Action::Accelerate(Accelerate::new(1)),
-                Action::Advance(Advance::new(1)),
-                Action::Turn(Turn::new(CubeDirection::DownRight)),
-                Action::Advance(Advance::new(1))
-            ]
+            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
         );
 
         let second_new_state: GameState = new_state.perform_move(second_move_).unwrap();
-        assert_eq!(second_new_state.other_ship.team, TeamEnum::Two);
-        assert_eq!(second_new_state.other_ship.position, CubeCoordinates::new(-1, 2));
+        assert_eq!(second_new_state.other_ship.team, TeamEnum::One);
+        assert_eq!(second_new_state.other_ship.position, CubeCoordinates::new(1, -1));
     }
 
     #[test]

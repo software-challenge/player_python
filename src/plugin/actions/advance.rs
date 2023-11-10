@@ -162,7 +162,7 @@ mod tests {
 
     #[test]
     fn test_advance_perform_invalid_distance() {
-        let advance: Advance = Advance::new(4);
+        let advance: Advance = Advance::new(-2);
         let state: GameState = setup();
 
         let result: Result<Ship, PyErr> = advance.perform(&state);
