@@ -5,16 +5,18 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'socha player template'
-copyright = '2022, Falcon'
-author = 'Falcon'
+project = 'socha python client'
+copyright = '2023, maxblan'
+author = 'maxblan'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    'sphinx.ext.autodoc'
+    'autoapi.extension'
 ]
+
+autoapi_dirs = ['../python/socha']
 
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']

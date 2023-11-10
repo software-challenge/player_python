@@ -1,11 +1,19 @@
 Python Client for the Software-Challenge Germany 2024
 =====================================================
 
-|Discord|
+|Read the Docs| |PyPI| |PyPI - Python Version| |Discord| |Documentation|
 
    **Be warned!** This package is currently experimental and has still a
    few known bugs. But please try it out and let us know if anything
    comes up.
+
+..
+
+   Hey there! To help you out, it's best to start by checking out the
+   `documentation for this
+   client <https://software-challenge-python-client.readthedocs.io/en/latest/>`__
+   before you ask any questions or open an issue. It'll provide you with
+   some helpful information!
 
 This repository contains the Python package for the `Software-Challenge
 Germany <https://www.software-challenge.de>`__, a programming
@@ -306,8 +314,16 @@ can use a logic written in Python and make changes in the Rust code.
 Each time a change is made, ``maturin develop`` must be executed again
 to make the change visible to the Python code.
 
+.. |Read the Docs| image:: https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs
+   :target: https://software-challenge-python-client.readthedocs.io/en/latest/
+.. |PyPI| image:: https://img.shields.io/pypi/v/socha?label=PyPi
+   :target: https://pypi.org/project/socha/
+.. |PyPI - Python Version| image:: https://img.shields.io/pypi/pyversions/socha?label=Python
+   :target: https://pypi.org/project/socha/
 .. |Discord| image:: https://img.shields.io/discord/233577109363097601?color=blue&label=Discord
    :target: https://discord.gg/ARZamDptG5
+.. |Documentation| image:: https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1
+   :target: https://docs.software-challenge.de/
 
 
 Indices and tables

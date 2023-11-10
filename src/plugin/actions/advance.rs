@@ -77,6 +77,8 @@ impl Advance {
 
 #[cfg(test)]
 mod tests {
+    use pyo3::prepare_freethreaded_python;
+    
     use crate::plugin::board::Board;
     use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::field::Field;
@@ -158,6 +160,7 @@ mod tests {
         assert!(result.is_err());
         let error: PyErr = result.unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(error.value(py).to_string(), AdvanceProblem::InvalidDistance.message());
         });
@@ -173,6 +176,7 @@ mod tests {
         assert!(result.is_err());
         let error: PyErr = result.unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 error.value(py).to_string(),

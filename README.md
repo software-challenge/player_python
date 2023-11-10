@@ -2,9 +2,19 @@
 
 # Python Client for the Software-Challenge Germany 2024
 
+[![Read the Docs](https://img.shields.io/readthedocs/socha-python-client.readthedocs?label=Docs)](https://socha-python-client.readthedocs.io/en/latest/)
+[![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
+[![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
 > **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
+
+> Hey there! To help you out, it's best to start by checking out the
+> [documentation for this client](https://socha-python-client.readthedocs.readthedocs.io/en/latest/)
+> before you ask any questions or open an issue.
+> It'll provide you with some helpful information!
+
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students

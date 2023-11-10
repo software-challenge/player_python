@@ -88,6 +88,8 @@ impl Accelerate {
 
 #[cfg(test)]
 mod tests {
+    use pyo3::prepare_freethreaded_python;
+
     use crate::plugin::board::Board;
     use crate::plugin::constants::PluginConstants;
     use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
@@ -145,6 +147,7 @@ mod tests {
 
         let result_error: PyErr = accelerate.perform(&game_state).unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(result_error.value(py).to_string(), AccelerationProblem::ZeroAcc.message());
         });
@@ -156,6 +159,7 @@ mod tests {
 
         let result_error = accelerate.perform(&game_state).unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 result_error.value(py).to_string(),
@@ -170,6 +174,7 @@ mod tests {
 
         let result = accelerate.perform(&game_state).unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(result.value(py).to_string(), AccelerationProblem::BelowMinSpeed.message());
         });
@@ -185,6 +190,7 @@ mod tests {
 
         let result = accelerate.perform(&mute_state).unwrap_err();
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 result.value(py).to_string(),

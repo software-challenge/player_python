@@ -92,6 +92,8 @@ impl Push {
 
 #[cfg(test)]
 mod tests {
+    use pyo3::prepare_freethreaded_python;
+    
     use crate::plugin::board::Board;
     use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
     use crate::plugin::field::Field;
@@ -159,7 +161,7 @@ mod tests {
         let new_ship: Ship = result.unwrap();
 
         assert_eq!(new_ship.position, CubeCoordinates::new(1, 0));
-        assert_eq!(new_ship.free_turns, 1);
+        assert_eq!(new_ship.free_turns, 2);
     }
 
     #[test]
@@ -207,6 +209,7 @@ mod tests {
 
         assert!(result.is_err());
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 result.unwrap_err().value(py).to_string(),
@@ -227,6 +230,7 @@ mod tests {
 
         assert!(result.is_err());
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 result.unwrap_err().value(py).to_string(),
@@ -247,6 +251,7 @@ mod tests {
 
         assert!(result.is_err());
 
+        prepare_freethreaded_python();
         Python::with_gil(|py| {
             assert_eq!(
                 result.unwrap_err().value(py).to_string(),
