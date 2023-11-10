@@ -12,6 +12,7 @@ impl PluginConstants {
     pub const MIN_SPEED: i32 = 1;
     pub const MAX_SPEED: i32 = 6;
     pub const FREE_ACC: i32 = 1;
+    pub const FREE_TURNS: i32 = 1;
 
     // Points
     pub const FINISH_POINTS: i32 = 6;

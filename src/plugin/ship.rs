@@ -9,6 +9,15 @@ pub enum TeamEnum {
     Two,
 }
 
+impl TeamEnum {
+    pub fn __repr__(&self) -> PyResult<String> {
+        Ok(match self {
+            TeamEnum::One => "TeamEnum.One".to_string(),
+            TeamEnum::Two => "TeamEnum.Two".to_string(),
+        })
+    }
+}
+
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Ship {
@@ -55,7 +64,7 @@ impl Ship {
             speed: speed.unwrap_or(PluginConstants::MIN_SPEED),
             coal: coal.unwrap_or(PluginConstants::START_COAL),
             passengers: passengers.unwrap_or(0),
-            free_turns: free_turns.unwrap_or(0),
+            free_turns: free_turns.unwrap_or(PluginConstants::FREE_TURNS),
             points: points.unwrap_or(0),
             free_acc: PluginConstants::FREE_ACC,
             movement: movement.unwrap_or(speed.unwrap_or(PluginConstants::MIN_SPEED)),
