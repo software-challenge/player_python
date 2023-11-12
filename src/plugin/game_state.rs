@@ -254,7 +254,7 @@ impl GameState {
         ship.speed - (self.board.does_field_have_stream(&ship.position) as i32)
     }
 
-    fn remove_passenger_at(&mut self, coord: CubeCoordinates) -> bool {
+    pub fn remove_passenger_at(&mut self, coord: CubeCoordinates) -> bool {
         let mut passenger_removed = false;
         for d in CubeDirection::VALUES {
             if let Some(mut field) = self.board.get_field_in_direction(&d, &coord) {

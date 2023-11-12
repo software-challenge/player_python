@@ -2,7 +2,7 @@
 
 # Python Client for the Software-Challenge Germany 2024
 
-[![Read the Docs](https://img.shields.io/readthedocs/socha-python-client.readthedocs?label=Docs)](https://socha-python-client.readthedocs.io/en/latest/)
+[![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/en/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
@@ -11,7 +11,7 @@
 > **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
 
 > Hey there! To help you out, it's best to start by checking out the
-> [documentation for this client](https://socha-python-client.readthedocs.readthedocs.io/en/latest/)
+> [documentation for this client](https://socha-python-client.readthedocs.io/en/)
 > before you ask any questions or open an issue.
 > It'll provide you with some helpful information!
 
@@ -115,14 +115,14 @@ This should satisfy the dependencies and you can start right away.
 
 If you want to start with the Software-Challenge Python Client, you have to import some dependencies first.
 
-The import is kept very simple,
-since herewith all needed dependencies are imported,
-due to changes of the `__init__.py`.
-But if you want to avoid unnecessary imports,
-you can of course import only what you actually need.
+The following are all possible imports which are available. You won't need every, but for the sake of completeness all are listed.
 
 ```python
-from socha import *
+from socha import Accelerate, AccelerationProblem, Advance, AdvanceInfo, AdvanceProblem, Board
+from socha import CartesianCoordinate, CubeCoordinates, CubeDirection, Field, FieldType, GameState
+from socha import Move, Passenger, Push, PushProblem, Segment, Ship, TeamEnum, TeamPoints, Turn, TurnProblem
+from socha.api.networking.game_client import IClientHandler
+from socha.starter import Starter
 ```
 
 If you now want to develop and implement your logic, then the structure of the class should look like this.
@@ -132,8 +132,7 @@ class Logic(IClientHandler):
     gameState: GameState
 
     def calculate_move(self) -> Move:
-        possibleMoves = self.gameState.possible_moves
-        return possibleMoves[0]
+        return Move([Advance(1)])
 
     def on_update(self, state: GameState):
         self.gameState = state
@@ -149,6 +148,8 @@ call the Starter with your desired arguments. The following starts the client wi
 if __name__ == "__main__":
     Starter(Logic())
 ```
+
+> If you want a complete file as an example, you can take a look at this [`logic.py`](https://github.com/maxblan/socha-python-client/blob/master/logic.py).
 
 ### Start arguments
 

@@ -11,9 +11,9 @@ Python Client for the Software-Challenge Germany 2024
 
    Hey there! To help you out, it's best to start by checking out the
    `documentation for this
-   client <https://software-challenge-python-client.readthedocs.io/en/latest/>`__
-   before you ask any questions or open an issue. It'll provide you with
-   some helpful information!
+   client <https://socha-python-client.readthedocs.io/en/>`__ before you
+   ask any questions or open an issue. It'll provide you with some
+   helpful information!
 
 This repository contains the Python package for the `Software-Challenge
 Germany <https://www.software-challenge.de>`__, a programming
@@ -126,14 +126,16 @@ Getting Started
 If you want to start with the Software-Challenge Python Client, you have
 to import some dependencies first.
 
-The import is kept very simple, since herewith all needed dependencies
-are imported, due to changes of the ``__init__.py``. But if you want to
-avoid unnecessary imports, you can of course import only what you
-actually need.
+The following are all possible imports which are available. You won't
+need every, but for the sake of completeness all are listed.
 
 .. code:: python
 
-   from socha import *
+   from socha import Accelerate, AccelerationProblem, Advance, AdvanceInfo, AdvanceProblem, Board
+   from socha import CartesianCoordinate, CubeCoordinates, CubeDirection, Field, FieldType, GameState
+   from socha import Move, Passenger, Push, PushProblem, Segment, Ship, TeamEnum, TeamPoints, Turn, TurnProblem
+   from socha.api.networking.game_client import IClientHandler
+   from socha.starter import Starter
 
 If you now want to develop and implement your logic, then the structure
 of the class should look like this.
@@ -144,8 +146,7 @@ of the class should look like this.
        gameState: GameState
 
        def calculate_move(self) -> Move:
-           possibleMoves = self.gameState.possible_moves
-           return possibleMoves[0]
+           return Move([Advance(1)])
 
        def on_update(self, state: GameState):
            self.gameState = state
@@ -163,6 +164,12 @@ arguments.
 
    if __name__ == "__main__":
        Starter(Logic())
+
+..
+
+   If you want a complete file as an example, you can take a look at
+   this
+   ```logic.py`` <https://github.com/maxblan/socha-python-client/blob/master/logic.py>`__.
 
 Start arguments
 ~~~~~~~~~~~~~~~
@@ -314,8 +321,8 @@ can use a logic written in Python and make changes in the Rust code.
 Each time a change is made, ``maturin develop`` must be executed again
 to make the change visible to the Python code.
 
-.. |Read the Docs| image:: https://img.shields.io/readthedocs/software-challenge-python-client?label=Docs
-   :target: https://software-challenge-python-client.readthedocs.io/en/latest/
+.. |Read the Docs| image:: https://img.shields.io/readthedocs/socha-python-client?label=Docs
+   :target: https://socha-python-client.readthedocs.io/en/
 .. |PyPI| image:: https://img.shields.io/pypi/v/socha?label=PyPi
    :target: https://pypi.org/project/socha/
 .. |PyPI - Python Version| image:: https://img.shields.io/pypi/pyversions/socha?label=Python
