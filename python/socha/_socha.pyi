@@ -51,12 +51,12 @@ class CubeCoordinates(object):
 
 
 class CubeDirection:
-    Right = 0
-    DownRight = 1
-    DownLeft = 2
-    Left = 3
-    UpLeft = 4
-    UpRight = 5
+    Right: int
+    DownRight: int
+    DownLeft: int
+    Left: int
+    UpLeft: int
+    UpRight: int
 
     def vector(self) -> CubeCoordinates: ...
     def angle(self) -> int: ...
@@ -75,8 +75,8 @@ class Move:
 
 
 class TeamEnum:
-    One = 0
-    Two = 1
+    One: int
+    Two: int
 
 
 class Ship:

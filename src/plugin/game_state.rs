@@ -1,3 +1,4 @@
+use std::cmp::Ordering;
 use std::mem::swap;
 
 use log::debug;
@@ -19,6 +20,7 @@ use crate::plugin::ship::Ship;
 use crate::plugin::errors::advance_errors::AdvanceProblem;
 
 use super::field::Passenger;
+use super::ship::TeamEnum;
 
 #[pyclass]
 #[derive(Debug, Clone)]
@@ -123,10 +125,19 @@ impl GameState {
     }
 
     pub fn determine_ahead_team(&self) -> Ship {
-        vec![self.other_ship, self.current_ship]
-            .into_iter()
-            .max_by_key(|s| (s.points, s.speed, s.coal))
-            .unwrap()
+        let calculate_points = |ship: Ship| -> i32 {
+            self.ship_advance_points(ship).unwrap() * 100 + ship.speed * 10 + ship.coal
+        };
+
+        let current_points = calculate_points(self.current_ship);
+        let other_points = calculate_points(self.other_ship);
+
+        match (current_points.cmp(&other_points), &self.current_ship.team) {
+            (Ordering::Greater, _) => self.current_ship.clone(),
+            (Ordering::Less, _) => self.other_ship.clone(),
+            (_, TeamEnum::One) => self.current_ship.clone(),
+            _ => self.other_ship.clone(),
+        }
     }
 
     pub fn is_current_ship_on_current(&self) -> bool {
@@ -1071,8 +1082,10 @@ mod tests {
         );
 
         let second_new_state: GameState = new_state.perform_move(second_move_).unwrap();
-        assert_eq!(second_new_state.other_ship.team, TeamEnum::One);
-        assert_eq!(second_new_state.other_ship.position, CubeCoordinates::new(1, -1));
+        assert_eq!(second_new_state.current_ship.team, TeamEnum::One);
+        assert_eq!(second_new_state.current_ship.position, CubeCoordinates::new(1, -1));
+        assert_eq!(second_new_state.other_ship.team, TeamEnum::Two);
+        assert_eq!(second_new_state.other_ship.position, CubeCoordinates::new(0, 1));
     }
 
     #[test]
@@ -1156,7 +1169,6 @@ mod tests {
         assert_eq!(game_state.current_ship.team, TeamEnum::Two);
         assert_eq!(game_state.other_ship.team, TeamEnum::One);
 
-        game_state.other_ship.speed += 1;
         game_state.advance_turn();
 
         assert_eq!(game_state.current_ship.team, TeamEnum::One);
@@ -1234,14 +1246,18 @@ mod tests {
 
         assert_eq!(game_state.determine_ahead_team().team, TeamEnum::One);
 
-        game_state.other_ship.speed += 1;
+        let _move: Move = Move::new(vec![Action::Advance(Advance::new(1))]);
 
-        assert_eq!(game_state.determine_ahead_team().team, TeamEnum::Two);
+        let new_state: GameState = game_state.perform_move(_move).unwrap();
+
+        assert_eq!(new_state.determine_ahead_team().team, TeamEnum::One);
+
+        let second_move: Move = Move::new(
+            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
+        );
+
+        let second_new_state: GameState = new_state.perform_move(second_move).unwrap();
+
+        assert_eq!(second_new_state.determine_ahead_team().team, TeamEnum::Two);
     }
-
-    #[test]
-    fn test_is_winner() {}
-
-    #[test]
-    fn test_get_points_for_team() {}
 }
