@@ -184,7 +184,7 @@ impl GameState {
                 _ => {}
             }
 
-            let mut new_current_ship: Result<Ship, PyErr> = Ok(new_state.current_ship);
+            let new_current_ship: Result<Ship, PyErr>;
             let mut new_other_ship: Result<Ship, PyErr> = Ok(new_state.other_ship);
 
             match action {
@@ -195,7 +195,9 @@ impl GameState {
                     new_current_ship = advance.perform(&new_state);
                 }
                 Action::Push(push) => {
-                    new_other_ship = push.perform(&new_state);
+                    let ship_tuple: (Ship, Ship) = push.perform(&new_state)?;
+                    new_current_ship = Ok(ship_tuple.0);
+                    new_other_ship = Ok(ship_tuple.1);
                 }
                 Action::Turn(turn) => {
                     new_current_ship = turn.perform(&new_state);

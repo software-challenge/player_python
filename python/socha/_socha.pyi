@@ -161,7 +161,7 @@ class Push:
     direction: CubeDirection
 
     def __init__(self, direction: CubeDirection) -> None: ...
-    def perform(self, state: GameState) -> Ship | BaseException(
+    def perform(self, state: GameState) -> (Ship, Ship) | BaseException(
         PushProblem): ...
 
 

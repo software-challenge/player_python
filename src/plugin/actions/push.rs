@@ -2,7 +2,7 @@ use log::debug;
 use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
-use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
 use crate::plugin::errors::push_error::PushProblem;
 use crate::plugin::field::FieldType;
 use crate::plugin::game_state::GameState;
@@ -23,15 +23,16 @@ impl Push {
         Push { direction }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
+    pub fn perform(&self, state: &GameState) -> Result<(Ship, Ship), PyErr> {
         debug!("Performing push with direction: {}", self.direction);
-        let current_ship: Ship = state.current_ship.clone();
+        let mut current_ship: Ship = state.current_ship.clone();
         let mut other_ship: Ship = state.other_ship.clone();
 
         if current_ship.movement == 0 {
             debug!("Movement points missing: {}", current_ship.movement);
             return Err(PyBaseException::new_err(PushProblem::MovementPointsMissing.message()));
         }
+        current_ship.movement -= 1;
 
         let push_from: CubeCoordinates = current_ship.position;
         let push_to: CubeCoordinates = push_from + self.direction.vector();
@@ -82,7 +83,7 @@ impl Push {
         other_ship.free_turns += 1;
 
         debug!("Push completed and other ship status: {:?}", other_ship);
-        Ok(other_ship)
+        Ok((current_ship, other_ship))
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -93,13 +94,13 @@ impl Push {
 #[cfg(test)]
 mod tests {
     use pyo3::prepare_freethreaded_python;
-    
+
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
     use crate::plugin::field::Field;
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{Ship, TeamEnum};
+    use crate::plugin::ship::{ Ship, TeamEnum };
 
     use super::*;
 
@@ -107,7 +108,7 @@ mod tests {
         c1: CubeCoordinates,
         c2: CubeCoordinates,
         fields: Vec<Vec<Field>>,
-        dir: CubeDirection,
+        dir: CubeDirection
     ) -> (GameState, Push) {
         let segment: Vec<Segment> = vec![Segment {
             direction: CubeDirection::Right,
@@ -124,7 +125,7 @@ mod tests {
             None,
             None,
             None,
-            None,
+            None
         );
         team_one.speed = 5;
         team_one.movement = 5;
@@ -137,7 +138,7 @@ mod tests {
             None,
             None,
             None,
-            None,
+            None
         );
         team_two.speed = 5;
         team_two.movement = 5;
@@ -152,16 +153,16 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Right,
+            CubeDirection::Right
         );
-        let result: Result<Ship, PyErr> = push.perform(&state);
+        let result: Result<(Ship, Ship), PyErr> = push.perform(&state);
 
         assert!(result.is_ok());
 
-        let new_ship: Ship = result.unwrap();
+        let new_ships: (Ship, Ship) = result.unwrap();
 
-        assert_eq!(new_ship.position, CubeCoordinates::new(1, 0));
-        assert_eq!(new_ship.free_turns, 2);
+        assert_eq!(new_ships.1.position, CubeCoordinates::new(1, 0));
+        assert_eq!(new_ships.1.free_turns, 2);
     }
 
     #[test]
@@ -171,41 +172,41 @@ mod tests {
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None),
+                Field::new(FieldType::Water, None)
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None),
+                Field::new(FieldType::Water, None)
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Island, None),
-                Field::new(FieldType::Water, None),
+                Field::new(FieldType::Water, None)
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None),
+                Field::new(FieldType::Water, None)
             ],
             vec![
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
                 Field::new(FieldType::Water, None),
-                Field::new(FieldType::Water, None),
-            ],
+                Field::new(FieldType::Water, None)
+            ]
         ];
 
         let (state, push) = setup(
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             fields,
-            CubeDirection::Right,
+            CubeDirection::Right
         );
-        let result: Result<Ship, PyErr> = push.perform(&state);
+        let result: Result<(Ship, Ship), PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 
@@ -224,9 +225,9 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(1, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Right,
+            CubeDirection::Right
         );
-        let result: Result<Ship, PyErr> = push.perform(&state);
+        let result: Result<(Ship, Ship), PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 
@@ -245,9 +246,9 @@ mod tests {
             CubeCoordinates::new(0, 0),
             CubeCoordinates::new(0, 0),
             vec![vec![Field::new(FieldType::Water, None); 4]; 5],
-            CubeDirection::Left,
+            CubeDirection::Left
         );
-        let result: Result<Ship, PyErr> = push.perform(&state);
+        let result: Result<(Ship, Ship), PyErr> = push.perform(&state);
 
         assert!(result.is_err());
 
