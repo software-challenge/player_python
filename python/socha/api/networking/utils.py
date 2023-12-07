@@ -82,13 +82,37 @@ def handle_move(move_response):
     return Data(class_value="move", actions=Actions(actions=protocol_actions))
 
 
+def _merge_advances(actions):
+    """
+    Merges consecutive Advance actions into a single action by adding their distances.
+    This is a workaround for handling multiple Advance actions in a sequence.
+
+    Args:
+        actions (list): A list of actions.
+
+    Returns:
+        list: A new list of actions where consecutive Advance actions have been merged.
+
+    Note:
+        This function modifies the input list 'actions' in-place.
+    """
+    new_actions = []
+    for i in range(len(actions) - 1):
+        if isinstance(actions[i], _socha.Advance) and isinstance(actions[i + 1], _socha.Advance):
+            actions[i + 1].distance += actions[i].distance
+            actions[i] = None
+    new_actions = [a for a in actions if a is not None]
+    return new_actions
+
+
 def if_last_game_state(message, last_game_state):
     last_game_state.board = _convert_board(message.data.class_binding.board)
     actions = message.data.class_binding.last_move.actions.actions
-    new_actions = [_socha.Accelerate(acc=a.acc) if isinstance(a, Acceleration)
-                   else _socha.Advance(distance=a.distance) if isinstance(a, Advance)
-                   else _socha.Push(direction=direction_from_string(a.direction)) if isinstance(a, Push)
-                   else _socha.Turn(direction=direction_from_string(a.direction)) for a in actions]
+    new_actions = _merge_advances([_socha.Accelerate(acc=a.acc) if isinstance(a, Acceleration)
+                                   else _socha.Advance(distance=a.distance) if isinstance(a, Advance)
+                                   else _socha.Push(direction=direction_from_string(a.direction)) if isinstance(a, Push)
+                                   else _socha.Turn(direction=direction_from_string(a.direction)) for a in actions])
+
     last_move = Move(actions=new_actions)
     return last_game_state.perform_move(last_move)
 

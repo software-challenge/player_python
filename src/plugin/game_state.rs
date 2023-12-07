@@ -343,17 +343,16 @@ impl GameState {
             total_cost += 1;
             let current_field_option: Option<Field> = self.board.get(&current_position);
 
-            if current_field_option.is_none() {
+            if current_field_option.is_none() || !current_field_option.unwrap().is_empty() {
                 return result!(AdvanceProblem::FieldIsBlocked);
             }
 
             if !has_current && self.board.does_field_have_stream(&current_position) {
                 has_current = true;
-                if total_cost < max_movement {
-                    total_cost += 1;
-                } else {
+                if total_cost >= max_movement {
                     break;
                 }
+                total_cost += 1;
             }
 
             if
