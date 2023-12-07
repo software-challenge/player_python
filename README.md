@@ -53,6 +53,8 @@ which installs the packages inside the folder.
 > - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
+> In some rare cases there maybe a [broken or missing installation of `setuptools`](https://github.com/maxblan/socha-python-client/issues/40). If this is the case on your machine you can install it again with `pip install -I setuptools`.
+
 ### Globally
 
 The installation is quite simple with pip.
