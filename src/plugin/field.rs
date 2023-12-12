@@ -5,7 +5,9 @@ use super::coordinate::CubeDirection;
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Passenger {
+    #[pyo3(get, set)]
     pub direction: CubeDirection,
+    #[pyo3(get, set)]
     pub passenger: i32,
 }
 
@@ -40,7 +42,9 @@ pub enum FieldType {
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct Field {
+    #[pyo3(get, set)]
     pub field_type: FieldType,
+    #[pyo3(get, set)]
     pub passenger: Option<Passenger>,
 }
 

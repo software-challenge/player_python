@@ -44,8 +44,11 @@ impl CartesianCoordinate {
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
 pub struct CubeCoordinates {
+    #[pyo3(get, set)]
     pub q: i32,
+    #[pyo3(get, set)]
     pub r: i32,
+    #[pyo3(get, set)]
     pub s: i32,
 }
 

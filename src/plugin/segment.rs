@@ -8,8 +8,11 @@ use super::coordinate::CartesianCoordinate;
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub struct Segment {
+    #[pyo3(get, set)]
     pub direction: CubeDirection,
+    #[pyo3(get, set)]
     pub center: CubeCoordinates,
+    #[pyo3(get, set)]
     pub fields: Vec<Vec<Field>>,
 }
 

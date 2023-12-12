@@ -12,7 +12,9 @@ use crate::plugin::ship::Ship;
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub struct Board {
+    #[pyo3(get, set)]
     pub segments: Vec<Segment>,
+    #[pyo3(get, set)]
     pub next_direction: CubeDirection,
 }
 
