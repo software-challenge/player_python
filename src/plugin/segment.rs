@@ -57,6 +57,10 @@ impl Segment {
         CartesianCoordinate::new(coords.array_x() + 1, coords.y() + 2)
     }
 
+    fn cube_coords(&self, coords: CartesianCoordinate) -> CubeCoordinates {
+        CubeCoordinates::new(coords.x - coords.y + 1, coords.y - 2)
+    }
+
     fn __repr__(&self) -> PyResult<String> {
         Ok(
             format!(
@@ -73,6 +77,27 @@ impl Segment {
 mod tests {
     use super::*;
     use crate::plugin::{ coordinate::{ CubeCoordinates, CubeDirection }, field::FieldType };
+
+    #[test]
+    fn test_cube_coords() {
+        let segment: Segment = Segment {
+            direction: CubeDirection::Right,
+            center: CubeCoordinates::new(0, 0),
+            fields: vec![vec![Field::new(FieldType::Water, None); 4]; 5],
+        };
+
+        let test_1: CartesianCoordinate = segment.array_coords(CubeCoordinates::new(0, 0));
+        assert_eq!(segment.cube_coords(test_1), CubeCoordinates::new(0, 0));
+
+        let test_2: CartesianCoordinate = segment.array_coords(CubeCoordinates::new(1, 0));
+        assert_eq!(segment.cube_coords(test_2), CubeCoordinates::new(1, 0));
+
+        let test_3: CartesianCoordinate = segment.array_coords(CubeCoordinates::new(2, 0));
+        assert_eq!(segment.cube_coords(test_3), CubeCoordinates::new(2, 0));
+
+        let test_4: CartesianCoordinate = segment.array_coords(CubeCoordinates::new(4, 2));
+        assert_eq!(segment.cube_coords(test_4), CubeCoordinates::new(4, 2));
+    }
 
     #[test]
     fn test_tip() {
