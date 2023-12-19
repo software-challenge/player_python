@@ -1,4 +1,3 @@
-use std::collections::HashSet;
 use std::collections::VecDeque;
 
 use pyo3::prelude::*;
@@ -112,6 +111,20 @@ impl Board {
             .collect()
     }
 
+    pub fn neighboring_coordinates(
+        &self,
+        coords: &CubeCoordinates
+    ) -> Vec<Option<CubeCoordinates>> {
+        CubeDirection::VALUES.iter()
+            .zip(
+                CubeDirection::VALUES.iter().map(|direction|
+                    self.get_field_in_direction(&direction, coords)
+                )
+            )
+            .map(|(direction, field)| field.map(|_| coords.clone() + direction.vector()))
+            .collect()
+    }
+
     pub fn effective_speed(&self, ship: &Ship) -> i32 {
         let speed = ship.speed;
         if self.does_field_have_stream(&ship.position) {
@@ -178,65 +191,61 @@ impl Board {
     /// If multiple fields of the same type are at the same minimum distance, it returns all of them.
     /// If there isn't a field of the specified type or path to it, it will return an empty Vec.
     ///
+    /// # Examples
+    ///
+    /// ```python
+    /// from plugin import Board, CubeCoordinates, FieldType
+    ///
+    /// board = Board()
+    /// board.find_nearest_field_types(CubeCoordinates(0, 0), FieldType.Water)
+    /// ```
+    ///
     pub fn find_nearest_field_types(
         &mut self,
         start_coordinates: &CubeCoordinates,
         field_type: FieldType
     ) -> Vec<CubeCoordinates> {
-        let mut visited_coordinates: HashSet<CubeCoordinates> = HashSet::new();
-        let mut neighbour_coordinates_queue: VecDeque<CubeCoordinates> = VecDeque::new();
-        let mut nearest_field_coordinates: Vec<CubeCoordinates> = Vec::new();
+        let mut nearest_coordinates: Vec<CubeCoordinates> = Vec::new();
+        let mut queue: VecDeque<(CubeCoordinates, i32)> = VecDeque::from(vec![(start_coordinates.clone(), 0)]);
+        let mut last_distance: i32 = 0;
 
-        let check_field_and_add_to_queue = |
-            coordinates: &CubeCoordinates,
-            neighbour_coordinates_queue: &mut VecDeque<CubeCoordinates>,
-            visited_coordinates: &HashSet<CubeCoordinates>
-        | {
-            let neighbour_field = self.get(coordinates);
-            if neighbour_field.is_some() && field_type == neighbour_field.unwrap().field_type {
-                if
-                    !visited_coordinates.contains(coordinates) &&
-                    !neighbour_coordinates_queue.contains(coordinates)
-                {
-                    neighbour_coordinates_queue.push_back(coordinates.clone());
-                }
-            }
-        };
-
-        for direction in CubeDirection::VALUES {
-            check_field_and_add_to_queue(
-                &(start_coordinates.clone() + direction.vector()),
-                &mut neighbour_coordinates_queue,
-                &visited_coordinates
-            );
-        }
-
-        while let Some(current_coordinates) = neighbour_coordinates_queue.pop_front() {
-            if
-                !nearest_field_coordinates.is_empty() &&
-                start_coordinates.distance_to(&current_coordinates) >
-                    start_coordinates.distance_to(nearest_field_coordinates.last().unwrap())
-            {
+        while let Some((current_coords, distance)) = queue.pop_front() {
+            if !nearest_coordinates.is_empty() && distance > last_distance {
                 break;
             }
-            visited_coordinates.insert(current_coordinates.clone());
-            let current_field = self.get(&current_coordinates);
-            if let Some(current_field_is) = current_field {
-                if field_type == current_field_is.field_type {
-                    nearest_field_coordinates.push(current_coordinates.clone());
-                } else {
-                    for direction in CubeDirection::VALUES {
-                        check_field_and_add_to_queue(
-                            &(current_coordinates.clone() + direction.vector()),
-                            &mut neighbour_coordinates_queue,
-                            &visited_coordinates
-                        );
-                    }
+
+            last_distance = distance;
+
+            if let Some(field) = self.get(&current_coords) {
+                if field.field_type == field_type {
+                    nearest_coordinates.push(current_coords.clone());
                 }
             }
+
+            self.neighboring_coordinates(&current_coords)
+                .iter()
+                .filter_map(|neighbor| neighbor.clone())
+                .for_each(|coord| queue.push_back((coord, distance + 1)));
         }
 
-        nearest_field_coordinates
+        nearest_coordinates
+    }
+
+    pub fn pretty_print(&self) {
+        for segment in &self.segments {
+            for col in &segment.fields {
+                for field in col {
+                    match field.field_type {
+                        FieldType::Water => print!("W"),
+                        FieldType::Sandbank => print!("S"),
+                        FieldType::Island => print!("I"),
+                        FieldType::Passenger => print!("P"),
+                        FieldType::Goal => print!("G"),
+                    }
+                }
+                println!();
+            }
+        }
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -367,4 +376,76 @@ mod tests {
 
     #[test]
     fn test_get_field_current_direction() {}
+
+    #[test]
+    fn test_find_nearest_field_types() {
+        let segment: Vec<Segment> = vec![Segment {
+            direction: CubeDirection::Right,
+            center: CubeCoordinates::new(0, 0),
+            fields: vec![
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Sandbank, None),
+                    Field::new(FieldType::Water, None)
+                ],
+                vec![
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None),
+                    Field::new(FieldType::Water, None)
+                ]
+            ],
+        }];
+        let mut board: Board = Board::new(segment, CubeDirection::DownRight);
+
+        assert_eq!(
+            board.find_nearest_field_types(&CubeCoordinates::new(0, 0), FieldType::Sandbank),
+            vec![CubeCoordinates::new(0, 0)]
+        );
+
+        board.segments[0].fields[1][2] = Field::new(FieldType::Water, None);
+
+        assert_eq!(
+            board.find_nearest_field_types(&CubeCoordinates::new(0, 0), FieldType::Sandbank),
+            vec![
+                CubeCoordinates::new(1, 0),
+                CubeCoordinates::new(0, 1),
+                CubeCoordinates::new(-1, 1),
+                CubeCoordinates::new(-1, 0),
+                CubeCoordinates::new(0, -1),
+                CubeCoordinates::new(1, -1)
+            ]
+        );
+        assert_eq!(
+            board.find_nearest_field_types(&CubeCoordinates::new(2, 0), FieldType::Sandbank),
+            vec![CubeCoordinates::new(1, 0)]
+        );
+
+        assert_eq!(
+            board.find_nearest_field_types(&CubeCoordinates::new(1, 0), FieldType::Water),
+            vec![
+                CubeCoordinates::new(2, 0),
+                CubeCoordinates::new(1, 1),
+                CubeCoordinates::new(0, 0),
+                CubeCoordinates::new(2, -1)
+            ]
+        );
+    }
 }
