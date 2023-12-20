@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Set
 
 
 class PluginConstants:
@@ -270,7 +270,7 @@ class Board:
         self, pos: CubeCoordinates) -> Optional[Field]: ...
 
     def find_nearest_field_types(self, start_coordinates: CubeCoordinates,
-                                 field_type: FieldType) -> List[CubeCoordinates]: ...
+                                 field_type: FieldType) -> Set[CubeCoordinates]: ...
 
 
 class TeamPoints:

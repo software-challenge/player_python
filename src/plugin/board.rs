@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::{ VecDeque, HashSet };
 
 use pyo3::prelude::*;
 
@@ -7,6 +7,8 @@ use crate::plugin::field::{ Field, FieldType };
 use crate::plugin::game_state::GameState;
 use crate::plugin::segment::Segment;
 use crate::plugin::ship::Ship;
+
+use super::constants::PluginConstants;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
@@ -204,10 +206,18 @@ impl Board {
         &mut self,
         start_coordinates: &CubeCoordinates,
         field_type: FieldType
-    ) -> Vec<CubeCoordinates> {
-        let mut nearest_coordinates: Vec<CubeCoordinates> = Vec::new();
-        let mut queue: VecDeque<(CubeCoordinates, i32)> = VecDeque::from(vec![(start_coordinates.clone(), 0)]);
+    ) -> HashSet<CubeCoordinates> {
+        let mut nearest_coordinates: HashSet<CubeCoordinates> = HashSet::new();
+        let mut queue: VecDeque<(CubeCoordinates, i32)> = VecDeque::from(
+            vec![(start_coordinates.clone(), 0)]
+        );
         let mut last_distance: i32 = 0;
+
+        let max_fields: i32 =
+            (self.segments.len() as i32) *
+            PluginConstants::SEGMENT_FIELDS_HEIGHT *
+            PluginConstants::SEGMENT_FIELDS_WIDTH;
+        let mut visited: HashSet<CubeCoordinates> = HashSet::new();
 
         while let Some((current_coords, distance)) = queue.pop_front() {
             if !nearest_coordinates.is_empty() && distance > last_distance {
@@ -218,7 +228,7 @@ impl Board {
 
             if let Some(field) = self.get(&current_coords) {
                 if field.field_type == field_type {
-                    nearest_coordinates.push(current_coords.clone());
+                    nearest_coordinates.insert(current_coords.clone());
                 }
             }
 
@@ -226,26 +236,14 @@ impl Board {
                 .iter()
                 .filter_map(|neighbor| neighbor.clone())
                 .for_each(|coord| queue.push_back((coord, distance + 1)));
+
+            visited.insert(current_coords.clone());
+            if visited.len() >= (max_fields as usize) {
+                break;
+            }
         }
 
         nearest_coordinates
-    }
-
-    pub fn pretty_print(&self) {
-        for segment in &self.segments {
-            for col in &segment.fields {
-                for field in col {
-                    match field.field_type {
-                        FieldType::Water => print!("W"),
-                        FieldType::Sandbank => print!("S"),
-                        FieldType::Island => print!("I"),
-                        FieldType::Passenger => print!("P"),
-                        FieldType::Goal => print!("G"),
-                    }
-                }
-                println!();
-            }
-        }
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -255,6 +253,8 @@ impl Board {
 
 #[cfg(test)]
 mod tests {
+    use crate::plugin::field::Passenger;
+
     use super::*;
 
     #[test]
@@ -379,45 +379,89 @@ mod tests {
 
     #[test]
     fn test_find_nearest_field_types() {
-        let segment: Vec<Segment> = vec![Segment {
-            direction: CubeDirection::Right,
-            center: CubeCoordinates::new(0, 0),
-            fields: vec![
-                vec![
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Water, None)
+        let segment: Vec<Segment> = vec![
+            Segment {
+                direction: CubeDirection::Right,
+                center: CubeCoordinates::new(0, 0),
+                fields: vec![
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Sandbank, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ]
                 ],
-                vec![
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Water, None)
+            },
+            Segment {
+                direction: CubeDirection::Right,
+                center: CubeCoordinates::new(4, 0),
+                fields: vec![
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(
+                            FieldType::Passenger,
+                            Some(Passenger {
+                                direction: CubeDirection::DownRight,
+                                passenger: 1,
+                            })
+                        ),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ],
+                    vec![
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None)
+                    ]
                 ],
-                vec![
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Sandbank, None),
-                    Field::new(FieldType::Water, None)
-                ],
-                vec![
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Water, None),
-                    Field::new(FieldType::Water, None)
-                ]
-            ],
-        }];
+            }
+        ];
         let mut board: Board = Board::new(segment, CubeDirection::DownRight);
 
         assert_eq!(
             board.find_nearest_field_types(&CubeCoordinates::new(0, 0), FieldType::Sandbank),
-            vec![CubeCoordinates::new(0, 0)]
+            vec![CubeCoordinates::new(0, 0)].into_iter().collect()
         );
 
         board.segments[0].fields[1][2] = Field::new(FieldType::Water, None);
@@ -432,20 +476,22 @@ mod tests {
                 CubeCoordinates::new(0, -1),
                 CubeCoordinates::new(1, -1)
             ]
+                .into_iter()
+                .collect()
         );
         assert_eq!(
             board.find_nearest_field_types(&CubeCoordinates::new(2, 0), FieldType::Sandbank),
-            vec![CubeCoordinates::new(1, 0)]
+            vec![CubeCoordinates::new(1, 0)].into_iter().collect()
         );
 
         assert_eq!(
-            board.find_nearest_field_types(&CubeCoordinates::new(1, 0), FieldType::Water),
-            vec![
-                CubeCoordinates::new(2, 0),
-                CubeCoordinates::new(1, 1),
-                CubeCoordinates::new(0, 0),
-                CubeCoordinates::new(2, -1)
-            ]
+            board.find_nearest_field_types(&CubeCoordinates::new(1, 0), FieldType::Passenger),
+            vec![CubeCoordinates::new(5, -2)].into_iter().collect()
+        );
+
+        assert_eq!(
+            board.find_nearest_field_types(&CubeCoordinates::new(1, 0), FieldType::Island),
+            vec![].into_iter().collect()
         );
     }
 }
