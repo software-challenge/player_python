@@ -51,7 +51,7 @@ impl AdvanceInfo {
     }
 
     pub fn advances(&self, distance: Option<usize>) -> Vec<Advance> {
-        let distance = distance.unwrap_or(self.costs.len().saturating_sub(1));
+        let distance = distance.unwrap_or(self.costs.len());
         (1..=distance).map(|it| Advance { distance: it as i32 }).collect()
     }
 
@@ -61,6 +61,44 @@ impl AdvanceInfo {
 
     pub fn __repr__(&self) -> PyResult<String> {
         Ok(format!("AdvanceInfo(costs={:?}, problem={:?})", self.costs, self.problem))
+    }
+}
+
+#[cfg(test)]
+mod advance_info_tests {
+    use super::*;
+
+    #[test]
+    fn test_cost_until() {
+        let advance_info: AdvanceInfo = AdvanceInfo {
+            costs: vec![1, 2, 3, 4, 5],
+            problem: AdvanceProblem::FieldIsBlocked,
+        };
+        assert_eq!(advance_info.cost_until(3), 3);
+    }
+
+    #[test]
+    fn test_advances() {
+        let advance_info: AdvanceInfo = AdvanceInfo {
+            costs: vec![1, 2, 3, 4, 5],
+            problem: AdvanceProblem::FieldIsBlocked,
+        };
+        assert_eq!(advance_info.advances(None), vec![
+            Advance { distance: 1 },
+            Advance { distance: 2 },
+            Advance { distance: 3 },
+            Advance { distance: 4 },
+            Advance { distance: 5 },
+        ]);
+    }
+
+    #[test]
+    fn test_distance() {
+        let advance_info: AdvanceInfo = AdvanceInfo {
+            costs: vec![1, 2, 3, 4, 5],
+            problem: AdvanceProblem::FieldIsBlocked,
+        };
+        assert_eq!(advance_info.distance(), 5);
     }
 }
 
@@ -436,42 +474,15 @@ impl GameState {
             return Vec::new();
         }
 
-        self.sandbank_advances_for(&ship).unwrap_or_else(||
-            self.check_ship_advance_limit(&ship).advances(None)
-        )
+        self.check_ship_advance_limit(&ship).advances(None)
     }
 
+    #[allow(unused_variables)]
     pub fn sandbank_advances_for(&self, ship: &Ship) -> Option<Vec<Advance>> {
-        if self.board.is_sandbank(&ship.position) {
-            Some(
-                [-1, 1]
-                    .into_iter()
-                    .map(Advance::new)
-                    .filter(|a| {
-                        let direction = if a.distance < 0 {
-                            ship.direction.opposite()
-                        } else {
-                            ship.direction
-                        };
-
-                        let advanced_ship: Ship = Ship::new(
-                            ship.position,
-                            ship.team,
-                            Some(direction),
-                            Some(1),
-                            Some(1),
-                            Some(ship.coal),
-                            Some(ship.points),
-                            Some(ship.passengers),
-                            Some(ship.free_turns)
-                        );
-                        self.check_ship_advance_limit(&advanced_ship).distance() > 1
-                    })
-                    .collect()
-            )
-        } else {
-            None
-        }
+        panic!(
+            "Sandbanks will not be included in the Software-Challenge 2024. 
+        Consequently, this particular method will not be implemented for the duration of this season."
+        );
     }
 
     pub fn possible_actions(&self, rank: i32) -> Vec<Action> {
@@ -872,7 +883,7 @@ mod tests {
         );
 
         let advances: Vec<Advance> = game_state.possible_advances();
-        assert_eq!(advances.len(), 2);
+        assert_eq!(advances.len(), 3);
         assert_eq!(advances[1].distance, 2);
     }
 
