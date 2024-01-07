@@ -1,4 +1,5 @@
 from ast import List
+import logging
 
 from socha import _socha
 from socha._socha import Field, FieldType, Move, TeamEnum, CubeCoordinates, GameState
@@ -106,15 +107,21 @@ def _merge_advances(actions):
 
 
 def if_last_game_state(message, last_game_state):
-    last_game_state.board = _convert_board(message.data.class_binding.board)
-    actions = message.data.class_binding.last_move.actions.actions
-    new_actions = _merge_advances([_socha.Accelerate(acc=a.acc) if isinstance(a, Acceleration)
-                                   else _socha.Advance(distance=a.distance) if isinstance(a, Advance)
-                                   else _socha.Push(direction=direction_from_string(a.direction)) if isinstance(a, Push)
-                                   else _socha.Turn(direction=direction_from_string(a.direction)) for a in actions])
+    try:
+        last_game_state.board = _convert_board(
+            message.data.class_binding.board)
+        actions = message.data.class_binding.last_move.actions.actions
+        new_actions = _merge_advances([_socha.Accelerate(acc=a.acc) if isinstance(a, Acceleration)
+                                       else _socha.Advance(distance=a.distance) if isinstance(a, Advance)
+                                       else _socha.Push(direction=direction_from_string(a.direction)) if isinstance(a, Push)
+                                       else _socha.Turn(direction=direction_from_string(a.direction)) for a in actions])
 
-    last_move = Move(actions=new_actions)
-    return last_game_state.perform_move(last_move)
+        last_move = Move(actions=new_actions)
+        return last_game_state.perform_move(last_move)
+    except Exception as e:
+        logging.warning(
+            f"An error occurred: {e}. Returning the last game state without changes.")
+        return last_game_state
 
 
 def if_not_last_game_state(message) -> GameState:
