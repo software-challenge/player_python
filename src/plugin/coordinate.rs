@@ -284,6 +284,10 @@ impl CubeDirection {
             CubeDirection::UpRight => 5,
         }
     }
+
+    pub fn __hash__(&self) -> i32 {
+        self.ordinal()
+    }
 }
 
 impl fmt::Display for CubeDirection {

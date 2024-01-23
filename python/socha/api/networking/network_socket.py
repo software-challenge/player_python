@@ -61,7 +61,7 @@ class NetworkSocket:
         If a timeout occurs or a connection reset error is encountered, the socket is closed and None is returned.
         """
         regex = re.compile(
-            br"<((room[\s\S]+?</room>)|errorpacket[\s\S]+?</errorpacket>|prepared[\s\S]+?</prepared>)")
+            br"<((room[\s\S]+?</room>)|(errorpacket[\s\S]+?</errorpacket>)|(prepared[\s\S]+?</prepared>)|(joined|left|join|observe|pause|step|cancel|creatGame|authenticate)[\s\S]*?/>)")
         while True:
             try:
                 chunk = self.socket.recv(16129)

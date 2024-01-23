@@ -5,10 +5,9 @@ use pyo3::prelude::*;
 use crate::plugin::{
     constants::PluginConstants,
     errors::advance_errors::AdvanceProblem,
-    game_state::AdvanceInfo,
     game_state::GameState,
 };
-use crate::plugin::field::FieldType;
+
 use crate::plugin::ship::Ship;
 
 #[pyclass]
@@ -26,50 +25,48 @@ impl Advance {
         debug!("New Advance with distance: {}", distance);
         Advance { distance }
     }
+
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("Performing advance with distance: {}", self.distance);
-        let mut current_ship: Ship = state.current_ship.clone();
+        let mut ship = state.current_ship.clone();
+        let valid_distance = self.validate_distance(&state, &ship)?;
+        let advance_info = state.calculate_advance_info(
+            &ship.position,
+            &ship.direction(!valid_distance),
+            ship.movement
+        );
+        let advance_possible = (advance_info.distance() as i32) >= self.distance.abs();
+
+        if !advance_possible {
+            debug!("Advance problem: {}", advance_info.problem.message());
+            return Err(PyBaseException::new_err(advance_info.problem.message()));
+        }
+
+        ship.update_position(self.distance, advance_info);
+        debug!("Advance completed: {:?}", ship);
+        Ok(ship)
+    }
+
+    fn validate_distance(&self, state: &GameState, ship: &Ship) -> Result<bool, PyErr> {
         if
             (self.distance < PluginConstants::MIN_SPEED &&
-                state.board.get(&current_ship.position).unwrap().field_type !=
-                    FieldType::Sandbank) ||
+                !state.board.is_sandbank(&ship.position)) ||
             self.distance > PluginConstants::MAX_SPEED
         {
-            debug!("Invalid distance error with distance: {}", self.distance);
+            debug!("Invalid distance: {}", self.distance);
             return Err(PyBaseException::new_err(AdvanceProblem::InvalidDistance.message()));
         }
-        if self.distance > current_ship.movement {
+        if self.distance > ship.movement {
             debug!(
-                "Movement points missing error with distance: {} and movement: {}",
+                "Movement points missing: {} needed, {} available",
                 self.distance,
-                current_ship.movement
+                ship.movement
             );
             return Err(PyBaseException::new_err(AdvanceProblem::MovementPointsMissing.message()));
         }
-        let result: AdvanceInfo = state.calculate_advance_info(
-            &current_ship.position,
-            &(if self.distance < 0 {
-                current_ship.direction.opposite()
-            } else {
-                current_ship.direction
-            }),
-            current_ship.movement
-        );
-        if (result.distance() as i32) < self.distance.abs() {
-            debug!(
-                "Advance problem with available distance: {} and requested distance: {}",
-                result.distance(),
-                self.distance
-            );
-            debug!("Advance problem reason: {}", result.problem.message());
-            return Err(PyBaseException::new_err(result.problem.message()));
-        }
-        current_ship.position += current_ship.direction.vector() * self.distance;
-        current_ship.movement -= result.cost_until(self.distance as usize);
-
-        debug!("Advance completed and ship status: {:?}", current_ship);
-        Ok(current_ship)
+        Ok(true)
     }
+
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!("Advance({})", self.distance))
     }
@@ -78,10 +75,10 @@ impl Advance {
 #[cfg(test)]
 mod tests {
     use pyo3::prepare_freethreaded_python;
-    
+
     use crate::plugin::board::Board;
     use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
-    use crate::plugin::field::Field;
+    use crate::plugin::field::{ Field, FieldType };
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
     use crate::plugin::ship::{ Ship, TeamEnum };
