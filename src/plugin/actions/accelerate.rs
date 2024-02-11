@@ -71,6 +71,7 @@ impl Accelerate {
             }
         }
     }
+
     fn accelerate(&self, ship: &mut Ship) -> Ship {
         debug!("accelerate() called with ship: {:?}", ship);
         let used_coal: i32 = self.acc.abs() - ship.free_acc;
@@ -80,6 +81,17 @@ impl Accelerate {
         debug!("Acceleration completed and ship status: {:?}", ship);
         return ship.clone();
     }
+
+    fn accelerate_unchecked(&self, ship: &mut Ship) -> Ship {
+        debug!("accelerate_unchecked() called with ship: {:?}", ship);
+        let used_coal: i32 = self.acc.abs() - ship.free_acc;
+        ship.coal -= used_coal.max(0);
+        ship.free_acc = (-used_coal).max(0);
+        ship.accelerate_by(self.acc);
+        debug!("Unchecked acceleration completed and ship status: {:?}", ship);
+        ship.clone()
+    }
+
     fn __repr__(&self) -> PyResult<String> {
         debug!("__repr__ method called for Accelerate with acc: {}", self.acc);
         Ok(format!("Accelerate({})", self.acc))

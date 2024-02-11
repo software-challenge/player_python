@@ -1,5 +1,5 @@
 use log::debug;
-use pyo3::{exceptions::PyBaseException, prelude::*};
+use pyo3::{ exceptions::PyBaseException, prelude::* };
 
 use crate::plugin::{
     coordinate::CubeDirection,
@@ -68,13 +68,13 @@ impl Turn {
 #[cfg(test)]
 mod tests {
     use pyo3::prepare_freethreaded_python;
-    
+
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
-    use crate::plugin::field::{Field, FieldType};
+    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+    use crate::plugin::field::{ Field, FieldType };
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{Ship, TeamEnum};
+    use crate::plugin::ship::{ Ship, TeamEnum };
 
     use super::*;
 
@@ -101,7 +101,7 @@ mod tests {
             None,
             None,
             None,
-            None,
+            None
         );
         team_one.speed = 5;
         team_one.movement = 5;
@@ -115,7 +115,7 @@ mod tests {
             None,
             None,
             None,
-            None,
+            None
         );
         team_two.speed = 5;
         team_two.movement = 5;
@@ -125,7 +125,7 @@ mod tests {
             0,
             team_one.clone(),
             team_two.clone(),
-            None,
+            None
         );
         game_state
     }

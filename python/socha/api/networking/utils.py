@@ -1,9 +1,8 @@
-from ast import List
-import logging
+from typing import List
 
 from socha import _socha
 from socha._socha import Field, FieldType, Move, TeamEnum, CubeCoordinates, GameState
-from socha.api.protocol.protocol import Acceleration, Actions, Advance, Push, Turn, Board, Data, Water, Sandbank, Island, Passenger, Goal
+from socha.api.protocol.protocol import Acceleration, Actions, Advance, Push, Ship, Turn, Board, Data, Water, Sandbank, Island, Passenger, Goal
 
 
 def _convert_board(protocol_board: Board) -> _socha.Board:
@@ -106,7 +105,18 @@ def _merge_advances(actions):
     return new_actions
 
 
-def if_last_game_state(message, last_game_state):
+def if_last_game_state(message, last_game_state) -> GameState:
+    """
+    Constructs a GameState from the provided message, ensuring to reflect the
+    current state based on the ships' positions, teams, and other attributes.
+
+    Args:
+        message: The input message containing the current game state.
+        last_game_state: The last game state to be updated.
+
+    Returns:
+        GameState: The constructed game state from the message.
+    """
     try:
         last_game_state.board = _convert_board(
             message.data.class_binding.board)
@@ -119,28 +129,40 @@ def if_last_game_state(message, last_game_state):
         last_move = Move(actions=new_actions)
         return last_game_state.perform_move(last_move)
     except Exception as e:
-        logging.warning(
-            f"An error occurred: {e}. Returning the last game state without changes.")
-        return last_game_state
+        return if_not_last_game_state(message)
 
 
 def if_not_last_game_state(message) -> GameState:
-    first_position = CubeCoordinates(
-        q=message.data.class_binding.ship[0].position.q, r=message.data.class_binding.ship[0].position.r)
-    first_team = TeamEnum.One if message.data.class_binding.ship[
-        0].team == "ONE" else TeamEnum.Two
-    first_team = _socha.Ship(position=first_position, team=first_team)
+    """
+    Constructs a GameState from the provided message, ensuring to reflect the
+    current state based on the ships' positions, teams, and other attributes.
 
-    second_position = CubeCoordinates(
-        q=message.data.class_binding.ship[1].position.q, r=message.data.class_binding.ship[1].position.r)
-    second_team = TeamEnum.One if message.data.class_binding.ship[
-        1].team == "ONE" else TeamEnum.Two
-    second_team = _socha.Ship(position=second_position, team=second_team)
+    Args:
+        message: The input message containing the current game state.
+
+    Returns:
+        GameState: The constructed game state from the message.
+    """
+    def create_ship(ship_data, team_enum_value) -> _socha.Ship:
+        """Helper function to create a ship from the ship data."""
+        position = CubeCoordinates(
+            q=ship_data.position.q, r=ship_data.position.r)
+        team = TeamEnum.One if team_enum_value == "ONE" else TeamEnum.Two
+        return _socha.Ship(position=position, team=team, coal=ship_data.coal,
+                           passengers=ship_data.passengers, points=ship_data.points,
+                           speed=ship_data.speed, free_turns=ship_data.free_turns,
+                           direction=direction_from_string(ship_data.direction))
+
+    first_ship_data, second_ship_data = message.data.class_binding.ship
+    first_ship = create_ship(first_ship_data, first_ship_data.team)
+    second_ship = create_ship(second_ship_data, second_ship_data.team)
+
+    current_team_enum = TeamEnum.One if message.data.class_binding.current_team == "ONE" else TeamEnum.Two
 
     return GameState(
         board=_convert_board(message.data.class_binding.board),
         turn=message.data.class_binding.turn,
-        current_ship=first_team,
-        other_ship=second_team,
-        last_move=None,
+        current_ship=first_ship if current_team_enum == TeamEnum.One else second_ship,
+        other_ship=second_ship if current_team_enum == TeamEnum.One else first_ship,
+        last_move=None
     )

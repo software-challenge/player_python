@@ -1,4 +1,5 @@
-use std::collections::{ VecDeque, HashSet };
+use std::cmp::Ordering;
+use std::collections::{ HashSet, BinaryHeap };
 
 use pyo3::prelude::*;
 
@@ -169,7 +170,7 @@ impl Board {
             .next()
     }
 
-    /// A function `find_nearest_field_types` to find the nearest field(s) of a specific type from a starting point in a 3D grid.
+    /// A function `find_nearest_field_types` to find the nearest field(s) of a specific type from a starting point in a hexagonal grid.
     ///
     /// # Arguments
     ///
@@ -203,28 +204,25 @@ impl Board {
     /// ```
     ///
     pub fn find_nearest_field_types(
-        &mut self,
+        &self,
         start_coordinates: &CubeCoordinates,
         field_type: FieldType
     ) -> HashSet<CubeCoordinates> {
-        let mut nearest_coordinates: HashSet<CubeCoordinates> = HashSet::new();
-        let mut queue: VecDeque<(CubeCoordinates, i32)> = VecDeque::from(
-            vec![(start_coordinates.clone(), 0)]
-        );
-        let mut last_distance: i32 = 0;
-
-        let max_fields: i32 =
-            (self.segments.len() as i32) *
+        let max_fields: usize = ((self.segments.len() as i32) *
             PluginConstants::SEGMENT_FIELDS_HEIGHT *
-            PluginConstants::SEGMENT_FIELDS_WIDTH;
-        let mut visited: HashSet<CubeCoordinates> = HashSet::new();
+            PluginConstants::SEGMENT_FIELDS_WIDTH) as usize;
+        let mut nearest_coordinates: HashSet<CubeCoordinates> = HashSet::with_capacity(max_fields);
+        let mut visited: HashSet<CubeCoordinates> = HashSet::with_capacity(max_fields);
+        let mut queue: BinaryHeap<QueueItem> = BinaryHeap::new();
+        queue.push(QueueItem {
+            coordinates: start_coordinates.clone(),
+            distance: 0,
+        });
 
-        while let Some((current_coords, distance)) = queue.pop_front() {
-            if !nearest_coordinates.is_empty() && distance > last_distance {
+        while let Some(QueueItem { coordinates: current_coords, distance }) = queue.pop() {
+            if self.found_fields(start_coordinates, nearest_coordinates.clone(), distance) {
                 break;
             }
-
-            last_distance = distance;
 
             if let Some(field) = self.get(&current_coords) {
                 if field.field_type == field_type {
@@ -233,21 +231,59 @@ impl Board {
             }
 
             self.neighboring_coordinates(&current_coords)
-                .iter()
-                .filter_map(|neighbor| neighbor.clone())
-                .for_each(|coord| queue.push_back((coord, distance + 1)));
-
-            visited.insert(current_coords.clone());
-            if visited.len() >= (max_fields as usize) {
-                break;
-            }
+                .into_iter()
+                .filter_map(|coord| coord)
+                .filter(|coord| visited.insert(coord.clone()))
+                .for_each(|coord|
+                    queue.push(QueueItem {
+                        coordinates: coord,
+                        distance: distance + 1,
+                    })
+                );
         }
 
         nearest_coordinates
     }
 
+    fn found_fields(
+        &self,
+        start_coordinates: &CubeCoordinates,
+        nearest_coordinates: HashSet<CubeCoordinates>,
+        distance: i32
+    ) -> bool {
+        !nearest_coordinates.is_empty() &&
+            distance >
+                start_coordinates.distance_to(
+                    nearest_coordinates.iter().next().unwrap_or(start_coordinates)
+                )
+    }
+
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!("Board(segments={:?}, next_direction={:?})", self.segments, self.next_direction))
+    }
+}
+
+#[derive(Eq)]
+struct QueueItem {
+    coordinates: CubeCoordinates,
+    distance: i32,
+}
+
+impl Ord for QueueItem {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.distance.cmp(&self.distance)
+    }
+}
+
+impl PartialOrd for QueueItem {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for QueueItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.distance == other.distance
     }
 }
 

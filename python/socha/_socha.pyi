@@ -1,4 +1,4 @@
-from typing import Any, List, Optional, Set
+from typing import Any, List, Optional, Set, Tuple
 
 
 class PluginConstants:
@@ -120,10 +120,7 @@ class Accelerate:
     acc: int
 
     def __init__(self, acc: int) -> None: ...
-    def perform(self, state: Any) -> Ship | BaseException(
-        AccelerationProblem): ...
-
-    def accelerate(self, ship: Any) -> Ship: ...
+    def perform(self, state: Any) -> Ship | BaseException: ...
     def __str__(self) -> str: ...
 
 
@@ -142,8 +139,7 @@ class Advance:
     distance: int
 
     def __init__(self, distance: int) -> None: ...
-    def perform(self, state: GameState) -> Ship | BaseException(
-        AdvanceProblem): ...
+    def perform(self, state: GameState) -> Ship | BaseException: ...
 
 
 class PushProblem:
@@ -161,8 +157,8 @@ class Push:
     direction: CubeDirection
 
     def __init__(self, direction: CubeDirection) -> None: ...
-    def perform(self, state: GameState) -> (Ship, Ship) | BaseException(
-        PushProblem): ...
+    def perform(self, state: GameState) -> Tuple[Ship,
+                                                 Ship] | BaseException: ...
 
 
 class TurnProblem():
@@ -177,8 +173,7 @@ class Turn:
     direction: CubeDirection
 
     def __init__(self, direction: CubeDirection) -> None: ...
-    def perform(self, state: GameState) -> Ship | BaseException(
-        TurnProblem): ...
+    def perform(self, state: GameState) -> Ship | BaseException: ...
 
     def coal_cost(self, ship: Ship) -> int: ...
 
@@ -267,10 +262,43 @@ class Board:
     def pickup_passenger(self, state: GameState) -> GameState: ...
 
     def pickup_passenger_at_position(
-        self, pos: CubeCoordinates) -> Optional[Field]: ...
+            self, pos: CubeCoordinates) -> Optional[Field]:
+        """
+            Picks up a passenger at the specified position using the CubeCoordinates.
+
+            Args:
+                pos (CubeCoordinates): The CubeCoordinates representing the position to check.
+
+            Returns:
+                Optional[Field]: The Field containing a passenger with a passenger count greater than 0,
+                or None if no such Field is found in any adjacent direction.
+        """
 
     def find_nearest_field_types(self, start_coordinates: CubeCoordinates,
-                                 field_type: FieldType) -> Set[CubeCoordinates]: ...
+                                 field_type: FieldType) -> Set[CubeCoordinates]:
+        """
+            A function to find the nearest field(s) of a specific type from a starting point in a hexagonal grid.
+
+            Args:
+                start_coordinates (CubeCoordinates): A CubeCoordinates object representing the starting point for the search.
+                field_type (FieldType): A FieldType object representing the type of field being searched for.
+
+            Returns:
+                list of CubeCoordinates: A list of CubeCoordinates corresponding to the location of the nearest field(s) of the specified type.
+
+            Note:
+                This function will always return the coordinates of the nearest field(s) of the specified type, if such a field(s) exist.
+                If multiple fields of the same type are at the same minimum distance, it returns all of them.
+                If there isn't a field of the specified type or path to it, it will return an empty list.
+
+            Examples:
+                ```python
+                from plugin import Board, CubeCoordinates, FieldType
+
+                board = Board()
+                board.find_nearest_field_types(CubeCoordinates(0, 0), FieldType.Water)
+                ```
+        """
 
 
 class TeamPoints:
@@ -302,7 +330,11 @@ class GameState:
     def ship_advance_points(self, ship: Ship) -> int: ...
     def calculate_points(self, ship: Ship) -> int: ...
     def is_current_ship_on_current(self) -> bool: ...
+    def perform_action(self, action: Accelerate | Advance |
+                       Push | Turn) -> GameState: ...
+
     def perform_move(self, move: Move) -> GameState: ...
+    def perform_move_unchecked(self, move: Move) -> GameState: ...
     def advance_turn(self) -> GameState: ...
     def effective_speed(self, ship: Ship) -> int: ...
     def remove_passenger_at(self, coords: CubeCoordinates) -> bool: ...
@@ -320,6 +352,13 @@ class GameState:
     def possible_turns(self) -> List[Turn]: ...
     def possible_advances(self) -> List[Advance]: ...
     def sandbank_advances_for(self, ship: Ship) -> Optional[List[Advance]]: ...
+
+    def possible_moves(self) -> List[Move]: ...
+
+    def possible_action_comb(self, current_state: GameState,
+                             current_actions: List[Accelerate | Advance | Push | Turn],
+                             depth: int,
+                             max_depth: int) -> List[List[Accelerate | Advance | Push | Turn]]: ...
 
     def possible_actions(self, rank: int) -> List[Accelerate |
                                                   Advance | Push | Turn]: ...

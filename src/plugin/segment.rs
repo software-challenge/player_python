@@ -119,8 +119,6 @@ mod tests {
         segment.fields[0][0] = Field::new(FieldType::Island, None);
         segment.fields[3][4] = Field::new(FieldType::Island, None);
 
-        println!("{:?}", segment.fields);
-
         assert_eq!(
             segment.get(CubeCoordinates::new(-1, -2)),
             Some(Field::new(FieldType::Island, None))

@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use super::{ constants::PluginConstants, coordinate::{ CubeCoordinates, CubeDirection } };
+use super::{ constants::PluginConstants, coordinate::{ CubeCoordinates, CubeDirection }, game_state::AdvanceInfo };
 
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
@@ -87,6 +87,15 @@ impl Ship {
     pub fn read_resolve(&mut self) {
         self.free_acc = PluginConstants::FREE_ACC;
         self.movement = self.speed;
+    }
+
+    pub fn direction(&self, reverse: bool) -> CubeDirection {
+        if reverse { self.direction.opposite() } else { self.direction }
+    }
+
+    pub fn update_position(&mut self, distance: i32, advance_info: AdvanceInfo) {
+        self.position += self.direction.vector() * distance;
+        self.movement -= advance_info.cost_until(distance as usize);
     }
 
     fn __repr__(&self) -> PyResult<String> {

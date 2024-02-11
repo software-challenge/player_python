@@ -28,8 +28,12 @@ impl PluginConstants {
 
     // Board Fields
     pub const MAX_SPECIAL: i32 = 0;
+
     // Sandbanks disabled
     pub const MIN_SPECIAL: i32 = 0;
     pub const MAX_ISLANDS: i32 = 3;
     pub const MIN_ISLANDS: i32 = 2;
+
+    // Recursion depth
+    pub const MAX_DEPTH: usize = 10;
 }
