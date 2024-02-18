@@ -1,4 +1,6 @@
 import logging
+import random
+from typing import List
 # not all imports are currently used, but they might be in the future and it shows all available functionalities
 from socha import Accelerate, AccelerationProblem, Advance, AdvanceInfo, AdvanceProblem, Board
 from socha import CartesianCoordinate, CubeCoordinates, CubeDirection, Field, FieldType, GameState
@@ -14,10 +16,11 @@ class Logic(IClientHandler):
     # this method should always be implemented otherwise the client will be disqualified
     def calculate_move(self) -> Move:
         logging.info("Calculate move...")
-        return Move([Advance(1)])
+        possible_moves: List[Move] = self.game_state.possible_moves()
+        return possible_moves[random.randint(0, len(possible_moves) - 1)]
 
     # this method is called every time the server has sent a new game state update
-    # this method should be implemented to keep
+    # this method should be implemented to keep the game state up to date
     def on_update(self, state: GameState):
         self.game_state = state
 

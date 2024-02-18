@@ -19,7 +19,7 @@ use crate::plugin::r#move::Move;
 use crate::plugin::ship::Ship;
 use crate::plugin::errors::advance_errors::AdvanceProblem;
 
-use super::field::Field;
+use super::field::{ Field, Passenger };
 use super::ship::TeamEnum;
 
 #[pyclass]
@@ -349,27 +349,34 @@ impl GameState {
     }
 
     pub fn remove_passenger_at(&mut self, coord: CubeCoordinates) -> bool {
-        CubeDirection::VALUES.iter().any(|&d| {
-            self.board
-                .get_field_in_direction(&d, &coord)
-                .and_then(|mut field| {
-                    field.passenger.as_mut().and_then(|passenger| {
-                        if passenger.passenger > 0 && passenger.direction == d.opposite() {
-                            passenger.passenger -= 1;
-                            Some(())
-                        } else {
-                            None
-                        }
-                    })
-                })
-                .is_some()
-        })
+        for &d in CubeDirection::VALUES.iter() {
+            if let Some(field) = self.board.get_field_in_direction(&d, &coord) {
+                if let Some(passenger) = field.passenger {
+                    if passenger.passenger > 0 && passenger.direction == d.opposite() {
+                        let updated_passenger = Passenger {
+                            passenger: passenger.passenger - 1,
+                            direction: passenger.direction,
+                        };
+                        self.board.set_field_in_direction(
+                            &d,
+                            &coord,
+                            Field::new(field.field_type, Some(updated_passenger))
+                        );
+                        return true;
+                    }
+                }
+            }
+        }
+        false
     }
 
     pub fn pick_up_passenger_current_ship(&mut self) {
         if self.effective_speed(self.current_ship) < 2 {
             if self.remove_passenger_at(self.current_ship.position) {
                 self.current_ship.passengers += 1;
+                self.current_ship.points = self
+                    .ship_points(self.current_ship)
+                    .expect("Could not calculate ship points");
             }
         }
     }
@@ -378,6 +385,9 @@ impl GameState {
         if self.effective_speed(self.other_ship) < 2 {
             if self.remove_passenger_at(self.other_ship.position) {
                 self.other_ship.passengers += 1;
+                self.other_ship.points = self
+                    .ship_points(self.other_ship)
+                    .expect("Could not calculate other ship's points");
             }
         }
     }
@@ -630,6 +640,19 @@ impl GameState {
         actions
     }
 
+    pub fn coal_for_action(&self, action: Action) -> usize {
+        match action {
+            Action::Accelerate(acc) => {
+                (acc.acc.abs() as usize) - (self.current_ship.free_acc as usize)
+            }
+            Action::Turn(dir) => {
+                let turn_count: i32 = self.current_ship.direction.turn_count_to(dir.direction);
+                (turn_count.abs() as usize) - (self.current_ship.free_turns as usize)
+            }
+            Action::Push(_) | Action::Advance(_) => { 0 }
+        }
+    }
+
     pub fn can_move(&self) -> bool {
         let current_ship_can_advance: bool = !self.possible_advances().is_empty();
 
@@ -720,6 +743,29 @@ mod tests {
 
     fn create_game_state(segment: Vec<Segment>, team_one: Ship, team_two: Ship) -> GameState {
         GameState::new(Board::new(segment, CubeDirection::Right), 0, team_one, team_two, None)
+    }
+
+    #[test]
+    fn test_remove_passenger_at() {
+        let mut segment = vec![
+            create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)
+        ];
+        let team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
+        let team_two = create_ship(CubeCoordinates::new(-1, 1), TeamEnum::Two);
+        segment[0].set(
+            CubeCoordinates::new(0, 0),
+            Field::new(FieldType::Passenger, Some(Passenger::new(CubeDirection::UpLeft, 1)))
+        );
+        let mut game_state = create_game_state(segment, team_one, team_two);
+
+        assert_eq!(game_state.current_ship.passengers, 0);
+        assert_eq!(game_state.current_ship.points, 0);
+        game_state.pick_up_passenger_current_ship();
+        assert_eq!(game_state.current_ship.passengers, 1);
+        assert_eq!(game_state.current_ship.points, 6);
+        game_state.pick_up_passenger_current_ship();
+        assert_eq!(game_state.current_ship.passengers, 1);
+        assert_eq!(game_state.current_ship.points, 6);
     }
 
     #[test]

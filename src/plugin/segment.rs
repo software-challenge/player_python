@@ -41,6 +41,17 @@ impl Segment {
             .cloned()
     }
 
+    pub fn set(&mut self, coordinates: CubeCoordinates, field: Field) {
+        let local: CubeCoordinates = self.global_to_local(coordinates);
+
+        let local_cart: CartesianCoordinate = self.array_coords(local);
+        if let Some(row) = self.fields.get_mut(local_cart.x as usize) {
+            if let Some(cell) = row.get_mut(local_cart.y as usize) {
+                *cell = field;
+            }
+        }
+    }
+
     pub fn local_to_global(&self, coordinates: CubeCoordinates) -> CubeCoordinates {
         coordinates.rotated_by(CubeDirection::Right.turn_count_to(self.direction)) + self.center
     }

@@ -76,6 +76,20 @@ impl Board {
         self.get(&(coords.clone() + direction.vector()))
     }
 
+    pub fn set_field_in_direction(
+        &mut self,
+        direction: &CubeDirection,
+        coords: &CubeCoordinates,
+        field: Field
+    ) {
+        for segment in &mut self.segments {
+            if segment.contains(*coords) {
+                segment.set(*coords + direction.vector(), field);
+                break;
+            }
+        }
+    }
+
     pub fn get_coordinate_by_index(
         &self,
         segment_index: usize,

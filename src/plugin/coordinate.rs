@@ -115,6 +115,10 @@ impl CubeCoordinates {
     pub fn distance_to(&self, other: &CubeCoordinates) -> i32 {
         ((self.q - other.q).abs() + (self.r - other.r).abs() + (self.s - other.s).abs()) / 2
     }
+
+    pub fn __repr__(&self) -> String {
+        format!("CubeCoordinates({}, {}, {})", self.q, self.r, self.s)
+    }
 }
 
 impl Add for CubeCoordinates {
@@ -285,8 +289,15 @@ impl CubeDirection {
         }
     }
 
-    pub fn __hash__(&self) -> i32 {
-        self.ordinal()
+    pub fn __repr__(&self) -> String {
+        format!("CubeDirection::{}", match self {
+            CubeDirection::Right => "Right",
+            CubeDirection::DownRight => "DownRight",
+            CubeDirection::DownLeft => "DownLeft",
+            CubeDirection::Left => "Left",
+            CubeDirection::UpLeft => "UpLeft",
+            CubeDirection::UpRight => "UpRight",
+        })
     }
 }
 

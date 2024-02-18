@@ -89,7 +89,7 @@ impl Ship {
         self.movement = self.speed;
     }
 
-    pub fn direction(&self, reverse: bool) -> CubeDirection {
+    pub fn resolve_direction(&self, reverse: bool) -> CubeDirection {
         if reverse { self.direction.opposite() } else { self.direction }
     }
 

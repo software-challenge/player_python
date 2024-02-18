@@ -32,7 +32,7 @@ impl Advance {
         let valid_distance = self.validate_distance(&state, &ship)?;
         let advance_info = state.calculate_advance_info(
             &ship.position,
-            &ship.direction(!valid_distance),
+            &ship.resolve_direction(!valid_distance),
             ship.movement
         );
         let advance_possible = (advance_info.distance() as i32) >= self.distance.abs();
