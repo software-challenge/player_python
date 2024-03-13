@@ -1,6 +1,6 @@
 [package]
 name = "_socha"
-version = "2.1.2"
+version = "2.2.0"
 edition = "2021"
 
 [lib]
@@ -11,8 +11,8 @@ crate-type = ["cdylib"]
 libm = "0.2.5"
 libmath = "0.2.1"
 regex = "1.7.1"
-yaserde = "0.8.0"
-yaserde_derive = "0.8.0"
+yaserde = "0.10.0"
+yaserde_derive = "0.10.0"
 pyo3 = { version = "0.20.0" }
 pyo3-log = "0.9.0"
 log = "0.4.20"
