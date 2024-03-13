@@ -439,32 +439,17 @@ class Score:
     class Meta:
         name = "score"
 
-    cause: Optional[str] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-    reason: Optional[object] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
     part: List[int] = field(
         default_factory=list,
         metadata={
             "type": "Element",
+            "min_occurs": 1,
         }
     )
 
 
 @dataclass
 class Winner:
-    """
-    The winner of a game.
-    """
-
     class Meta:
         name = "winner"
 
@@ -472,6 +457,21 @@ class Winner:
         default=None,
         metadata={
             "type": "Attribute",
+            "required": True,
+        }
+    )
+    regular: Optional[bool] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        }
+    )
+    reason: Optional[str] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
         }
     )
 
@@ -747,20 +747,6 @@ class Turn:
 
 
 @dataclass
-class Winner:
-    class Meta:
-        name = "winner"
-
-    team: Optional[str] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-            "required": True,
-        }
-    )
-
-
-@dataclass
 class Actions:
     class Meta:
         name = "actions"
@@ -830,21 +816,6 @@ class Error:
     """
     message: str
     originalMessage: OriginalMessage
-
-
-@dataclass
-class Definition:
-    class Meta:
-        name = "definition"
-
-    fragment: List[Fragment] = field(
-        default_factory=list,
-        metadata={
-            "type": "Element",
-            "min_occurs": 1,
-        }
-    )
-
 
 @dataclass
 class Entry:
@@ -1029,20 +1000,6 @@ class LastMove:
         metadata={
             "type": "Element",
             "required": True,
-        }
-    )
-
-
-@dataclass
-class Scores:
-    class Meta:
-        name = "scores"
-
-    entry: List[Entry] = field(
-        default_factory=list,
-        metadata={
-            "type": "Element",
-            "min_occurs": 1,
         }
     )
 
