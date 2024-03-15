@@ -320,6 +320,7 @@ impl GameState {
         Ok(new_state)
     }
 
+    #[allow(clippy::nonminimal_bool)]
     pub fn advance_turn(&mut self) {
         self.current_ship.free_acc = 1;
         self.current_ship.free_turns = 1;
@@ -498,6 +499,7 @@ impl GameState {
             .collect()
     }
 
+    #[allow(clippy::only_used_in_recursion)]
     pub fn possible_action_comb(
         &self,
         current_state: &GameState,

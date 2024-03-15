@@ -46,6 +46,7 @@ pub struct Ship {
 #[pymethods]
 impl Ship {
     #[new]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         position: CubeCoordinates,
         team: TeamEnum,
