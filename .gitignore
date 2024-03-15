@@ -9,13 +9,14 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+socha_builds/
 .Python
 .venv/
 env/
 bin/
 build/
 develop-eggs/
-# dist/
+dist/
 eggs/
 lib/
 lib64/

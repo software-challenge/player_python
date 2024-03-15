@@ -96,7 +96,7 @@ class SochaPackageBuilder:
             )
         main_modules = {
             name for name in main_modules
-            if hasattr(sys.modules[name], "__file__")
+            if hasattr(sys.modules[name], "__file__") and sys.modules[name].__file__ is not None
             and (os.path.abspath(os.path.dirname(sys.modules[name].__file__)) == main_dir
                  or os.path.abspath(os.path.dirname(sys.modules[name].__file__)).startswith(main_dir + os.path.sep))
         }

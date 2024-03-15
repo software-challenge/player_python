@@ -705,34 +705,6 @@ class Push:
 
 
 @dataclass
-class Score:
-    class Meta:
-        name = "score"
-
-    cause: Optional[str] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-            "required": True,
-        }
-    )
-    reason: Optional[object] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-            "required": True,
-        }
-    )
-    part: List[int] = field(
-        default_factory=list,
-        metadata={
-            "type": "Element",
-            "min_occurs": 1,
-        }
-    )
-
-
-@dataclass
 class Turn:
     class Meta:
         name = "turn"
