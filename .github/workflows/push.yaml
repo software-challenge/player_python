@@ -11,6 +11,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      # Clippy - Rust linter
+      - name: Install Rust toolchain
+        run: rustup toolchain install stable
+      - name: Run Clippy
+        run: rustup component add clippy && cargo clippy -- -D warnings
+
+      # Ruff - Python linter
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10'
+      - name: Install Ruff
+        run: pip install ruff
+      - name: Run Ruff
+        run: ruff .
+
+      # Python unittests
+      - name: Install project dependencies
+        run: pip install -r requirements.txt
+      - name: Run unittests
+        run: python -m unittest discover -s tests -p '*.py'
+
+      # Build and test steps for Rust
       - name: Build
         run: cargo build --verbose
       - name: Run tests
