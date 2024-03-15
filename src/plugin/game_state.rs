@@ -367,7 +367,10 @@ impl GameState {
     }
 
     pub fn pick_up_passenger_current_ship(&mut self) {
-        if self.effective_speed(self.current_ship) < 2 && self.remove_passenger_at(self.current_ship.position) {
+        if
+            self.effective_speed(self.current_ship) < 2 &&
+            self.remove_passenger_at(self.current_ship.position)
+        {
             self.current_ship.passengers += 1;
             self.current_ship.points = self
                 .ship_points(self.current_ship)
@@ -376,7 +379,10 @@ impl GameState {
     }
 
     pub fn pick_up_passenger_other_ship(&mut self) {
-        if self.effective_speed(self.other_ship) < 2 && self.remove_passenger_at(self.other_ship.position) {
+        if
+            self.effective_speed(self.other_ship) < 2 &&
+            self.remove_passenger_at(self.other_ship.position)
+        {
             self.other_ship.passengers += 1;
             self.other_ship.points = self
                 .ship_points(self.other_ship)
@@ -401,7 +407,7 @@ impl GameState {
     }
 
     pub fn must_push(&self) -> bool {
-        &self.current_ship.position == &self.other_ship.position
+        self.current_ship.position == self.other_ship.position
     }
 
     pub fn check_ship_advance_limit(&self, ship: &Ship) -> AdvanceInfo {
@@ -988,13 +994,7 @@ mod tests {
             Some(0),
             Some(1)
         );
-        let game_state: GameState = GameState::new(
-            board,
-            0,
-            *team_one,
-            *team_two,
-            None
-        );
+        let game_state: GameState = GameState::new(board, 0, *team_one, *team_two, None);
 
         let move_: Move = Move::new(
             vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
