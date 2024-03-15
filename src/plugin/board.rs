@@ -38,7 +38,7 @@ impl Board {
         self.segments
             .iter()
             .enumerate()
-            .find(|(_, segment)| { segment.contains(coords.clone()) })
+            .find(|(_, segment)| { segment.contains(coords) })
             .map(|(i, s)| (i, s.clone()))
     }
 
@@ -63,7 +63,7 @@ impl Board {
                     s.center,
                     s.center + next_dir,
                     s.center + next_dir * 2,
-                ].contains(&coords)
+                ].contains(coords)
             })
             .unwrap_or(false)
     }
@@ -73,7 +73,7 @@ impl Board {
         direction: &CubeDirection,
         coords: &CubeCoordinates
     ) -> Option<Field> {
-        self.get(&(coords.clone() + direction.vector()))
+        self.get(&(*coords + direction.vector()))
     }
 
     pub fn set_field_in_direction(
@@ -114,7 +114,7 @@ impl Board {
     }
 
     pub fn segment_index(&self, coordinate: &CubeCoordinates) -> Option<usize> {
-        self.segments.iter().position(|segment| segment.contains(coordinate.clone()))
+        self.segments.iter().position(|segment| segment.contains(*coordinate))
     }
 
     pub fn find_segment(&self, coordinate: &CubeCoordinates) -> Option<Segment> {
@@ -124,7 +124,7 @@ impl Board {
 
     pub fn neighboring_fields(&self, coords: &CubeCoordinates) -> Vec<Option<Field>> {
         CubeDirection::VALUES.iter()
-            .map(|direction| self.get_field_in_direction(&direction, coords))
+            .map(|direction| self.get_field_in_direction(direction, coords))
             .collect()
     }
 
@@ -135,10 +135,10 @@ impl Board {
         CubeDirection::VALUES.iter()
             .zip(
                 CubeDirection::VALUES.iter().map(|direction|
-                    self.get_field_in_direction(&direction, coords)
+                    self.get_field_in_direction(direction, coords)
                 )
             )
-            .map(|(direction, field)| field.map(|_| coords.clone() + direction.vector()))
+            .map(|(direction, field)| field.map(|_| *coords + direction.vector()))
             .collect()
     }
 
@@ -162,9 +162,7 @@ impl Board {
         let mut ship = new_state.current_ship;
         if self.effective_speed(&ship) < 2 {
             if let Some(mut field) = new_state.board.pickup_passenger_at_position(&ship.position) {
-                field.passenger.as_mut().map(|passenger| {
-                    passenger.passenger -= 1;
-                });
+                if let Some(passenger) = field.passenger.as_mut() { passenger.passenger -= 1; }
                 ship.passengers += 1;
             }
         }
@@ -229,7 +227,7 @@ impl Board {
         let mut visited: HashSet<CubeCoordinates> = HashSet::with_capacity(max_fields);
         let mut queue: BinaryHeap<QueueItem> = BinaryHeap::new();
         queue.push(QueueItem {
-            coordinates: start_coordinates.clone(),
+            coordinates: *start_coordinates,
             distance: 0,
         });
 
@@ -240,14 +238,14 @@ impl Board {
 
             if let Some(field) = self.get(&current_coords) {
                 if field.field_type == field_type {
-                    nearest_coordinates.insert(current_coords.clone());
+                    nearest_coordinates.insert(current_coords);
                 }
             }
 
             self.neighboring_coordinates(&current_coords)
                 .into_iter()
-                .filter_map(|coord| coord)
-                .filter(|coord| visited.insert(coord.clone()))
+                .flatten()
+                .filter(|coord| visited.insert(*coord))
                 .for_each(|coord|
                     queue.push(QueueItem {
                         coordinates: coord,
@@ -353,10 +351,10 @@ mod tests {
         }];
         let mut board: Board = Board::new(segment, CubeDirection::DownRight);
 
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(-1, 1)), false);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(1, 1)), false);
+        assert!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)));
+        assert!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)));
+        assert!(!board.does_field_have_stream(&CubeCoordinates::new(-1, 1)));
+        assert!(!board.does_field_have_stream(&CubeCoordinates::new(1, 1)));
 
         segment = vec![Segment {
             direction: CubeDirection::DownRight,
@@ -397,10 +395,10 @@ mod tests {
 
         board = Board::new(segment, CubeDirection::DownRight);
 
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)), true);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(-1, 1)), false);
-        assert_eq!(board.does_field_have_stream(&CubeCoordinates::new(1, 1)), false);
+        assert!(board.does_field_have_stream(&CubeCoordinates::new(0, 0)));
+        assert!(board.does_field_have_stream(&CubeCoordinates::new(0, 1)));
+        assert!(!board.does_field_have_stream(&CubeCoordinates::new(-1, 1)));
+        assert!(!board.does_field_have_stream(&CubeCoordinates::new(1, 1)));
     }
 
     #[test]

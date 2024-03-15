@@ -39,25 +39,25 @@ impl Accelerate {
     }
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("perform() called with acc: {} and game state: {:?}", self.acc, state);
-        let mut ship: Ship = state.current_ship.clone();
+        let mut ship: Ship = state.current_ship;
         let mut speed = ship.speed;
         speed += self.acc;
         match () {
             _ if self.acc == 0 => {
                 debug!("Zero acceleration is not allowed");
-                return Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message()));
+                Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message()))
             }
             _ if speed > PluginConstants::MAX_SPEED => {
                 debug!("Acceleration would exceed max speed but was {}", speed);
-                return Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message()));
+                Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message()))
             }
             _ if speed < PluginConstants::MIN_SPEED => {
                 debug!("Acceleration would go below min speed but was {}", speed);
-                return Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message()));
+                Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message()))
             }
             _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
                 debug!("Cannot accelerate on sandbank. Ship position: {}", ship.position);
-                return Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message()));
+                Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message()))
             }
             _ => {
                 let new_ship: Ship = self.accelerate(&mut ship);
@@ -79,7 +79,7 @@ impl Accelerate {
         ship.free_acc = (-used_coal).max(0);
         ship.accelerate_by(self.acc);
         debug!("Acceleration completed and ship status: {:?}", ship);
-        return ship.clone();
+        *ship
     }
 
     fn accelerate_unchecked(&self, ship: &mut Ship) -> Ship {
@@ -89,7 +89,7 @@ impl Accelerate {
         ship.free_acc = (-used_coal).max(0);
         ship.accelerate_by(self.acc);
         debug!("Unchecked acceleration completed and ship status: {:?}", ship);
-        ship.clone()
+        *ship
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -149,7 +149,7 @@ mod tests {
             None,
             None
         );
-        let game_state: GameState = GameState::new(board, 0, team_one.clone(), team_two, None);
+        let game_state: GameState = GameState::new(board, 0, team_one, team_two, None);
         (accelerate, game_state)
     }
 
@@ -200,7 +200,7 @@ mod tests {
         mute_state.current_ship.coal = 0;
         mute_state.other_ship.coal = 0;
 
-        let result = accelerate.perform(&mute_state).unwrap_err();
+        let result = accelerate.perform(mute_state).unwrap_err();
 
         prepare_freethreaded_python();
         Python::with_gil(|py| {

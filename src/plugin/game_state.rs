@@ -174,10 +174,10 @@ impl GameState {
         let other_points = calculate_points(self.other_ship);
 
         match (current_points.cmp(&other_points), &self.current_ship.team) {
-            (Ordering::Greater, _) => self.current_ship.clone(),
-            (Ordering::Less, _) => self.other_ship.clone(),
-            (_, TeamEnum::One) => self.current_ship.clone(),
-            _ => self.other_ship.clone(),
+            (Ordering::Greater, _) => self.current_ship,
+            (Ordering::Less, _) => self.other_ship,
+            (_, TeamEnum::One) => self.current_ship,
+            _ => self.other_ship,
         }
     }
 
@@ -284,9 +284,7 @@ impl GameState {
         debug!("Actions: {:?}", move_.actions);
 
         for (i, action) in move_.actions.iter().enumerate() {
-            new_state.move_pre_check(*action, i, self.current_ship).map_err(|e| {
-                return e;
-            })?;
+            new_state.move_pre_check(*action, i, self.current_ship)?;
             match new_state.perform_action(*action) {
                 Ok(state) => {
                     new_state = state;
@@ -297,9 +295,7 @@ impl GameState {
             }
         }
 
-        new_state.move_after_check(new_state.current_ship).map_err(|e| {
-            return e;
-        })?;
+        new_state.move_after_check(new_state.current_ship)?;
 
         new_state.pick_up_passenger_current_ship();
         new_state.current_ship.points = new_state
@@ -371,24 +367,20 @@ impl GameState {
     }
 
     pub fn pick_up_passenger_current_ship(&mut self) {
-        if self.effective_speed(self.current_ship) < 2 {
-            if self.remove_passenger_at(self.current_ship.position) {
-                self.current_ship.passengers += 1;
-                self.current_ship.points = self
-                    .ship_points(self.current_ship)
-                    .expect("Could not calculate ship points");
-            }
+        if self.effective_speed(self.current_ship) < 2 && self.remove_passenger_at(self.current_ship.position) {
+            self.current_ship.passengers += 1;
+            self.current_ship.points = self
+                .ship_points(self.current_ship)
+                .expect("Could not calculate ship points");
         }
     }
 
     pub fn pick_up_passenger_other_ship(&mut self) {
-        if self.effective_speed(self.other_ship) < 2 {
-            if self.remove_passenger_at(self.other_ship.position) {
-                self.other_ship.passengers += 1;
-                self.other_ship.points = self
-                    .ship_points(self.other_ship)
-                    .expect("Could not calculate other ship's points");
-            }
+        if self.effective_speed(self.other_ship) < 2 && self.remove_passenger_at(self.other_ship.position) {
+            self.other_ship.passengers += 1;
+            self.other_ship.points = self
+                .ship_points(self.other_ship)
+                .expect("Could not calculate other ship's points");
         }
     }
 
@@ -403,8 +395,8 @@ impl GameState {
 
     pub fn ship_points(&self, ship: Ship) -> Option<i32> {
         Some(
-            self.ship_advance_points(ship.clone())? +
-                (ship.passengers as i32) * PluginConstants::POINTS_PER_PASSENGER
+            self.ship_advance_points(ship)? +
+                ship.passengers * PluginConstants::POINTS_PER_PASSENGER
         )
     }
 
@@ -468,7 +460,7 @@ impl GameState {
             }
         }
 
-        return AdvanceInfo { costs, problem: AdvanceProblem::MovementPointsMissing };
+        AdvanceInfo { costs, problem: AdvanceProblem::MovementPointsMissing }
     }
 
     fn merge_consecutive_advances(&self, actions: Vec<Action>) -> Vec<Action> {
@@ -494,7 +486,7 @@ impl GameState {
     }
 
     pub fn possible_moves(&self, depth: Option<usize>) -> Vec<Move> {
-        self.possible_action_comb(&self, vec![], 0, depth.unwrap_or(PluginConstants::MAX_DEPTH))
+        self.possible_action_comb(self, vec![], 0, depth.unwrap_or(PluginConstants::MAX_DEPTH))
             .into_iter()
             .map(|actions| Move { actions })
             .collect()
@@ -522,12 +514,10 @@ impl GameState {
                 current_state
                     .perform_action(action)
                     .ok()
-                    .and_then(|new_state| {
+                    .map(|new_state| {
                         let mut new_actions = current_actions.clone();
                         new_actions.push(action);
-                        Some(
-                            self.possible_action_comb(&new_state, new_actions, depth + 1, max_depth)
-                        )
+                        self.possible_action_comb(&new_state, new_actions, depth + 1, max_depth)
                     })
             })
             .flatten()
@@ -643,11 +633,11 @@ impl GameState {
     pub fn coal_for_action(&self, action: Action) -> usize {
         match action {
             Action::Accelerate(acc) => {
-                (acc.acc.abs() as usize) - (self.current_ship.free_acc as usize)
+                (acc.acc.unsigned_abs() as usize) - (self.current_ship.free_acc as usize)
             }
             Action::Turn(dir) => {
                 let turn_count: i32 = self.current_ship.direction.turn_count_to(dir.direction);
-                (turn_count.abs() as usize) - (self.current_ship.free_turns as usize)
+                (turn_count.unsigned_abs() as usize) - (self.current_ship.free_turns as usize)
             }
             Action::Push(_) | Action::Advance(_) => { 0 }
         }
@@ -1001,8 +991,8 @@ mod tests {
         let game_state: GameState = GameState::new(
             board,
             0,
-            team_one.clone(),
-            team_two.clone(),
+            *team_one,
+            *team_two,
             None
         );
 

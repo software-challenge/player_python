@@ -25,8 +25,8 @@ impl Push {
 
     pub fn perform(&self, state: &GameState) -> Result<(Ship, Ship), PyErr> {
         debug!("Performing push with direction: {}", self.direction);
-        let mut current_ship: Ship = state.current_ship.clone();
-        let mut other_ship: Ship = state.other_ship.clone();
+        let mut current_ship: Ship = state.current_ship;
+        let mut other_ship: Ship = state.other_ship;
 
         if current_ship.movement == 0 {
             debug!("Movement points missing: {}", current_ship.movement);

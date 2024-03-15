@@ -247,11 +247,11 @@ impl CubeDirection {
     }
 
     pub fn angle(&self) -> i32 {
-        (self.clone() as i32) * 60
+        (*self as i32) * 60
     }
 
     pub fn with_neighbors(&self) -> [CubeDirection; 3] {
-        [self.rotated_by(-1), self.clone(), self.rotated_by(1)]
+        [self.rotated_by(-1), *self, self.rotated_by(1)]
     }
 
     pub fn opposite(&self) -> CubeDirection {
@@ -266,16 +266,16 @@ impl CubeDirection {
     }
 
     pub fn turn_count_to(&self, target: CubeDirection) -> i32 {
-        let diff = ((target as i32) - (self.clone() as i32)).rem_euclid(6);
+        let diff = ((target as i32) - (*self as i32)).rem_euclid(6);
         if diff > 3 {
-            diff - (6 as i32)
+            diff - 6_i32
         } else {
             diff
         }
     }
 
     pub fn rotated_by(&self, turns: i32) -> CubeDirection {
-        Self::VALUES[((self.clone() as i32) + (turns as i32)).rem_euclid(6) as usize]
+        Self::VALUES[((*self as i32) + turns).rem_euclid(6) as usize]
     }
 
     pub fn ordinal(&self) -> i32 {

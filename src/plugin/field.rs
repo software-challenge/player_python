@@ -90,16 +90,16 @@ mod tests {
     #[test]
     fn test_is_empty() {
         let field1 = Field::new(FieldType::Sandbank, None);
-        assert_eq!(field1.is_empty(), true);
+        assert!(field1.is_empty());
 
         let field2 = Field::new(FieldType::Water, None);
-        assert_eq!(field2.is_empty(), true);
+        assert!(field2.is_empty());
 
         let field3 = Field::new(FieldType::Goal, None);
-        assert_eq!(field3.is_empty(), true);
+        assert!(field3.is_empty());
 
         let field4 = Field::new(FieldType::Island, None);
-        assert_eq!(field4.is_empty(), false);
+        assert!(!field4.is_empty());
 
         let field5 = Field::new(
             FieldType::Passenger,
@@ -108,13 +108,13 @@ mod tests {
                 passenger: 1,
             })
         );
-        assert_eq!(field5.is_empty(), false);
+        assert!(!field5.is_empty());
     }
 
     #[test]
     fn test_is_field_type() {
         let field = Field::new(FieldType::Water, None);
-        assert_eq!(field.is_field_type(FieldType::Water), true);
-        assert_eq!(field.is_field_type(FieldType::Island), false);
+        assert!(field.is_field_type(FieldType::Water));
+        assert!(!field.is_field_type(FieldType::Island));
     }
 }

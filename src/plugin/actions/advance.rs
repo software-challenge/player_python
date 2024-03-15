@@ -28,8 +28,8 @@ impl Advance {
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("Performing advance with distance: {}", self.distance);
-        let mut ship = state.current_ship.clone();
-        let valid_distance = self.validate_distance(&state, &ship)?;
+        let mut ship = state.current_ship;
+        let valid_distance = self.validate_distance(state, &ship)?;
         let advance_info = state.calculate_advance_info(
             &ship.position,
             &ship.resolve_direction(!valid_distance),
@@ -127,8 +127,8 @@ mod tests {
         let game_state: GameState = GameState::new(
             board,
             0,
-            team_one.clone(),
-            team_two.clone(),
+            *team_one,
+            *team_two,
             None
         );
         game_state

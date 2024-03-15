@@ -135,14 +135,14 @@ mod tests {
             free_acc: 0,
             movement: 0,
         };
-        assert_eq!(ship.can_turn(), false);
+        assert!(!ship.can_turn());
 
         ship.free_turns = 1;
-        assert_eq!(ship.can_turn(), true);
+        assert!(ship.can_turn());
 
         ship.free_turns = 0;
         ship.coal = 1;
-        assert_eq!(ship.can_turn(), true);
+        assert!(ship.can_turn());
     }
 
     #[test]

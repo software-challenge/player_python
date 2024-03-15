@@ -26,9 +26,9 @@ impl Turn {
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("Performing turn with direction: {}", self.direction);
-        let mut current_ship: Ship = state.current_ship.clone();
+        let mut current_ship: Ship = state.current_ship;
 
-        let turn_count: i32 = current_ship.direction.turn_count_to(self.direction.clone());
+        let turn_count: i32 = current_ship.direction.turn_count_to(self.direction);
 
         let abs_turn_count: i32 = turn_count.abs();
         let used_coal: i32 = abs_turn_count - current_ship.free_turns;
@@ -50,14 +50,14 @@ impl Turn {
             current_ship.coal -= used_coal;
         }
 
-        current_ship.direction = self.direction.clone();
+        current_ship.direction = self.direction;
 
         debug!("Turn completed and ship status: {:?}", current_ship);
         Ok(current_ship)
     }
 
     pub fn coal_cost(&self, ship: &Ship) -> i32 {
-        self.direction.turn_count_to(self.direction.clone()).abs().saturating_sub(ship.free_turns)
+        self.direction.turn_count_to(self.direction).abs().saturating_sub(ship.free_turns)
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -123,8 +123,8 @@ mod tests {
         let game_state: GameState = GameState::new(
             board,
             0,
-            team_one.clone(),
-            team_two.clone(),
+            *team_one,
+            *team_two,
             None
         );
         game_state
