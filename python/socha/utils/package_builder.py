@@ -30,7 +30,7 @@ class SochaPackageBuilder:
         except Exception as e:
             logging.error(f"Error reading requirements file: {str(e)}")
             logging.info(
-                f"Please create a 'requirements.txt' in the same folder as your logic.")
+                "Please create a 'requirements.txt' in the same folder as your logic.")
             sys.exit(1)
 
         logging.info(f'Downloading the following packages: {requirements}')
@@ -148,17 +148,17 @@ class SochaPackageBuilder:
             f.write('set -e\n')
             f.write('\n')
             f.write(
-                f'# Sets the environment variable, which specifies the location for pip to store its cache files\n')
+                '# Sets the environment variable, which specifies the location for pip to store its cache files\n')
             f.write(
                 f'export XDG_CACHE_HOME=./{self.package_name}/.pip_cache\n')
             f.write('\n')
             f.write(
-                f'# Sets the environment variable, which adds the directory to the list of paths that Python searches '
-                f'for modules and packages when they are imported.\n')
+                '# Sets the environment variable, which adds the directory to the list of paths that Python searches '
+                'for modules and packages when they are imported.\n')
             f.write(
                 f'export PYTHONPATH=./{self.package_name}/packages:$PYTHONPATH\n')
             f.write('\n')
-            f.write(f'# Install the package socha and dependencies\n')
+            f.write('# Install the package socha and dependencies\n')
             f.write(
                 f'pip install --no-index --find-links=./{self.package_name}/{self.dependencies_dir}/ --target=./'
                 f'{self.package_name}/{self.packages_dir}/ --cache-dir=./{self.package_name}/{self.cache_dir} ')

@@ -2,7 +2,7 @@ from typing import List
 
 from socha import _socha
 from socha._socha import Field, FieldType, Move, TeamEnum, CubeCoordinates, GameState
-from socha.api.protocol.protocol import Acceleration, Actions, Advance, Push, Ship, Turn, Board, Data, Water, Sandbank, Island, Passenger, Goal
+from socha.api.protocol.protocol import Acceleration, Actions, Advance, Push, Turn, Board, Data, Water, Sandbank, Island, Passenger, Goal
 
 
 def _convert_board(protocol_board: Board) -> _socha.Board:
@@ -128,7 +128,7 @@ def if_last_game_state(message, last_game_state) -> GameState:
 
         last_move = Move(actions=new_actions)
         return last_game_state.perform_move(last_move)
-    except Exception as e:
+    except Exception:
         return if_not_last_game_state(message)
 
 

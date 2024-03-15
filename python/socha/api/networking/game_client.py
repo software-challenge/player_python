@@ -12,7 +12,7 @@ from socha._socha import GameState, Move
 from socha.api.networking.utils import handle_move, if_last_game_state, if_not_last_game_state
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
 from socha.api.protocol.protocol import State, Error, Join, Joined, JoinPrepared, JoinRoom, Room, Result, MoveRequest, \
-    Left, Errorpacket, Authenticate, Prepared, Slot, Prepare, Observe, Cancel, Observed, Step, Pause
+    Left, Authenticate, Prepared, Slot, Prepare, Observe, Cancel, Observed, Step, Pause
 from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
@@ -296,7 +296,7 @@ class GameClient(XMLProtocolInterface):
                 "The server left. Client tries to reconnect to the server.")
             for _ in range(3):
                 logging.info(
-                    f"Try to establish a connection with the server...")
+                    "Try to establish a connection with the server...")
                 try:
                     self.connect()
                     if self.network_interface.connected:
