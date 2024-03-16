@@ -546,7 +546,7 @@ impl GameState {
         }
 
         let ship = self.current_ship;
-        let max_coal = max_coal.unwrap_or(ship.coal.try_into().unwrap());
+        let max_coal = max_coal.unwrap_or_else(|| ship.coal.try_into().unwrap());
         let max_possible_acceleration = max_coal + (ship.free_acc as usize);
 
         (1..=max_possible_acceleration as i32)
@@ -630,7 +630,7 @@ impl GameState {
     }
 
     pub fn possible_actions(&self, rank: usize, max_coal: Option<usize>) -> Vec<Action> {
-        let max_coal = max_coal.unwrap_or(self.current_ship.coal.try_into().unwrap());
+        let max_coal = max_coal.unwrap_or_else(|| self.current_ship.coal.try_into().unwrap());
         let mut actions: Vec<Action> = Vec::new();
 
         if rank == 0 {
