@@ -33,7 +33,7 @@ pyo3::create_exception!(_socha, PushProblem, PyException);
 pyo3::create_exception!(_socha, TurnProblem, PyException);
 
 #[pymodule]
-fn _socha(_py: Python, m: &PyModule) -> PyResult<()> {
+fn _socha(py: Python, m: &PyModule) -> PyResult<()> {
     pyo3_log::init();
 
     m.add_class::<Accelerate>()?;
@@ -41,15 +41,15 @@ fn _socha(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<Push>()?;
     m.add_class::<Turn>()?;
 
-    m.add("AccelerationProblem", _py.get_type::<AccelerationProblem>())?;
-    m.add("AdvanceProblem", _py.get_type::<AdvanceProblem>())?;
+    m.add("AccelerationProblem", py.get_type::<AccelerationProblem>())?;
+    m.add("AdvanceProblem", py.get_type::<AdvanceProblem>())?;
     m.add(
         "InvalidMoveException",
-        _py.get_type::<InvalidMoveException>(),
+        py.get_type::<InvalidMoveException>(),
     )?;
-    m.add("MoveMistake", _py.get_type::<MoveMistake>())?;
-    m.add("PushProblem", _py.get_type::<PushProblem>())?;
-    m.add("TurnProblem", _py.get_type::<TurnProblem>())?;
+    m.add("MoveMistake", py.get_type::<MoveMistake>())?;
+    m.add("PushProblem", py.get_type::<PushProblem>())?;
+    m.add("TurnProblem", py.get_type::<TurnProblem>())?;
 
     m.add_class::<PluginConstants>()?;
 
