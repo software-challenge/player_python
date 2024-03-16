@@ -36,10 +36,10 @@ jobs:
         run: ruff .
 
       # Python unittests
-      - name: Set PYTHONPATH
-        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/python" >> $GITHUB_ENV
-      - name: Install project dependencies
-        run: pip install -r requirements.txt
+      - name: Install Maturin
+        run: pip install maturin
+      - name: Maturin develop
+        run: maturing develop
       - name: Run unittests
         run: python -m unittest discover -s tests -p '*.py'
 
