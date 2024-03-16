@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "socha"
-version = "2.2.0"
+version = "2.2.1"
 authors = [{ name = "maxblan", email = "stu222782@mail.uni-kiel.de" }]
 description = "This is the package for the Software-Challenge Germany 2023. This Season the game will be 'Hey, danke für den Fisch' a.k.a. 'Penguins' in short."
 readme = "README.md"
