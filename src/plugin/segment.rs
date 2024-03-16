@@ -236,7 +236,4 @@ mod tests {
             CubeCoordinates::new(-4, 0)
         );
     }
-
-    #[test]
-    fn test_contains() {}
 }
