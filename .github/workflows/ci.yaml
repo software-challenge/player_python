@@ -25,21 +25,30 @@ jobs:
       - name: Run Clippy
         run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Ruff - Python linter
+      # Set up Python and create a virtual environment
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
           python-version: "3.10"
+
+      - name: Create and activate virtual environment
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+
+      # Install and run Ruff - Python linter
       - name: Install Ruff
         run: pip install ruff
+
       - name: Run Ruff
         run: ruff .
 
-      # Python unittests
-      - name: Install Maturin
-        run: pip install maturin
-      - name: Maturin develop
-        run: maturin develop
+      # Python unittests within the virtual environment
+      - name: Install dependencies for unittests
+        run: |
+          pip install maturin
+          maturin develop
+
       - name: Run unittests
         run: python -m unittest discover -s tests -p '*.py'
 
