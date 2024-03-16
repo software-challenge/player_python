@@ -1,7 +1,7 @@
 name: convert readme
 on:
   push:
-    branches: [ master ]
+    branches: [master]
 jobs:
   convert:
     runs-on: ubuntu-latest

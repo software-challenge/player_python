@@ -3,9 +3,9 @@ use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
 use crate::plugin::constants::PluginConstants;
-use crate::plugin::{ errors::acceleration_errors::AccelerationProblem, game_state::GameState };
 use crate::plugin::field::FieldType;
 use crate::plugin::ship::Ship;
+use crate::plugin::{errors::acceleration_errors::AccelerationProblem, game_state::GameState};
 
 /// `Accelerate` is representing a ship's ability to change its speed and acceleration.
 /// It contains methods for initiating and managing the acceleration process.
@@ -38,32 +38,48 @@ impl Accelerate {
         Self { acc }
     }
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
-        debug!("perform() called with acc: {} and game state: {:?}", self.acc, state);
-        let mut ship: Ship = state.current_ship.clone();
+        debug!(
+            "perform() called with acc: {} and game state: {:?}",
+            self.acc, state
+        );
+        let mut ship: Ship = state.current_ship;
         let mut speed = ship.speed;
         speed += self.acc;
         match () {
             _ if self.acc == 0 => {
                 debug!("Zero acceleration is not allowed");
-                return Err(PyBaseException::new_err(AccelerationProblem::ZeroAcc.message()));
+                Err(PyBaseException::new_err(
+                    AccelerationProblem::ZeroAcc.message(),
+                ))
             }
             _ if speed > PluginConstants::MAX_SPEED => {
                 debug!("Acceleration would exceed max speed but was {}", speed);
-                return Err(PyBaseException::new_err(AccelerationProblem::AboveMaxSpeed.message()));
+                Err(PyBaseException::new_err(
+                    AccelerationProblem::AboveMaxSpeed.message(),
+                ))
             }
             _ if speed < PluginConstants::MIN_SPEED => {
                 debug!("Acceleration would go below min speed but was {}", speed);
-                return Err(PyBaseException::new_err(AccelerationProblem::BelowMinSpeed.message()));
+                Err(PyBaseException::new_err(
+                    AccelerationProblem::BelowMinSpeed.message(),
+                ))
             }
             _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
-                debug!("Cannot accelerate on sandbank. Ship position: {}", ship.position);
-                return Err(PyBaseException::new_err(AccelerationProblem::OnSandbank.message()));
+                debug!(
+                    "Cannot accelerate on sandbank. Ship position: {}",
+                    ship.position
+                );
+                Err(PyBaseException::new_err(
+                    AccelerationProblem::OnSandbank.message(),
+                ))
             }
             _ => {
                 let new_ship: Ship = self.accelerate(&mut ship);
                 if new_ship.coal < 0 {
                     debug!("Insufficient coal for acceleration was {}", new_ship.coal);
-                    Err(PyBaseException::new_err(AccelerationProblem::InsufficientCoal.message()))
+                    Err(PyBaseException::new_err(
+                        AccelerationProblem::InsufficientCoal.message(),
+                    ))
                 } else {
                     debug!("Ship accelerated successfully");
                     Ok(ship)
@@ -79,7 +95,7 @@ impl Accelerate {
         ship.free_acc = (-used_coal).max(0);
         ship.accelerate_by(self.acc);
         debug!("Acceleration completed and ship status: {:?}", ship);
-        return ship.clone();
+        *ship
     }
 
     fn accelerate_unchecked(&self, ship: &mut Ship) -> Ship {
@@ -88,12 +104,18 @@ impl Accelerate {
         ship.coal -= used_coal.max(0);
         ship.free_acc = (-used_coal).max(0);
         ship.accelerate_by(self.acc);
-        debug!("Unchecked acceleration completed and ship status: {:?}", ship);
-        ship.clone()
+        debug!(
+            "Unchecked acceleration completed and ship status: {:?}",
+            ship
+        );
+        *ship
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        debug!("__repr__ method called for Accelerate with acc: {}", self.acc);
+        debug!(
+            "__repr__ method called for Accelerate with acc: {}",
+            self.acc
+        );
         Ok(format!("Accelerate({})", self.acc))
     }
 }
@@ -104,11 +126,11 @@ mod tests {
 
     use crate::plugin::board::Board;
     use crate::plugin::constants::PluginConstants;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
     use crate::plugin::field::Field;
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{ Ship, TeamEnum };
+    use crate::plugin::ship::{Ship, TeamEnum};
 
     use super::*;
 
@@ -136,7 +158,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         let team_two: Ship = Ship::new(
             CubeCoordinates::new(-1, 1),
@@ -147,9 +169,9 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
-        let game_state: GameState = GameState::new(board, 0, team_one.clone(), team_two, None);
+        let game_state: GameState = GameState::new(board, 0, team_one, team_two, None);
         (accelerate, game_state)
     }
 
@@ -161,7 +183,10 @@ mod tests {
 
         prepare_freethreaded_python();
         Python::with_gil(|py| {
-            assert_eq!(result_error.value(py).to_string(), AccelerationProblem::ZeroAcc.message());
+            assert_eq!(
+                result_error.value(py).to_string(),
+                AccelerationProblem::ZeroAcc.message()
+            );
         });
     }
 
@@ -188,7 +213,10 @@ mod tests {
 
         prepare_freethreaded_python();
         Python::with_gil(|py| {
-            assert_eq!(result.value(py).to_string(), AccelerationProblem::BelowMinSpeed.message());
+            assert_eq!(
+                result.value(py).to_string(),
+                AccelerationProblem::BelowMinSpeed.message()
+            );
         });
     }
 
@@ -200,7 +228,7 @@ mod tests {
         mute_state.current_ship.coal = 0;
         mute_state.other_ship.coal = 0;
 
-        let result = accelerate.perform(&mute_state).unwrap_err();
+        let result = accelerate.perform(mute_state).unwrap_err();
 
         prepare_freethreaded_python();
         Python::with_gil(|py| {
@@ -232,7 +260,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
 
         assert_eq!(ship.speed, PluginConstants::MIN_SPEED);

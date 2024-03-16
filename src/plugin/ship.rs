@@ -1,6 +1,10 @@
 use pyo3::prelude::*;
 
-use super::{ constants::PluginConstants, coordinate::{ CubeCoordinates, CubeDirection }, game_state::AdvanceInfo };
+use super::{
+    constants::PluginConstants,
+    coordinate::{CubeCoordinates, CubeDirection},
+    game_state::AdvanceInfo,
+};
 
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash, Copy)]
 #[pyclass]
@@ -46,6 +50,7 @@ pub struct Ship {
 #[pymethods]
 impl Ship {
     #[new]
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         position: CubeCoordinates,
         team: TeamEnum,
@@ -55,7 +60,7 @@ impl Ship {
         passengers: Option<i32>,
         points: Option<i32>,
         free_turns: Option<i32>,
-        movement: Option<i32>
+        movement: Option<i32>,
     ) -> Self {
         Ship {
             team,
@@ -67,7 +72,7 @@ impl Ship {
             free_turns: free_turns.unwrap_or(PluginConstants::FREE_TURNS),
             points: points.unwrap_or(0),
             free_acc: PluginConstants::FREE_ACC,
-            movement: movement.unwrap_or(speed.unwrap_or(PluginConstants::MIN_SPEED)),
+            movement: movement.unwrap_or_else(|| speed.unwrap_or(PluginConstants::MIN_SPEED)),
         }
     }
 
@@ -90,7 +95,11 @@ impl Ship {
     }
 
     pub fn resolve_direction(&self, reverse: bool) -> CubeDirection {
-        if reverse { self.direction.opposite() } else { self.direction }
+        if reverse {
+            self.direction.opposite()
+        } else {
+            self.direction
+        }
     }
 
     pub fn update_position(&mut self, distance: i32, advance_info: AdvanceInfo) {
@@ -135,14 +144,14 @@ mod tests {
             free_acc: 0,
             movement: 0,
         };
-        assert_eq!(ship.can_turn(), false);
+        assert!(!ship.can_turn());
 
         ship.free_turns = 1;
-        assert_eq!(ship.can_turn(), true);
+        assert!(ship.can_turn());
 
         ship.free_turns = 0;
         ship.coal = 1;
-        assert_eq!(ship.can_turn(), true);
+        assert!(ship.can_turn());
     }
 
     #[test]

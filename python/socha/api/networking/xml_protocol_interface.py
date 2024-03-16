@@ -1,20 +1,27 @@
 """
 Here are all incoming byte streams and all outgoing protocol objects handheld.
 """
+
 import contextlib
 import logging
-from typing import Iterator, Callable, Any
-from socha._socha import TeamEnum
+from typing import Any, Callable, Iterator
 
+from socha._socha import TeamEnum
+from socha.api.networking.network_socket import NetworkSocket
+from socha.api.protocol.protocol import (
+    Close,
+    Error,
+    MoveRequest,
+    Result,
+    WelcomeMessage,
+)
+from socha.api.protocol.protocol_packet import ProtocolPacket
 from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.parsers.config import ParserConfig
 from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
-
-from socha.api.networking.network_socket import NetworkSocket
-from socha.api.protocol.protocol import *
 
 
 def custom_class_factory(clazz, params: dict):
@@ -25,7 +32,8 @@ def custom_class_factory(clazz, params: dict):
             ...
         if params.get("class_value") == "welcomeMessage":
             welcome_message = WelcomeMessage(
-                TeamEnum.One if params.get("name") == "ONE" else TeamEnum.Two)
+                TeamEnum.One if params.get("name") == "ONE" else TeamEnum.Two
+            )
             return clazz(class_binding=welcome_message, **params)
         elif params.get("class_value") == "memento":
             state_object = params.get("state")
@@ -34,12 +42,17 @@ def custom_class_factory(clazz, params: dict):
             move_request_object = MoveRequest()
             return clazz(class_binding=move_request_object, **params)
         elif params.get("class_value") == "result":
-            result_object = Result(definition=params.get("definition"), scores=params.get("scores"),
-                                   winner=params.get("winner"))
+            result_object = Result(
+                definition=params.get("definition"),
+                scores=params.get("scores"),
+                winner=params.get("winner"),
+            )
             return clazz(class_binding=result_object, **params)
         elif params.get("class_value") == "error":
-            error_object = Error(message=params.get(
-                "message"), originalMessage=params.get("original_message"))
+            error_object = Error(
+                message=params.get("message"),
+                originalMessage=params.get("original_message"),
+            )
             return clazz(class_binding=error_object, **params)
 
     return clazz(**params)
@@ -62,10 +75,10 @@ class XMLProtocolInterface:
         context = XmlContext()
         deserialize_config = ParserConfig(class_factory=custom_class_factory)
         self.deserializer = XmlParser(
-            handler=XmlEventHandler, context=context, config=deserialize_config)
+            handler=XmlEventHandler, context=context, config=deserialize_config
+        )
 
-        serialize_config = SerializerConfig(
-            pretty_print=True, xml_declaration=False)
+        serialize_config = SerializerConfig(pretty_print=True, xml_declaration=False)
         self.serializer = XmlSerializer(config=serialize_config)
 
     def connect(self):
@@ -97,13 +110,13 @@ class XMLProtocolInterface:
             cls = self._deserialize_object(receiving)
             return cls
         except OSError:
-            logging.error(
-                "An OSError occurred while receiving data from the server.")
+            logging.error("An OSError occurred while receiving data from the server.")
             self.running = False
             raise
         except Exception as e:
             logging.error(
-                "An error occurred while receiving data from the server: %s", e)
+                "An error occurred while receiving data from the server: %s", e
+            )
             self.running = False
             raise
 
@@ -117,8 +130,11 @@ class XMLProtocolInterface:
             raise ValueError("Cannot send `None` to server")
 
         with self._encode_context() as encode:
-            shipment = PROTOCOL_PREFIX + \
-                encode(obj) if self.first_time is True else encode(obj)
+            shipment = (
+                PROTOCOL_PREFIX + encode(obj)
+                if self.first_time is True
+                else encode(obj)
+            )
 
         try:
             self.network_interface.send(shipment)

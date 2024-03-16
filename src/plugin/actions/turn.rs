@@ -1,12 +1,9 @@
 use log::debug;
-use pyo3::{ exceptions::PyBaseException, prelude::* };
+use pyo3::{exceptions::PyBaseException, prelude::*};
 
 use crate::plugin::{
-    coordinate::CubeDirection,
-    errors::turn_error::TurnProblem,
-    field::FieldType,
-    game_state::GameState,
-    ship::Ship,
+    coordinate::CubeDirection, errors::turn_error::TurnProblem, field::FieldType,
+    game_state::GameState, ship::Ship,
 };
 
 #[pyclass]
@@ -26,9 +23,9 @@ impl Turn {
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("Performing turn with direction: {}", self.direction);
-        let mut current_ship: Ship = state.current_ship.clone();
+        let mut current_ship: Ship = state.current_ship;
 
-        let turn_count: i32 = current_ship.direction.turn_count_to(self.direction.clone());
+        let turn_count: i32 = current_ship.direction.turn_count_to(self.direction);
 
         let abs_turn_count: i32 = turn_count.abs();
         let used_coal: i32 = abs_turn_count - current_ship.free_turns;
@@ -36,28 +33,36 @@ impl Turn {
         current_ship.free_turns = std::cmp::max(current_ship.free_turns - abs_turn_count, 0);
 
         if state.board.get(&current_ship.position).unwrap().field_type == FieldType::Sandbank {
-            debug!("Rotation on sandbank not allowed. Position: {}", current_ship.position);
-            return Err(
-                PyBaseException::new_err(TurnProblem::RotationOnSandbankNotAllowed.message())
+            debug!(
+                "Rotation on sandbank not allowed. Position: {}",
+                current_ship.position
             );
+            return Err(PyBaseException::new_err(
+                TurnProblem::RotationOnSandbankNotAllowed.message(),
+            ));
         }
         if current_ship.coal < used_coal {
             debug!("Not enough coal for rotation. Coal: {}", current_ship.coal);
-            return Err(PyBaseException::new_err(TurnProblem::NotEnoughCoalForRotation.message()));
+            return Err(PyBaseException::new_err(
+                TurnProblem::NotEnoughCoalForRotation.message(),
+            ));
         }
 
         if used_coal > 0 {
             current_ship.coal -= used_coal;
         }
 
-        current_ship.direction = self.direction.clone();
+        current_ship.direction = self.direction;
 
         debug!("Turn completed and ship status: {:?}", current_ship);
         Ok(current_ship)
     }
 
     pub fn coal_cost(&self, ship: &Ship) -> i32 {
-        self.direction.turn_count_to(self.direction.clone()).abs().saturating_sub(ship.free_turns)
+        self.direction
+            .turn_count_to(self.direction)
+            .abs()
+            .saturating_sub(ship.free_turns)
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -70,11 +75,11 @@ mod tests {
     use pyo3::prepare_freethreaded_python;
 
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
-    use crate::plugin::field::{ Field, FieldType };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+    use crate::plugin::field::{Field, FieldType};
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{ Ship, TeamEnum };
+    use crate::plugin::ship::{Ship, TeamEnum};
 
     use super::*;
 
@@ -101,7 +106,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_one.speed = 5;
         team_one.movement = 5;
@@ -115,18 +120,12 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_two.speed = 5;
         team_two.movement = 5;
         team_two.coal = coal;
-        let game_state: GameState = GameState::new(
-            board,
-            0,
-            team_one.clone(),
-            team_two.clone(),
-            None
-        );
+        let game_state: GameState = GameState::new(board, 0, *team_one, *team_two, None);
         game_state
     }
 

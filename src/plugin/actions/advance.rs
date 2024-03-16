@@ -3,9 +3,7 @@ use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
 use crate::plugin::{
-    constants::PluginConstants,
-    errors::advance_errors::AdvanceProblem,
-    game_state::GameState,
+    constants::PluginConstants, errors::advance_errors::AdvanceProblem, game_state::GameState,
 };
 
 use crate::plugin::ship::Ship;
@@ -28,12 +26,12 @@ impl Advance {
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
         debug!("Performing advance with distance: {}", self.distance);
-        let mut ship = state.current_ship.clone();
-        let valid_distance = self.validate_distance(&state, &ship)?;
+        let mut ship = state.current_ship;
+        let valid_distance = self.validate_distance(state, &ship)?;
         let advance_info = state.calculate_advance_info(
             &ship.position,
             &ship.resolve_direction(!valid_distance),
-            ship.movement
+            ship.movement,
         );
         let advance_possible = (advance_info.distance() as i32) >= self.distance.abs();
 
@@ -48,21 +46,22 @@ impl Advance {
     }
 
     fn validate_distance(&self, state: &GameState, ship: &Ship) -> Result<bool, PyErr> {
-        if
-            (self.distance < PluginConstants::MIN_SPEED &&
-                !state.board.is_sandbank(&ship.position)) ||
-            self.distance > PluginConstants::MAX_SPEED
+        if (self.distance < PluginConstants::MIN_SPEED && !state.board.is_sandbank(&ship.position))
+            || self.distance > PluginConstants::MAX_SPEED
         {
             debug!("Invalid distance: {}", self.distance);
-            return Err(PyBaseException::new_err(AdvanceProblem::InvalidDistance.message()));
+            return Err(PyBaseException::new_err(
+                AdvanceProblem::InvalidDistance.message(),
+            ));
         }
         if self.distance > ship.movement {
             debug!(
                 "Movement points missing: {} needed, {} available",
-                self.distance,
-                ship.movement
+                self.distance, ship.movement
             );
-            return Err(PyBaseException::new_err(AdvanceProblem::MovementPointsMissing.message()));
+            return Err(PyBaseException::new_err(
+                AdvanceProblem::MovementPointsMissing.message(),
+            ));
         }
         Ok(true)
     }
@@ -77,11 +76,11 @@ mod tests {
     use pyo3::prepare_freethreaded_python;
 
     use crate::plugin::board::Board;
-    use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
-    use crate::plugin::field::{ Field, FieldType };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+    use crate::plugin::field::{Field, FieldType};
     use crate::plugin::game_state::GameState;
     use crate::plugin::segment::Segment;
-    use crate::plugin::ship::{ Ship, TeamEnum };
+    use crate::plugin::ship::{Ship, TeamEnum};
 
     use super::*;
 
@@ -107,7 +106,7 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_one.speed = 5;
         team_one.movement = 5;
@@ -120,17 +119,11 @@ mod tests {
             None,
             None,
             None,
-            None
+            None,
         );
         team_two.speed = 5;
         team_two.movement = 5;
-        let game_state: GameState = GameState::new(
-            board,
-            0,
-            team_one.clone(),
-            team_two.clone(),
-            None
-        );
+        let game_state: GameState = GameState::new(board, 0, *team_one, *team_two, None);
         game_state
     }
 
@@ -159,7 +152,10 @@ mod tests {
 
         prepare_freethreaded_python();
         Python::with_gil(|py| {
-            assert_eq!(error.value(py).to_string(), AdvanceProblem::InvalidDistance.message());
+            assert_eq!(
+                error.value(py).to_string(),
+                AdvanceProblem::InvalidDistance.message()
+            );
         });
     }
 

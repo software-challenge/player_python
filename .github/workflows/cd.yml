@@ -1,10 +1,8 @@
-name: continuous deployment
+name: CD
 
 on:
   release:
     types: [published]
-    branches:
-      - master
 
 permissions:
   contents: read
@@ -96,7 +94,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: "startsWith(github.ref, 'refs/tags/')"
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [linux, windows, macos, sdist]
     steps:
       - uses: actions/download-artifact@v3

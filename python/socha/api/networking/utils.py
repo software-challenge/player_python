@@ -1,8 +1,21 @@
 from typing import List
 
 from socha import _socha
-from socha._socha import Field, FieldType, Move, TeamEnum, CubeCoordinates, GameState
-from socha.api.protocol.protocol import Acceleration, Actions, Advance, Push, Ship, Turn, Board, Data, Water, Sandbank, Island, Passenger, Goal
+from socha._socha import CubeCoordinates, Field, FieldType, GameState, Move, TeamEnum
+from socha.api.protocol.protocol import (
+    Acceleration,
+    Actions,
+    Advance,
+    Board,
+    Data,
+    Goal,
+    Island,
+    Passenger,
+    Push,
+    Sandbank,
+    Turn,
+    Water,
+)
 
 
 def _convert_board(protocol_board: Board) -> _socha.Board:
@@ -26,18 +39,30 @@ def _convert_board(protocol_board: Board) -> _socha.Board:
                 elif isinstance(field, Island):
                     con_row.append(Field(FieldType.Island, None))
                 elif isinstance(field, Passenger):
-                    con_row.append(Field(
-                        FieldType.Passenger, _socha.Passenger(direction_from_string(field.direction), field.passenger)))
+                    con_row.append(
+                        Field(
+                            FieldType.Passenger,
+                            _socha.Passenger(
+                                direction_from_string(field.direction), field.passenger
+                            ),
+                        )
+                    )
                 elif isinstance(field, Goal):
                     con_row.append(Field(FieldType.Goal, None))
             con_fields.append(con_row)
         con_center: _socha.CubeCoordinates = CubeCoordinates(
-            q=segment.center.q, r=segment.center.r)
-        con_segments.append(_socha.Segment(direction=direction_from_string(
-            segment.direction), center=con_center, fields=con_fields))
+            q=segment.center.q, r=segment.center.r
+        )
+        con_segments.append(
+            _socha.Segment(
+                direction=direction_from_string(segment.direction),
+                center=con_center,
+                fields=con_fields,
+            )
+        )
     return _socha.Board(
         segments=con_segments,
-        next_direction=direction_from_string(protocol_board.next_direction)
+        next_direction=direction_from_string(protocol_board.next_direction),
     )
 
 
@@ -75,10 +100,22 @@ def direction_to_string(cube_direction: _socha.CubeDirection) -> str:
 
 def handle_move(move_response):
     actions = move_response.actions
-    protocol_actions = [Acceleration(acc=a.acc) if isinstance(a, _socha.Accelerate)
-                        else Advance(distance=a.distance) if isinstance(a, _socha.Advance)
-                        else Push(direction=direction_to_string(a.direction)) if isinstance(a, _socha.Push)
-                        else Turn(direction=direction_to_string(a.direction)) for a in actions]
+    protocol_actions = [
+        (
+            Acceleration(acc=a.acc)
+            if isinstance(a, _socha.Accelerate)
+            else (
+                Advance(distance=a.distance)
+                if isinstance(a, _socha.Advance)
+                else (
+                    Push(direction=direction_to_string(a.direction))
+                    if isinstance(a, _socha.Push)
+                    else Turn(direction=direction_to_string(a.direction))
+                )
+            )
+        )
+        for a in actions
+    ]
     return Data(class_value="move", actions=Actions(actions=protocol_actions))
 
 
@@ -98,7 +135,9 @@ def _merge_advances(actions):
     """
     new_actions = []
     for i in range(len(actions) - 1):
-        if isinstance(actions[i], _socha.Advance) and isinstance(actions[i + 1], _socha.Advance):
+        if isinstance(actions[i], _socha.Advance) and isinstance(
+            actions[i + 1], _socha.Advance
+        ):
             actions[i + 1].distance += actions[i].distance
             actions[i] = None
     new_actions = [a for a in actions if a is not None]
@@ -118,17 +157,32 @@ def if_last_game_state(message, last_game_state) -> GameState:
         GameState: The constructed game state from the message.
     """
     try:
-        last_game_state.board = _convert_board(
-            message.data.class_binding.board)
+        last_game_state.board = _convert_board(message.data.class_binding.board)
         actions = message.data.class_binding.last_move.actions.actions
-        new_actions = _merge_advances([_socha.Accelerate(acc=a.acc) if isinstance(a, Acceleration)
-                                       else _socha.Advance(distance=a.distance) if isinstance(a, Advance)
-                                       else _socha.Push(direction=direction_from_string(a.direction)) if isinstance(a, Push)
-                                       else _socha.Turn(direction=direction_from_string(a.direction)) for a in actions])
+        new_actions = _merge_advances(
+            [
+                (
+                    _socha.Accelerate(acc=a.acc)
+                    if isinstance(a, Acceleration)
+                    else (
+                        _socha.Advance(distance=a.distance)
+                        if isinstance(a, Advance)
+                        else (
+                            _socha.Push(direction=direction_from_string(a.direction))
+                            if isinstance(a, Push)
+                            else _socha.Turn(
+                                direction=direction_from_string(a.direction)
+                            )
+                        )
+                    )
+                )
+                for a in actions
+            ]
+        )
 
         last_move = Move(actions=new_actions)
         return last_game_state.perform_move(last_move)
-    except Exception as e:
+    except Exception:
         return if_not_last_game_state(message)
 
 
@@ -143,26 +197,36 @@ def if_not_last_game_state(message) -> GameState:
     Returns:
         GameState: The constructed game state from the message.
     """
+
     def create_ship(ship_data, team_enum_value) -> _socha.Ship:
         """Helper function to create a ship from the ship data."""
-        position = CubeCoordinates(
-            q=ship_data.position.q, r=ship_data.position.r)
+        position = CubeCoordinates(q=ship_data.position.q, r=ship_data.position.r)
         team = TeamEnum.One if team_enum_value == "ONE" else TeamEnum.Two
-        return _socha.Ship(position=position, team=team, coal=ship_data.coal,
-                           passengers=ship_data.passengers, points=ship_data.points,
-                           speed=ship_data.speed, free_turns=ship_data.free_turns,
-                           direction=direction_from_string(ship_data.direction))
+        return _socha.Ship(
+            position=position,
+            team=team,
+            coal=ship_data.coal,
+            passengers=ship_data.passengers,
+            points=ship_data.points,
+            speed=ship_data.speed,
+            free_turns=ship_data.free_turns,
+            direction=direction_from_string(ship_data.direction),
+        )
 
     first_ship_data, second_ship_data = message.data.class_binding.ship
     first_ship = create_ship(first_ship_data, first_ship_data.team)
     second_ship = create_ship(second_ship_data, second_ship_data.team)
 
-    current_team_enum = TeamEnum.One if message.data.class_binding.current_team == "ONE" else TeamEnum.Two
+    current_team_enum = (
+        TeamEnum.One
+        if message.data.class_binding.current_team == "ONE"
+        else TeamEnum.Two
+    )
 
     return GameState(
         board=_convert_board(message.data.class_binding.board),
         turn=message.data.class_binding.turn,
         current_ship=first_ship if current_team_enum == TeamEnum.One else second_ship,
         other_ship=second_ship if current_team_enum == TeamEnum.One else first_ship,
-        last_move=None
+        last_move=None,
     )
