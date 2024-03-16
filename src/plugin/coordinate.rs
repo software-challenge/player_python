@@ -1,7 +1,7 @@
-use std::{ fmt, ops::Sub };
-use std::ops::{ Add, AddAssign, Mul, SubAssign, Neg, DivAssign, Div, MulAssign };
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, SubAssign};
+use std::{fmt, ops::Sub};
 
-use pyo3::{ pyclass, pymethods };
+use pyo3::{pyclass, pymethods};
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Copy, Debug, Hash)]
@@ -290,33 +290,40 @@ impl CubeDirection {
     }
 
     pub fn __repr__(&self) -> String {
-        format!("CubeDirection::{}", match self {
-            CubeDirection::Right => "Right",
-            CubeDirection::DownRight => "DownRight",
-            CubeDirection::DownLeft => "DownLeft",
-            CubeDirection::Left => "Left",
-            CubeDirection::UpLeft => "UpLeft",
-            CubeDirection::UpRight => "UpRight",
-        })
+        format!(
+            "CubeDirection::{}",
+            match self {
+                CubeDirection::Right => "Right",
+                CubeDirection::DownRight => "DownRight",
+                CubeDirection::DownLeft => "DownLeft",
+                CubeDirection::Left => "Left",
+                CubeDirection::UpLeft => "UpLeft",
+                CubeDirection::UpRight => "UpRight",
+            }
+        )
     }
 }
 
 impl fmt::Display for CubeDirection {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", match self {
-            CubeDirection::Right => "Right",
-            CubeDirection::DownRight => "DownRight",
-            CubeDirection::DownLeft => "DownLeft",
-            CubeDirection::Left => "Left",
-            CubeDirection::UpLeft => "UpLeft",
-            CubeDirection::UpRight => "UpRight",
-        })
+        write!(
+            f,
+            "{}",
+            match self {
+                CubeDirection::Right => "Right",
+                CubeDirection::DownRight => "DownRight",
+                CubeDirection::DownLeft => "DownLeft",
+                CubeDirection::Left => "Left",
+                CubeDirection::UpLeft => "UpLeft",
+                CubeDirection::UpRight => "UpRight",
+            }
+        )
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::plugin::coordinate::{ CubeDirection, CubeCoordinates };
+    use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
 
     #[test]
     fn test_cube_direction_angle() {
@@ -330,36 +337,54 @@ mod tests {
 
     #[test]
     fn test_cube_direction_with_neighbors() {
-        assert_eq!(CubeDirection::Right.with_neighbors(), [
-            CubeDirection::UpRight,
-            CubeDirection::Right,
-            CubeDirection::DownRight,
-        ]);
-        assert_eq!(CubeDirection::DownRight.with_neighbors(), [
-            CubeDirection::Right,
-            CubeDirection::DownRight,
-            CubeDirection::DownLeft,
-        ]);
-        assert_eq!(CubeDirection::DownLeft.with_neighbors(), [
-            CubeDirection::DownRight,
-            CubeDirection::DownLeft,
-            CubeDirection::Left,
-        ]);
-        assert_eq!(CubeDirection::Left.with_neighbors(), [
-            CubeDirection::DownLeft,
-            CubeDirection::Left,
-            CubeDirection::UpLeft,
-        ]);
-        assert_eq!(CubeDirection::UpLeft.with_neighbors(), [
-            CubeDirection::Left,
-            CubeDirection::UpLeft,
-            CubeDirection::UpRight,
-        ]);
-        assert_eq!(CubeDirection::UpRight.with_neighbors(), [
-            CubeDirection::UpLeft,
-            CubeDirection::UpRight,
-            CubeDirection::Right,
-        ]);
+        assert_eq!(
+            CubeDirection::Right.with_neighbors(),
+            [
+                CubeDirection::UpRight,
+                CubeDirection::Right,
+                CubeDirection::DownRight,
+            ]
+        );
+        assert_eq!(
+            CubeDirection::DownRight.with_neighbors(),
+            [
+                CubeDirection::Right,
+                CubeDirection::DownRight,
+                CubeDirection::DownLeft,
+            ]
+        );
+        assert_eq!(
+            CubeDirection::DownLeft.with_neighbors(),
+            [
+                CubeDirection::DownRight,
+                CubeDirection::DownLeft,
+                CubeDirection::Left,
+            ]
+        );
+        assert_eq!(
+            CubeDirection::Left.with_neighbors(),
+            [
+                CubeDirection::DownLeft,
+                CubeDirection::Left,
+                CubeDirection::UpLeft,
+            ]
+        );
+        assert_eq!(
+            CubeDirection::UpLeft.with_neighbors(),
+            [
+                CubeDirection::Left,
+                CubeDirection::UpLeft,
+                CubeDirection::UpRight,
+            ]
+        );
+        assert_eq!(
+            CubeDirection::UpRight.with_neighbors(),
+            [
+                CubeDirection::UpLeft,
+                CubeDirection::UpRight,
+                CubeDirection::Right,
+            ]
+        );
     }
 
     #[test]
@@ -375,11 +400,23 @@ mod tests {
     #[test]
     fn test_cube_direction_turn_count_to() {
         assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::Right), 0);
-        assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::DownRight), 1);
-        assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::DownLeft), 2);
+        assert_eq!(
+            CubeDirection::Right.turn_count_to(CubeDirection::DownRight),
+            1
+        );
+        assert_eq!(
+            CubeDirection::Right.turn_count_to(CubeDirection::DownLeft),
+            2
+        );
         assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::Left), 3);
-        assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::UpLeft), -2);
-        assert_eq!(CubeDirection::Right.turn_count_to(CubeDirection::UpRight), -1);
+        assert_eq!(
+            CubeDirection::Right.turn_count_to(CubeDirection::UpLeft),
+            -2
+        );
+        assert_eq!(
+            CubeDirection::Right.turn_count_to(CubeDirection::UpRight),
+            -1
+        );
     }
 
     #[test]

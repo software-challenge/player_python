@@ -6,20 +6,20 @@ use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 
 use crate::plugin::actions::accelerate::Accelerate;
-use crate::plugin::actions::Action;
 use crate::plugin::actions::advance::Advance;
 use crate::plugin::actions::push::Push;
 use crate::plugin::actions::turn::Turn;
+use crate::plugin::actions::Action;
 use crate::plugin::board::Board;
 use crate::plugin::constants::PluginConstants;
-use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
+use crate::plugin::errors::advance_errors::AdvanceProblem;
 use crate::plugin::errors::movement_error::MoveMistake;
 use crate::plugin::field::FieldType;
 use crate::plugin::r#move::Move;
 use crate::plugin::ship::Ship;
-use crate::plugin::errors::advance_errors::AdvanceProblem;
 
-use super::field::{ Field, Passenger };
+use super::field::{Field, Passenger};
 use super::ship::TeamEnum;
 
 #[pyclass]
@@ -52,7 +52,11 @@ impl AdvanceInfo {
 
     pub fn advances(&self, distance: Option<usize>) -> Vec<Advance> {
         let distance = distance.unwrap_or(self.costs.len());
-        (1..=distance).map(|it| Advance { distance: it as i32 }).collect()
+        (1..=distance)
+            .map(|it| Advance {
+                distance: it as i32,
+            })
+            .collect()
     }
 
     pub fn distance(&self) -> usize {
@@ -60,7 +64,10 @@ impl AdvanceInfo {
     }
 
     pub fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("AdvanceInfo(costs={:?}, problem={:?})", self.costs, self.problem))
+        Ok(format!(
+            "AdvanceInfo(costs={:?}, problem={:?})",
+            self.costs, self.problem
+        ))
     }
 }
 
@@ -154,7 +161,7 @@ impl GameState {
         turn: i32,
         current_ship: Ship,
         other_ship: Ship,
-        last_move: Option<Move>
+        last_move: Option<Move>,
     ) -> GameState {
         GameState {
             board,
@@ -182,54 +189,47 @@ impl GameState {
     }
 
     pub fn is_current_ship_on_current(&self) -> bool {
-        self.board.does_field_have_stream(&self.current_ship.position)
+        self.board
+            .does_field_have_stream(&self.current_ship.position)
     }
 
     pub fn perform_action(&self, action: Action) -> Result<GameState, PyErr> {
         let mut new_state = self.clone();
 
         match action {
-            Action::Accelerate(accelerate) => {
-                match accelerate.perform(&new_state) {
-                    Ok(updated_ship) => {
-                        new_state.current_ship = updated_ship;
-                    }
-                    Err(e) => {
-                        return Err(e);
-                    }
+            Action::Accelerate(accelerate) => match accelerate.perform(&new_state) {
+                Ok(updated_ship) => {
+                    new_state.current_ship = updated_ship;
                 }
-            }
-            Action::Advance(advance) => {
-                match advance.perform(&new_state) {
-                    Ok(updated_ship) => {
-                        new_state.current_ship = updated_ship;
-                    }
-                    Err(e) => {
-                        return Err(e);
-                    }
+                Err(e) => {
+                    return Err(e);
                 }
-            }
-            Action::Turn(turn) => {
-                match turn.perform(&new_state) {
-                    Ok(updated_ship) => {
-                        new_state.current_ship = updated_ship;
-                    }
-                    Err(e) => {
-                        return Err(e);
-                    }
+            },
+            Action::Advance(advance) => match advance.perform(&new_state) {
+                Ok(updated_ship) => {
+                    new_state.current_ship = updated_ship;
                 }
-            }
-            Action::Push(push) => {
-                match push.perform(&new_state) {
-                    Ok((updated_current_ship, updated_other_ship)) => {
-                        new_state.current_ship = updated_current_ship;
-                        new_state.other_ship = updated_other_ship;
-                    }
-                    Err(e) => {
-                        return Err(e);
-                    }
+                Err(e) => {
+                    return Err(e);
                 }
-            }
+            },
+            Action::Turn(turn) => match turn.perform(&new_state) {
+                Ok(updated_ship) => {
+                    new_state.current_ship = updated_ship;
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            },
+            Action::Push(push) => match push.perform(&new_state) {
+                Ok((updated_current_ship, updated_other_ship)) => {
+                    new_state.current_ship = updated_current_ship;
+                    new_state.other_ship = updated_other_ship;
+                }
+                Err(e) => {
+                    return Err(e);
+                }
+            },
         }
 
         Ok(new_state)
@@ -238,16 +238,21 @@ impl GameState {
     fn move_pre_check(&self, action: Action, action_idx: usize, ship: Ship) -> Result<(), PyErr> {
         match action {
             Action::Push(_) if !self.must_push() => {
-                return Err(PyBaseException::new_err(MoveMistake::PushActionRequired.message()));
+                return Err(PyBaseException::new_err(
+                    MoveMistake::PushActionRequired.message(),
+                ));
             }
             Action::Accelerate(_) if action_idx != 0 => {
-                return Err(PyBaseException::new_err(MoveMistake::FirstActionAccelerate.message()));
+                return Err(PyBaseException::new_err(
+                    MoveMistake::FirstActionAccelerate.message(),
+                ));
             }
-            Action::Advance(ad) if
-                self.board
+            Action::Advance(ad)
+                if self
+                    .board
                     .get(&(ship.position + ship.direction.vector() * ad.distance))
-                    .map_or(false, |f| f.field_type == FieldType::Sandbank)
-            => {
+                    .map_or(false, |f| f.field_type == FieldType::Sandbank) =>
+            {
                 return Err(PyBaseException::new_err(MoveMistake::SandBankEnd.message()));
             }
             _ => {}
@@ -258,15 +263,11 @@ impl GameState {
 
     fn move_after_check(&self, ship: Ship) -> Result<(), PyErr> {
         if ship.movement != 0 {
-            return Err(
-                PyBaseException::new_err(
-                    if ship.movement > 0 {
-                        MoveMistake::MovementPointsLeft.message()
-                    } else {
-                        MoveMistake::MovementPointsMissing.message()
-                    }
-                )
-            );
+            return Err(PyBaseException::new_err(if ship.movement > 0 {
+                MoveMistake::MovementPointsLeft.message()
+            } else {
+                MoveMistake::MovementPointsMissing.message()
+            }));
         }
 
         Ok(())
@@ -328,9 +329,8 @@ impl GameState {
 
         self.turn += 1;
 
-        if
-            (self.turn % 2 == 0 && self.determine_ahead_team() != self.current_ship) ||
-            self.turn % 2 != 0
+        if (self.turn % 2 == 0 && self.determine_ahead_team() != self.current_ship)
+            || self.turn % 2 != 0
         {
             swap(&mut self.current_ship, &mut self.other_ship);
         }
@@ -357,7 +357,7 @@ impl GameState {
                         self.board.set_field_in_direction(
                             &d,
                             &coord,
-                            Field::new(field.field_type, Some(updated_passenger))
+                            Field::new(field.field_type, Some(updated_passenger)),
                         );
                         return true;
                     }
@@ -368,9 +368,8 @@ impl GameState {
     }
 
     pub fn pick_up_passenger_current_ship(&mut self) {
-        if
-            self.effective_speed(self.current_ship) < 2 &&
-            self.remove_passenger_at(self.current_ship.position)
+        if self.effective_speed(self.current_ship) < 2
+            && self.remove_passenger_at(self.current_ship.position)
         {
             self.current_ship.passengers += 1;
             self.current_ship.points = self
@@ -380,9 +379,8 @@ impl GameState {
     }
 
     pub fn pick_up_passenger_other_ship(&mut self) {
-        if
-            self.effective_speed(self.other_ship) < 2 &&
-            self.remove_passenger_at(self.other_ship.position)
+        if self.effective_speed(self.other_ship) < 2
+            && self.remove_passenger_at(self.other_ship.position)
         {
             self.other_ship.passengers += 1;
             self.other_ship.points = self
@@ -394,16 +392,16 @@ impl GameState {
     pub fn ship_advance_points(&self, ship: Ship) -> Option<i32> {
         let (i, segment) = self.board.segment_with_index_at(ship.position)?;
         Some(
-            (i as i32) * PluginConstants::POINTS_PER_SEGMENT +
-                segment.global_to_local(ship.position).array_x() +
-                1
+            (i as i32) * PluginConstants::POINTS_PER_SEGMENT
+                + segment.global_to_local(ship.position).array_x()
+                + 1,
         )
     }
 
     pub fn ship_points(&self, ship: Ship) -> Option<i32> {
         Some(
-            self.ship_advance_points(ship)? +
-                ship.passengers * PluginConstants::POINTS_PER_PASSENGER
+            self.ship_advance_points(ship)?
+                + ship.passengers * PluginConstants::POINTS_PER_PASSENGER,
         )
     }
 
@@ -419,7 +417,7 @@ impl GameState {
         &self,
         start: &CubeCoordinates,
         direction: &CubeDirection,
-        max_movement_points: i32
+        max_movement_points: i32,
     ) -> AdvanceInfo {
         let max_movement = max_movement_points.clamp(0, PluginConstants::MAX_SPEED);
         let mut current_position = *start;
@@ -442,9 +440,8 @@ impl GameState {
                         }
                     }
 
-                    if
-                        self.current_ship.position == current_position ||
-                        self.other_ship.position == current_position
+                    if self.current_ship.position == current_position
+                        || self.other_ship.position == current_position
                     {
                         if total_cost < max_movement {
                             costs.push(total_cost);
@@ -453,21 +450,33 @@ impl GameState {
                                 problem: AdvanceProblem::ShipAlreadyInTarget,
                             };
                         }
-                        return AdvanceInfo { costs, problem: AdvanceProblem::InsufficientPush };
+                        return AdvanceInfo {
+                            costs,
+                            problem: AdvanceProblem::InsufficientPush,
+                        };
                     }
 
                     if let FieldType::Sandbank = field.field_type {
-                        return AdvanceInfo { costs, problem: AdvanceProblem::MoveEndOnSandbank };
+                        return AdvanceInfo {
+                            costs,
+                            problem: AdvanceProblem::MoveEndOnSandbank,
+                        };
                     }
                     costs.push(total_cost);
                 }
                 _ => {
-                    return AdvanceInfo { costs, problem: AdvanceProblem::FieldIsBlocked };
+                    return AdvanceInfo {
+                        costs,
+                        problem: AdvanceProblem::FieldIsBlocked,
+                    };
                 }
             }
         }
 
-        AdvanceInfo { costs, problem: AdvanceProblem::MovementPointsMissing }
+        AdvanceInfo {
+            costs,
+            problem: AdvanceProblem::MovementPointsMissing,
+        }
     }
 
     fn merge_consecutive_advances(&self, actions: Vec<Action>) -> Vec<Action> {
@@ -483,7 +492,9 @@ impl GameState {
                             total_distance += a.distance;
                         }
                     }
-                    merged_actions.push(Action::Advance(Advance { distance: total_distance }));
+                    merged_actions.push(Action::Advance(Advance {
+                        distance: total_distance,
+                    }));
                 }
                 _ => merged_actions.push(action),
             }
@@ -505,28 +516,25 @@ impl GameState {
         current_state: &GameState,
         current_actions: Vec<Action>,
         depth: usize,
-        max_depth: usize
+        max_depth: usize,
     ) -> Vec<Vec<Action>> {
         if depth > max_depth || (!current_state.can_move() && !current_state.must_push()) {
             return current_state
                 .move_after_check(current_state.current_ship)
-                .map_or(vec![], |_|
+                .map_or(vec![], |_| {
                     vec![current_state.merge_consecutive_advances(current_actions)]
-                );
+                });
         }
 
         current_state
             .possible_actions(depth, None)
             .iter()
             .filter_map(|&action| {
-                current_state
-                    .perform_action(action)
-                    .ok()
-                    .map(|new_state| {
-                        let mut new_actions = current_actions.clone();
-                        new_actions.push(action);
-                        self.possible_action_comb(&new_state, new_actions, depth + 1, max_depth)
-                    })
+                current_state.perform_action(action).ok().map(|new_state| {
+                    let mut new_actions = current_actions.clone();
+                    new_actions.push(action);
+                    self.possible_action_comb(&new_state, new_actions, depth + 1, max_depth)
+                })
             })
             .flatten()
             .collect()
@@ -559,21 +567,22 @@ impl GameState {
     }
 
     pub fn possible_pushes(&self) -> Vec<Push> {
-        if
-            self.board.get_field_in_direction(
-                &self.current_ship.direction,
-                &self.current_ship.position
-            ) == Some(Field::new(FieldType::Sandbank, None)) ||
-            !self.must_push() ||
-            self.current_ship.movement < 1
+        if self
+            .board
+            .get_field_in_direction(&self.current_ship.direction, &self.current_ship.position)
+            == Some(Field::new(FieldType::Sandbank, None))
+            || !self.must_push()
+            || self.current_ship.movement < 1
         {
             return Vec::new();
         }
 
-        CubeDirection::VALUES.into_iter()
+        CubeDirection::VALUES
+            .into_iter()
             .filter(|&dir| {
-                dir != self.current_ship.direction.opposite() &&
-                    self.board
+                dir != self.current_ship.direction.opposite()
+                    && self
+                        .board
                         .get_field_in_direction(&dir, &self.current_ship.position)
                         .map_or(false, |f| f.is_empty())
             })
@@ -582,10 +591,9 @@ impl GameState {
     }
 
     pub fn possible_turns(&self, max_coal: Option<usize>) -> Vec<Turn> {
-        if
-            self.board.get(&self.current_ship.position) ==
-                Some(Field::new(FieldType::Sandbank, None)) ||
-            self.must_push()
+        if self.board.get(&self.current_ship.position)
+            == Some(Field::new(FieldType::Sandbank, None))
+            || self.must_push()
         {
             return Vec::new();
         }
@@ -597,7 +605,7 @@ impl GameState {
             .flat_map(|i| {
                 vec![
                     Turn::new(self.current_ship.direction.rotated_by(i as i32)),
-                    Turn::new(self.current_ship.direction.rotated_by(-(i as i32)))
+                    Turn::new(self.current_ship.direction.rotated_by(-(i as i32))),
                 ]
             })
             .take(5)
@@ -609,7 +617,8 @@ impl GameState {
             return Vec::new();
         }
 
-        self.check_ship_advance_limit(&self.current_ship).advances(None)
+        self.check_ship_advance_limit(&self.current_ship)
+            .advances(None)
     }
 
     #[allow(unused_variables)]
@@ -626,10 +635,16 @@ impl GameState {
 
         if rank == 0 {
             actions.extend(
-                self.possible_accelerations(Some(max_coal)).into_iter().map(Action::Accelerate)
+                self.possible_accelerations(Some(max_coal))
+                    .into_iter()
+                    .map(Action::Accelerate),
             );
         }
-        actions.extend(self.possible_turns(Some(max_coal)).into_iter().map(Action::Turn));
+        actions.extend(
+            self.possible_turns(Some(max_coal))
+                .into_iter()
+                .map(Action::Turn),
+        );
         actions.extend(self.possible_advances().into_iter().map(Action::Advance));
         if rank != 0 {
             actions.extend(self.possible_pushes().into_iter().map(Action::Push));
@@ -647,7 +662,7 @@ impl GameState {
                 let turn_count: i32 = self.current_ship.direction.turn_count_to(dir.direction);
                 (turn_count.unsigned_abs() as usize) - (self.current_ship.free_turns as usize)
             }
-            Action::Push(_) | Action::Advance(_) => { 0 }
+            Action::Push(_) | Action::Advance(_) => 0,
         }
     }
 
@@ -663,18 +678,18 @@ impl GameState {
 
     pub fn is_over(&self) -> bool {
         // Bedingung 1: ein Dampfer mit 2 Passagieren erreicht ein Zielfeld mit Geschwindigkeit 1
-        let condition1 =
-            self.turn % 2 == 0 &&
-            (self.is_winner(&self.current_ship) || self.is_winner(&self.other_ship));
+        let condition1 = self.turn % 2 == 0
+            && (self.is_winner(&self.current_ship) || self.is_winner(&self.other_ship));
 
         // Bedingung 2: ein Spieler macht einen ungültigen Zug.
         // Das wird durch eine InvalidMoveException während des Spiels behandelt.
 
         // Bedingung 3: am Ende einer Runde liegt ein Dampfer mehr als 3 Spielsegmente zurück
-        let condition3 =
-            self.board
-                .segment_distance(&self.current_ship.position, &self.other_ship.position)
-                .abs() > 3;
+        let condition3 = self
+            .board
+            .segment_distance(&self.current_ship.position, &self.other_ship.position)
+            .abs()
+            > 3;
 
         // Bedingung 4: das Rundenlimit von 30 Runden ist erreicht
         let condition4 = self.turn / 2 >= PluginConstants::ROUND_LIMIT;
@@ -686,13 +701,19 @@ impl GameState {
     }
 
     pub fn is_winner(&self, ship: &Ship) -> bool {
-        ship.passengers > 1 &&
-            self.board.effective_speed(ship) < 2 &&
-            self.board
+        ship.passengers > 1
+            && self.board.effective_speed(ship) < 2
+            && self
+                .board
                 .get(&ship.position)
                 .unwrap_or_else(|| {
-                    panic!("[is_winner] Field at position {} does not exist", ship.position)
-                }).field_type == FieldType::Goal
+                    panic!(
+                        "[is_winner] Field at position {} does not exist",
+                        ship.position
+                    )
+                })
+                .field_type
+                == FieldType::Goal
     }
 
     pub fn get_points_for_team(&self, ship: &Ship) -> TeamPoints {
@@ -705,22 +726,24 @@ impl GameState {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(
-            format!(
-                "GameState(board={:?} segments, turn={}, team_one={:?}, team_two={:?}, last_move={:?})",
-                self.board.segments.len(),
-                self.turn,
-                self.current_ship,
-                self.other_ship,
-                self.last_move
-            )
-        )
+        Ok(format!(
+            "GameState(board={:?} segments, turn={}, team_one={:?}, team_two={:?}, last_move={:?})",
+            self.board.segments.len(),
+            self.turn,
+            self.current_ship,
+            self.other_ship,
+            self.last_move
+        ))
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::plugin::{ segment::Segment, field::{ Field, Passenger }, ship::TeamEnum };
+    use crate::plugin::{
+        field::{Field, Passenger},
+        segment::Segment,
+        ship::TeamEnum,
+    };
 
     use super::*;
 
@@ -728,10 +751,7 @@ mod tests {
         Segment {
             direction,
             center,
-            fields: vec![
-                vec![Field::new(FieldType::Water, None); 4];
-                5
-            ],
+            fields: vec![vec![Field::new(FieldType::Water, None); 4]; 5],
         }
     }
 
@@ -740,19 +760,29 @@ mod tests {
     }
 
     fn create_game_state(segment: Vec<Segment>, team_one: Ship, team_two: Ship) -> GameState {
-        GameState::new(Board::new(segment, CubeDirection::Right), 0, team_one, team_two, None)
+        GameState::new(
+            Board::new(segment, CubeDirection::Right),
+            0,
+            team_one,
+            team_two,
+            None,
+        )
     }
 
     #[test]
     fn test_remove_passenger_at() {
-        let mut segment = vec![
-            create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)
-        ];
+        let mut segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
         let team_two = create_ship(CubeCoordinates::new(-1, 1), TeamEnum::Two);
         segment[0].set(
             CubeCoordinates::new(0, 0),
-            Field::new(FieldType::Passenger, Some(Passenger::new(CubeDirection::UpLeft, 1)))
+            Field::new(
+                FieldType::Passenger,
+                Some(Passenger::new(CubeDirection::UpLeft, 1)),
+            ),
         );
         let mut game_state = create_game_state(segment, team_one, team_two);
 
@@ -768,7 +798,10 @@ mod tests {
 
     #[test]
     fn find_possible_moves_returns_correct_count() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
         let team_two = create_ship(CubeCoordinates::new(-1, 1), TeamEnum::Two);
         let game_state = create_game_state(segment, team_one, team_two);
@@ -779,7 +812,10 @@ mod tests {
 
     #[test]
     fn test_check_advance_limit() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -797,7 +833,10 @@ mod tests {
 
     #[test]
     fn test_check_advance_limit_to_upperleft_end() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -816,7 +855,10 @@ mod tests {
 
     #[test]
     fn test_get_accelerations() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -832,7 +874,10 @@ mod tests {
 
     #[test]
     fn test_get_turns() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -848,7 +893,10 @@ mod tests {
 
     #[test]
     fn test_get_advances() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -864,7 +912,10 @@ mod tests {
 
     #[test]
     fn test_get_pushes() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -880,7 +931,10 @@ mod tests {
 
     #[test]
     fn test_only_pushes_if_must_push() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let mut team_one = create_ship(CubeCoordinates::new(0, 0), TeamEnum::One);
         team_one.speed = 5;
         team_one.movement = 5;
@@ -905,32 +959,32 @@ mod tests {
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
-                    ]
+                        Field::new(FieldType::Water, None),
+                    ],
                 ],
             },
             Segment {
@@ -941,37 +995,37 @@ mod tests {
                         Field::new(FieldType::Water, None),
                         Field::new(
                             FieldType::Passenger,
-                            Some(Passenger::new(CubeDirection::DownLeft, 1))
+                            Some(Passenger::new(CubeDirection::DownLeft, 1)),
                         ),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
+                        Field::new(FieldType::Water, None),
                     ],
                     vec![
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
-                    ],
-                    vec![
-                        Field::new(FieldType::Island, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
                     ],
                     vec![
                         Field::new(FieldType::Island, None),
                         Field::new(FieldType::Water, None),
                         Field::new(FieldType::Water, None),
-                        Field::new(FieldType::Water, None)
-                    ]
+                        Field::new(FieldType::Water, None),
+                    ],
+                    vec![
+                        Field::new(FieldType::Island, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                        Field::new(FieldType::Water, None),
+                    ],
                 ],
-            }
+            },
         ];
         let board: Board = Board::new(segment, CubeDirection::Right);
         let team_one: &mut Ship = &mut Ship::new(
@@ -983,7 +1037,7 @@ mod tests {
             Some(0),
             Some(0),
             Some(0),
-            Some(1)
+            Some(1),
         );
         let team_two: &mut Ship = &mut Ship::new(
             CubeCoordinates::new(-2, 1),
@@ -994,16 +1048,20 @@ mod tests {
             Some(0),
             Some(0),
             Some(0),
-            Some(1)
+            Some(1),
         );
         let game_state: GameState = GameState::new(board, 0, *team_one, *team_two, None);
 
-        let move_: Move = Move::new(
-            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
-        );
+        let move_: Move = Move::new(vec![
+            Action::Accelerate(Accelerate::new(1)),
+            Action::Advance(Advance::new(2)),
+        ]);
 
         assert_eq!(game_state.current_ship.team, TeamEnum::One);
-        assert_eq!(game_state.current_ship.position, CubeCoordinates::new(-1, -1));
+        assert_eq!(
+            game_state.current_ship.position,
+            CubeCoordinates::new(-1, -1)
+        );
 
         let new_state: GameState = game_state.perform_move(move_).unwrap();
         assert_eq!(new_state.other_ship.team, TeamEnum::One);
@@ -1012,20 +1070,30 @@ mod tests {
         assert_eq!(new_state.current_ship.team, TeamEnum::Two);
         assert_eq!(new_state.current_ship.position, CubeCoordinates::new(-2, 1));
 
-        let second_move_: Move = Move::new(
-            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
-        );
+        let second_move_: Move = Move::new(vec![
+            Action::Accelerate(Accelerate::new(1)),
+            Action::Advance(Advance::new(2)),
+        ]);
 
         let second_new_state: GameState = new_state.perform_move(second_move_).unwrap();
         assert_eq!(second_new_state.current_ship.team, TeamEnum::One);
-        assert_eq!(second_new_state.current_ship.position, CubeCoordinates::new(1, -1));
+        assert_eq!(
+            second_new_state.current_ship.position,
+            CubeCoordinates::new(1, -1)
+        );
         assert_eq!(second_new_state.other_ship.team, TeamEnum::Two);
-        assert_eq!(second_new_state.other_ship.position, CubeCoordinates::new(0, 1));
+        assert_eq!(
+            second_new_state.other_ship.position,
+            CubeCoordinates::new(0, 1)
+        );
     }
 
     #[test]
     fn test_advance_turn() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
         let team_two = create_ship(CubeCoordinates::new(-1, 1), TeamEnum::Two);
         let mut game_state = create_game_state(segment, team_one, team_two);
@@ -1046,7 +1114,10 @@ mod tests {
 
     #[test]
     fn test_team_ahead() {
-        let segment = vec![create_water_segment(CubeCoordinates::new(0, 0), CubeDirection::Right)];
+        let segment = vec![create_water_segment(
+            CubeCoordinates::new(0, 0),
+            CubeDirection::Right,
+        )];
         let team_one = create_ship(CubeCoordinates::new(0, -1), TeamEnum::One);
         let team_two = create_ship(CubeCoordinates::new(-1, 1), TeamEnum::Two);
         let game_state = create_game_state(segment, team_one, team_two);
@@ -1059,9 +1130,10 @@ mod tests {
 
         assert_eq!(new_state.determine_ahead_team().team, TeamEnum::One);
 
-        let second_move: Move = Move::new(
-            vec![Action::Accelerate(Accelerate::new(1)), Action::Advance(Advance::new(2))]
-        );
+        let second_move: Move = Move::new(vec![
+            Action::Accelerate(Accelerate::new(1)),
+            Action::Advance(Advance::new(2)),
+        ]);
 
         let second_new_state: GameState = new_state.perform_move(second_move).unwrap();
 

@@ -1,9 +1,18 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from socha.api.protocol.protocol_packet import ProtocolPacket, AdminLobbyRequest, ResponsePacket, LobbyRequest
-from socha.api.protocol.room_message import RoomMessage, ObservableRoomMessage, RoomOrchestrationMessage
 from socha._socha import TeamEnum
+from socha.api.protocol.protocol_packet import (
+    AdminLobbyRequest,
+    LobbyRequest,
+    ProtocolPacket,
+    ResponsePacket,
+)
+from socha.api.protocol.room_message import (
+    ObservableRoomMessage,
+    RoomMessage,
+    RoomOrchestrationMessage,
+)
 
 
 @dataclass
@@ -16,14 +25,14 @@ class OriginalRequest(ProtocolPacket):
         metadata={
             "name": "class",
             "type": "Attribute",
-        }
+        },
     )
     reservation_code: Optional[str] = field(
         default=None,
         metadata={
             "name": "reservationCode",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -36,55 +45,14 @@ class Errorpacket(ProtocolPacket):
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     original_request: Optional[OriginalRequest] = field(
         default=None,
         metadata={
             "name": "originalRequest",
             "type": "Element",
-        }
-    )
-
-
-@dataclass
-class OriginalRequest(ProtocolPacket):
-    class Meta:
-        name = "originalRequest"
-
-    class_value: Optional[str] = field(
-        default=None,
-        metadata={
-            "name": "class",
-            "type": "Attribute",
-        }
-    )
-    reservation_code: Optional[str] = field(
-        default=None,
-        metadata={
-            "name": "reservationCode",
-            "type": "Attribute",
-        }
-    )
-
-
-@dataclass
-class Errorpacket(ProtocolPacket):
-    class Meta:
-        name = "errorpacket"
-
-    message: Optional[str] = field(
-        default=None,
-        metadata={
-            "type": "Attribute",
-        }
-    )
-    original_request: Optional[OriginalRequest] = field(
-        default=None,
-        metadata={
-            "name": "originalRequest",
-            "type": "Element",
-        }
+        },
     )
 
 
@@ -102,7 +70,7 @@ class Left(ProtocolPacket):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -129,7 +97,7 @@ class Close(ProtocolPacket):
 @dataclass
 class Authenticate(AdminLobbyRequest):
     """
-    Authenticates a client as administrator to _send AdminLobbyRequest`s. \n
+    Authenticates a client as administrator to _send AdminLobbyRequest`s.
     *Is not answered if successful.*
     """
 
@@ -140,7 +108,7 @@ class Authenticate(AdminLobbyRequest):
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -158,7 +126,7 @@ class Cancel(AdminLobbyRequest):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -176,14 +144,14 @@ class JoinedGameRoom(ObservableRoomMessage):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
     player_count: Optional[int] = field(
         default=None,
         metadata={
             "name": "playerCount",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -201,7 +169,7 @@ class Observe(AdminLobbyRequest):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -219,13 +187,13 @@ class Pause(AdminLobbyRequest):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
     pause: Optional[bool] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -243,20 +211,20 @@ class Slot(RoomOrchestrationMessage):
         metadata={
             "name": "displayName",
             "type": "Attribute",
-        }
+        },
     )
     can_timeout: Optional[bool] = field(
         default=None,
         metadata={
             "name": "canTimeout",
             "type": "Attribute",
-        }
+        },
     )
     reserved: Optional[bool] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -276,7 +244,7 @@ class Step(RoomOrchestrationMessage):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -295,19 +263,19 @@ class Prepare(RoomOrchestrationMessage):
         metadata={
             "name": "gameType",
             "type": "Attribute",
-        }
+        },
     )
     pause: Optional[bool] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     slot: List[Slot] = field(
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -337,7 +305,7 @@ class JoinPrepared(LobbyRequest):
         metadata={
             "name": "reservationCode",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -355,7 +323,7 @@ class JoinRoom(LobbyRequest):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -372,20 +340,20 @@ class Fragment:
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     aggregation: Optional[str] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     relevant_for_ranking: Optional[bool] = field(
         default=None,
         metadata={
             "name": "relevantForRanking",
             "type": "Element",
-        }
+        },
     )
 
 
@@ -403,7 +371,7 @@ class Joined(ResponsePacket):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -420,13 +388,13 @@ class Player:
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     team: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -444,7 +412,7 @@ class Score:
         metadata={
             "type": "Element",
             "min_occurs": 1,
-        }
+        },
     )
 
 
@@ -458,21 +426,21 @@ class Winner:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     regular: Optional[bool] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     reason: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -491,7 +459,7 @@ class Definition:
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -509,13 +477,13 @@ class Entry:
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     score: Optional[Score] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -532,7 +500,7 @@ class Scores:
         default_factory=list,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -542,6 +510,7 @@ class WelcomeMessage(RoomOrchestrationMessage):
     Welcome message is sent to the client when the client joins the room.
     In this message the server tells the client which team it is.
     """
+
     team: TeamEnum
 
 
@@ -551,6 +520,7 @@ class Result(ObservableRoomMessage):
     Result of a game.
     This will the server _send after a game is finished.
     """
+
     definition: Definition
     scores: Scores
     winner: Winner
@@ -566,7 +536,7 @@ class Acceleration:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -580,7 +550,7 @@ class Advance:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -594,21 +564,21 @@ class Center:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     r: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     s: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -622,14 +592,14 @@ class Fragment:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     aggregation: Optional[str] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
     relevant_for_ranking: Optional[bool] = field(
         default=None,
@@ -637,7 +607,7 @@ class Fragment:
             "name": "relevantForRanking",
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -651,14 +621,14 @@ class Player:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     team: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -672,21 +642,21 @@ class Position:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     r: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     s: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -700,7 +670,7 @@ class Push:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -714,7 +684,7 @@ class Turn:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -751,7 +721,7 @@ class Actions:
                     "namespace": "",
                 },
             ),
-        }
+        },
     )
 
 
@@ -770,14 +740,14 @@ class OriginalMessage:
         metadata={
             "name": "class",
             "type": "Attribute",
-        }
+        },
     )
 
     actions: Optional[Actions] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
 
 
@@ -786,8 +756,10 @@ class Error:
     """
     This sends the server when the client sent a erroneous message.
     """
+
     message: str
     originalMessage: OriginalMessage
+
 
 @dataclass
 class Entry:
@@ -799,14 +771,14 @@ class Entry:
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
     score: Optional[Score] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -820,14 +792,14 @@ class Passenger:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     passenger: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
 
 
@@ -894,7 +866,7 @@ class FieldArray:
                     "namespace": "",
                 },
             ),
-        }
+        },
     )
 
 
@@ -908,35 +880,35 @@ class Ship:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     direction: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     speed: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     coal: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     passengers: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     free_turns: Optional[int] = field(
         default=None,
@@ -944,21 +916,21 @@ class Ship:
             "name": "freeTurns",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     points: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     position: Optional[Position] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -972,7 +944,7 @@ class LastMove:
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -986,14 +958,14 @@ class Segment:
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     center: Optional[Center] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
     field_array: List[FieldArray] = field(
         default_factory=list,
@@ -1001,7 +973,7 @@ class Segment:
             "name": "field-array",
             "type": "Element",
             "min_occurs": 1,
-        }
+        },
     )
 
 
@@ -1016,14 +988,14 @@ class Board:
             "name": "nextDirection",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     segment: List[Segment] = field(
         default_factory=list,
         metadata={
             "type": "Element",
             "min_occurs": 1,
-        }
+        },
     )
 
 
@@ -1038,7 +1010,7 @@ class State(ObservableRoomMessage):
             "name": "class",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     start_team: Optional[str] = field(
         default=None,
@@ -1046,14 +1018,14 @@ class State(ObservableRoomMessage):
             "name": "startTeam",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     turn: Optional[int] = field(
         default=None,
         metadata={
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     current_team: Optional[str] = field(
         default=None,
@@ -1061,28 +1033,28 @@ class State(ObservableRoomMessage):
             "name": "currentTeam",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     board: Optional[Board] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
     ship: List[Ship] = field(
         default_factory=list,
         metadata={
             "type": "Element",
             "min_occurs": 1,
-        }
+        },
     )
     last_move: Optional[LastMove] = field(
         default=None,
         metadata={
             "name": "lastMove",
             "type": "Element",
-        }
+        },
     )
 
 
@@ -1097,59 +1069,57 @@ class Data:
             "name": "class",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
-    class_binding: Optional[object] = field(
-        default=None
-    )
+    class_binding: Optional[object] = field(default=None)
     definition: Optional[Definition] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     scores: Optional[Scores] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     winner: Optional[Winner] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     state: Optional[State] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     actions: Optional[Actions] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     original_message: Optional[OriginalMessage] = field(
         default=None,
         metadata={
             "name": "originalMessage",
             "type": "Element",
-        }
+        },
     )
     color: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
     message: Optional[str] = field(
         default=None,
         metadata={
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -1164,34 +1134,14 @@ class Room(ProtocolPacket):
             "name": "roomId",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     data: Optional[Data] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
-    )
-
-
-@dataclass
-class Prepared(RoomOrchestrationMessage):
-    class Meta:
-        name = "prepared"
-
-    room_id: Optional[str] = field(
-        default=None,
-        metadata={
-            "name": "roomId",
-            "type": "Attribute",
-        }
-    )
-    reservation: List[str] = field(
-        default_factory=list,
-        metadata={
-            "type": "Element",
-        }
+        },
     )
 
 
@@ -1205,7 +1155,7 @@ class Observed(RoomOrchestrationMessage):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
 
 
@@ -1219,27 +1169,13 @@ class Prepared(RoomOrchestrationMessage):
         metadata={
             "name": "roomId",
             "type": "Attribute",
-        }
+        },
     )
     reservation: List[str] = field(
         default_factory=list,
         metadata={
             "type": "Element",
-        }
-    )
-
-
-@dataclass
-class Observed(RoomOrchestrationMessage):
-    class Meta:
-        name = "observed"
-
-    room_id: Optional[str] = field(
-        default=None,
-        metadata={
-            "name": "roomId",
-            "type": "Attribute",
-        }
+        },
     )
 
 
@@ -1258,73 +1194,72 @@ class Protocol:
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     joined_game_room: Optional[JoinedGameRoom] = field(
         default=None,
         metadata={
             "name": "joinedGameRoom",
             "type": "Element",
-        }
+        },
     )
     prepare: Optional[Prepare] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     observe: Optional[Observe] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     pause: Optional[Pause] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     step: Optional[Step] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     cancel: Optional[Cancel] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     join: Optional[Join] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     joined: Optional[Joined] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     room: List[Room] = field(
         default_factory=list,
         metadata={
             "type": "Element",
-        }
-
+        },
     )
     prepared: Optional[Prepared] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )
     observed: Optional[Observed] = field(
         default=None,
         metadata={
             "type": "Element",
-        }
+        },
     )

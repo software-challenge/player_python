@@ -59,9 +59,9 @@ impl Field {
     }
 
     pub fn is_empty(&self) -> bool {
-        self.field_type == FieldType::Sandbank ||
-            self.field_type == FieldType::Water ||
-            self.field_type == FieldType::Goal
+        self.field_type == FieldType::Sandbank
+            || self.field_type == FieldType::Water
+            || self.field_type == FieldType::Goal
     }
 
     pub fn is_field_type(&self, field_type: FieldType) -> bool {
@@ -106,7 +106,7 @@ mod tests {
             Some(Passenger {
                 direction: CubeDirection::DownRight,
                 passenger: 1,
-            })
+            }),
         );
         assert!(!field5.is_empty());
     }
