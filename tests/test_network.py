@@ -2,7 +2,7 @@ import socket
 import unittest
 from unittest.mock import MagicMock
 
-from socha.api.networking.network_socket import NetworkSocket
+from python.socha.api.networking.network_socket import NetworkSocket
 
 
 class ReceiveTestCase(unittest.TestCase):
