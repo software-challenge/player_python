@@ -45,11 +45,13 @@ pub struct AdvanceInfo {
 
 #[pymethods]
 impl AdvanceInfo {
+    #[must_use]
     pub fn cost_until(&self, distance: usize) -> i32 {
         let cost: i32 = self.costs[distance - 1];
         cost
     }
 
+    #[must_use]
     pub fn advances(&self, distance: Option<usize>) -> Vec<Advance> {
         let distance = distance.unwrap_or(self.costs.len());
         (1..=distance)
@@ -59,6 +61,7 @@ impl AdvanceInfo {
             .collect()
     }
 
+    #[must_use]
     pub fn distance(&self) -> usize {
         self.costs.len()
     }
@@ -156,14 +159,15 @@ pub struct GameState {
 #[pymethods]
 impl GameState {
     #[new]
+    #[must_use]
     pub fn new(
         board: Board,
         turn: i32,
         current_ship: Ship,
         other_ship: Ship,
         last_move: Option<Move>,
-    ) -> GameState {
-        GameState {
+    ) -> Self {
+        Self {
             board,
             turn,
             current_ship,
@@ -172,6 +176,7 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub fn determine_ahead_team(&self) -> Ship {
         let calculate_points = |ship: Ship| -> i32 {
             self.ship_advance_points(ship).unwrap() * 100 + ship.speed * 10 + ship.coal
@@ -188,12 +193,13 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub fn is_current_ship_on_current(&self) -> bool {
         self.board
             .does_field_have_stream(&self.current_ship.position)
     }
 
-    pub fn perform_action(&self, action: Action) -> Result<GameState, PyErr> {
+    pub fn perform_action(&self, action: Action) -> Result<Self, PyErr> {
         let mut new_state = self.clone();
 
         match action {
@@ -273,7 +279,7 @@ impl GameState {
         Ok(())
     }
 
-    pub fn perform_move(&self, move_: Move) -> Result<GameState, PyErr> {
+    pub fn perform_move(&self, move_: Move) -> Result<Self, PyErr> {
         debug!("Current ship before move: {:?}", self.current_ship);
         debug!("Other ship before move: {:?}", self.other_ship);
 
@@ -341,12 +347,13 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub fn effective_speed(&self, ship: Ship) -> i32 {
-        ship.speed - (self.board.does_field_have_stream(&ship.position) as i32)
+        ship.speed - i32::from(self.board.does_field_have_stream(&ship.position))
     }
 
     pub fn remove_passenger_at(&mut self, coord: CubeCoordinates) -> bool {
-        for &d in CubeDirection::VALUES.iter() {
+        for &d in &CubeDirection::VALUES {
             if let Some(field) = self.board.get_field_in_direction(&d, &coord) {
                 if let Some(passenger) = field.passenger {
                     if passenger.passenger > 0 && passenger.direction == d.opposite() {
@@ -389,6 +396,7 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub fn ship_advance_points(&self, ship: Ship) -> Option<i32> {
         let (i, segment) = self.board.segment_with_index_at(ship.position)?;
         Some(
@@ -398,6 +406,7 @@ impl GameState {
         )
     }
 
+    #[must_use]
     pub fn ship_points(&self, ship: Ship) -> Option<i32> {
         Some(
             self.ship_advance_points(ship)?
@@ -405,14 +414,17 @@ impl GameState {
         )
     }
 
+    #[must_use]
     pub fn must_push(&self) -> bool {
         self.current_ship.position == self.other_ship.position
     }
 
+    #[must_use]
     pub fn check_ship_advance_limit(&self, ship: &Ship) -> AdvanceInfo {
         self.calculate_advance_info(&ship.position, &ship.direction, ship.movement)
     }
 
+    #[must_use]
     pub fn calculate_advance_info(
         &self,
         start: &CubeCoordinates,
@@ -456,7 +468,7 @@ impl GameState {
                         };
                     }
 
-                    if let FieldType::Sandbank = field.field_type {
+                    if field.field_type == FieldType::Sandbank {
                         return AdvanceInfo {
                             costs,
                             problem: AdvanceProblem::MoveEndOnSandbank,
@@ -503,6 +515,7 @@ impl GameState {
         merged_actions
     }
 
+    #[must_use]
     pub fn possible_moves(&self, depth: Option<usize>) -> Vec<Move> {
         self.possible_action_comb(self, vec![], 0, depth.unwrap_or(PluginConstants::MAX_DEPTH))
             .into_iter()
@@ -511,9 +524,10 @@ impl GameState {
     }
 
     #[allow(clippy::only_used_in_recursion)]
+    #[must_use]
     pub fn possible_action_comb(
         &self,
-        current_state: &GameState,
+        current_state: &Self,
         current_actions: Vec<Action>,
         depth: usize,
         max_depth: usize,
@@ -521,7 +535,7 @@ impl GameState {
         if depth > max_depth || (!current_state.can_move() && !current_state.must_push()) {
             return current_state
                 .move_after_check(current_state.current_ship)
-                .map_or(vec![], |_| {
+                .map_or(vec![], |()| {
                     vec![current_state.merge_consecutive_advances(current_actions)]
                 });
         }
@@ -540,6 +554,7 @@ impl GameState {
             .collect()
     }
 
+    #[must_use]
     pub fn possible_accelerations(&self, max_coal: Option<usize>) -> Vec<Accelerate> {
         if self.must_push() {
             return Vec::new();
@@ -566,6 +581,7 @@ impl GameState {
             .collect()
     }
 
+    #[must_use]
     pub fn possible_pushes(&self) -> Vec<Push> {
         if self
             .board
@@ -590,6 +606,7 @@ impl GameState {
             .collect()
     }
 
+    #[must_use]
     pub fn possible_turns(&self, max_coal: Option<usize>) -> Vec<Turn> {
         if self.board.get(&self.current_ship.position)
             == Some(Field::new(FieldType::Sandbank, None))
@@ -612,6 +629,7 @@ impl GameState {
             .collect()
     }
 
+    #[must_use]
     pub fn possible_advances(&self) -> Vec<Advance> {
         if self.current_ship.movement < 1 || self.must_push() {
             return Vec::new();
@@ -622,6 +640,7 @@ impl GameState {
     }
 
     #[allow(unused_variables)]
+    #[must_use]
     pub fn sandbank_advances_for(&self, ship: &Ship) -> Option<Vec<Advance>> {
         panic!(
             "Sandbanks will not be included in the Software-Challenge 2024. 
@@ -653,6 +672,7 @@ impl GameState {
         actions
     }
 
+    #[must_use]
     pub fn coal_for_action(&self, action: Action) -> usize {
         match action {
             Action::Accelerate(acc) => {
@@ -666,6 +686,7 @@ impl GameState {
         }
     }
 
+    #[must_use]
     pub fn can_move(&self) -> bool {
         let current_ship_can_advance: bool = !self.possible_advances().is_empty();
 
@@ -676,6 +697,7 @@ impl GameState {
         current_ship_can_advance || current_ship_can_turn || current_ship_can_accelerate
     }
 
+    #[must_use]
     pub fn is_over(&self) -> bool {
         // Bedingung 1: ein Dampfer mit 2 Passagieren erreicht ein Zielfeld mit Geschwindigkeit 1
         let condition1 = self.turn % 2 == 0
@@ -700,6 +722,7 @@ impl GameState {
         condition1 || condition3 || condition4 || condition5
     }
 
+    #[must_use]
     pub fn is_winner(&self, ship: &Ship) -> bool {
         ship.passengers > 1
             && self.board.effective_speed(ship) < 2
@@ -716,8 +739,9 @@ impl GameState {
                 == FieldType::Goal
     }
 
+    #[must_use]
     pub fn get_points_for_team(&self, ship: &Ship) -> TeamPoints {
-        let finish_points = PluginConstants::FINISH_POINTS * (self.is_winner(ship) as i32);
+        let finish_points = PluginConstants::FINISH_POINTS * i32::from(self.is_winner(ship));
         TeamPoints {
             ship_points: ship.points,
             coal_points: ship.coal * 2,

@@ -33,6 +33,7 @@ pub struct Accelerate {
 #[pymethods]
 impl Accelerate {
     #[new]
+    #[must_use]
     pub fn new(acc: i32) -> Self {
         debug!("Creating Accelerate with acc: {}", acc);
         Self { acc }
@@ -46,25 +47,25 @@ impl Accelerate {
         let mut speed = ship.speed;
         speed += self.acc;
         match () {
-            _ if self.acc == 0 => {
+            () if self.acc == 0 => {
                 debug!("Zero acceleration is not allowed");
                 Err(PyBaseException::new_err(
                     AccelerationProblem::ZeroAcc.message(),
                 ))
             }
-            _ if speed > PluginConstants::MAX_SPEED => {
+            () if speed > PluginConstants::MAX_SPEED => {
                 debug!("Acceleration would exceed max speed but was {}", speed);
                 Err(PyBaseException::new_err(
                     AccelerationProblem::AboveMaxSpeed.message(),
                 ))
             }
-            _ if speed < PluginConstants::MIN_SPEED => {
+            () if speed < PluginConstants::MIN_SPEED => {
                 debug!("Acceleration would go below min speed but was {}", speed);
                 Err(PyBaseException::new_err(
                     AccelerationProblem::BelowMinSpeed.message(),
                 ))
             }
-            _ if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
+            () if state.board.get(&ship.position).unwrap().field_type == FieldType::Sandbank => {
                 debug!(
                     "Cannot accelerate on sandbank. Ship position: {}",
                     ship.position
@@ -73,7 +74,7 @@ impl Accelerate {
                     AccelerationProblem::OnSandbank.message(),
                 ))
             }
-            _ => {
+            () => {
                 let new_ship: Ship = self.accelerate(&mut ship);
                 if new_ship.coal < 0 {
                     debug!("Insufficient coal for acceleration was {}", new_ship.coal);

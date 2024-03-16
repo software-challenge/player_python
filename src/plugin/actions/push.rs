@@ -18,9 +18,10 @@ pub struct Push {
 #[pymethods]
 impl Push {
     #[new]
+    #[must_use]
     pub fn new(direction: CubeDirection) -> Self {
         debug!("New Push with direction: {}", direction);
-        Push { direction }
+        Self { direction }
     }
 
     pub fn perform(&self, state: &GameState) -> Result<(Ship, Ship), PyErr> {

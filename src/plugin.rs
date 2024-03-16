@@ -1,10 +1,10 @@
-pub mod game_state;
-pub mod coordinate;
-pub mod r#move;
-pub mod field;
-pub mod board;
 pub mod actions;
-pub mod errors;
+pub mod board;
 pub mod constants;
-pub mod ship;
+pub mod coordinate;
+pub mod errors;
+pub mod field;
+pub mod game_state;
+pub mod r#move;
 pub mod segment;
+pub mod ship;

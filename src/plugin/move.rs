@@ -12,8 +12,9 @@ pub struct Move {
 #[pymethods]
 impl Move {
     #[new]
+    #[must_use]
     pub fn new(actions: Vec<Action>) -> Self {
-        Move { actions }
+        Self { actions }
     }
 
     fn __repr__(&self) -> PyResult<String> {
@@ -24,14 +25,16 @@ impl Move {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::plugin::actions::{ Action, accelerate::Accelerate, advance::Advance, push::Push };
+    use crate::plugin::actions::{accelerate::Accelerate, advance::Advance, push::Push, Action};
 
     #[test]
     fn test_new_move() {
         let actions = vec![
             Action::Accelerate(Accelerate::new(1)),
             Action::Advance(Advance::new(1)),
-            Action::Push(Push::new(crate::plugin::coordinate::CubeDirection::DownLeft))
+            Action::Push(Push::new(
+                crate::plugin::coordinate::CubeDirection::DownLeft,
+            )),
         ];
         let m = Move::new(actions.clone());
         assert_eq!(m.actions, actions);

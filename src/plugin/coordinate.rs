@@ -15,16 +15,19 @@ pub struct CartesianCoordinate {
 #[pymethods]
 impl CartesianCoordinate {
     #[new]
+    #[must_use]
     pub fn new(x: i32, y: i32) -> Self {
-        CartesianCoordinate { x, y }
+        Self { x, y }
     }
 
+    #[must_use]
     pub fn to_cube(&self) -> CubeCoordinates {
         let q = (self.x - self.y) / 2;
         let r = self.y;
         CubeCoordinates::new(q, r)
     }
 
+    #[must_use]
     pub fn to_index(&self) -> Option<u64> {
         if self.x < 0 || self.y < 0 || self.x > 3 || self.y > 4 {
             return None;
@@ -33,8 +36,9 @@ impl CartesianCoordinate {
     }
 
     #[staticmethod]
-    pub fn from_index(index: u64) -> CartesianCoordinate {
-        CartesianCoordinate {
+    #[must_use]
+    pub fn from_index(index: u64) -> Self {
+        Self {
             x: (index % 4) as i32,
             y: (index / 5) as i32,
         }
@@ -57,50 +61,61 @@ impl CubeCoordinates {
     pub const ORIGIN: Self = Self { q: 0, r: 0, s: 0 };
 
     #[new]
+    #[must_use]
     pub fn new(q: i32, r: i32) -> Self {
         let s: i32 = -q - r;
-        CubeCoordinates { q, r, s }
+        Self { q, r, s }
     }
 
+    #[must_use]
     pub fn coordinates(&self) -> [i32; 3] {
         [self.q, self.r, self.s]
     }
 
+    #[must_use]
     pub fn x(&self) -> i32 {
         self.q * 2 + self.r
     }
 
+    #[must_use]
     pub fn y(&self) -> i32 {
         self.r
     }
 
+    #[must_use]
     pub fn array_x(&self) -> i32 {
         self.q.max(-self.s)
     }
 
+    #[must_use]
     pub fn to_cartesian(&self) -> CartesianCoordinate {
         CartesianCoordinate::new(self.x(), self.y())
     }
 
-    pub fn times(&self, count: i32) -> CubeCoordinates {
-        CubeCoordinates::new(self.q * count, self.r * count)
+    #[must_use]
+    pub fn times(&self, count: i32) -> Self {
+        Self::new(self.q * count, self.r * count)
     }
 
-    pub fn plus(&self, other: &CubeCoordinates) -> CubeCoordinates {
-        CubeCoordinates::new(self.q + other.q, self.r + other.r)
+    #[must_use]
+    pub fn plus(&self, other: &Self) -> Self {
+        Self::new(self.q + other.q, self.r + other.r)
     }
 
-    pub fn minus(&self, other: &CubeCoordinates) -> CubeCoordinates {
-        CubeCoordinates::new(self.q - other.q, self.r - other.r)
+    #[must_use]
+    pub fn minus(&self, other: &Self) -> Self {
+        Self::new(self.q - other.q, self.r - other.r)
     }
 
-    pub fn unary_minus(&self) -> CubeCoordinates {
-        CubeCoordinates::new(-self.q, -self.r)
+    #[must_use]
+    pub fn unary_minus(&self) -> Self {
+        Self::new(-self.q, -self.r)
     }
 
-    pub fn rotated_by(&self, turns: i32) -> CubeCoordinates {
+    #[must_use]
+    pub fn rotated_by(&self, turns: i32) -> Self {
         let components: [i32; 3] = [self.q, self.r, self.s];
-        let vec = CubeCoordinates {
+        let vec = Self {
             q: components[turns.rem_euclid(3) as usize],
             r: components[(turns + 1).rem_euclid(3) as usize],
             s: components[(turns + 2).rem_euclid(3) as usize],
@@ -112,10 +127,12 @@ impl CubeCoordinates {
         }
     }
 
-    pub fn distance_to(&self, other: &CubeCoordinates) -> i32 {
+    #[must_use]
+    pub fn distance_to(&self, other: &Self) -> i32 {
         ((self.q - other.q).abs() + (self.r - other.r).abs() + (self.s - other.s).abs()) / 2
     }
 
+    #[must_use]
     pub fn __repr__(&self) -> String {
         format!("CubeCoordinates({}, {}, {})", self.q, self.r, self.s)
     }
@@ -129,7 +146,7 @@ impl Add for CubeCoordinates {
     }
 }
 
-impl AddAssign<CubeCoordinates> for CubeCoordinates {
+impl AddAssign<Self> for CubeCoordinates {
     fn add_assign(&mut self, rhs: Self) {
         self.q += rhs.q;
         self.r += rhs.r;
@@ -145,7 +162,7 @@ impl Sub for CubeCoordinates {
     }
 }
 
-impl SubAssign<CubeCoordinates> for CubeCoordinates {
+impl SubAssign<Self> for CubeCoordinates {
     fn sub_assign(&mut self, rhs: Self) {
         self.q -= rhs.q;
         self.r -= rhs.r;
@@ -203,7 +220,7 @@ impl Neg for CubeCoordinates {
 
 impl Default for CubeCoordinates {
     fn default() -> Self {
-        CubeCoordinates::new(0, 0)
+        Self::new(0, 0)
     }
 }
 
@@ -227,45 +244,50 @@ pub enum CubeDirection {
 
 #[pymethods]
 impl CubeDirection {
-    pub const VALUES: [CubeDirection; 6] = [
-        CubeDirection::Right,
-        CubeDirection::DownRight,
-        CubeDirection::DownLeft,
-        CubeDirection::Left,
-        CubeDirection::UpLeft,
-        CubeDirection::UpRight,
+    pub const VALUES: [Self; 6] = [
+        Self::Right,
+        Self::DownRight,
+        Self::DownLeft,
+        Self::Left,
+        Self::UpLeft,
+        Self::UpRight,
     ];
+    #[must_use]
     pub fn vector(&self) -> CubeCoordinates {
         match *self {
-            CubeDirection::Right => CubeCoordinates { q: 1, r: 0, s: -1 },
-            CubeDirection::DownRight => CubeCoordinates { q: 0, r: 1, s: -1 },
-            CubeDirection::DownLeft => CubeCoordinates { q: -1, r: 1, s: 0 },
-            CubeDirection::Left => CubeCoordinates { q: -1, r: 0, s: 1 },
-            CubeDirection::UpLeft => CubeCoordinates { q: 0, r: -1, s: 1 },
-            CubeDirection::UpRight => CubeCoordinates { q: 1, r: -1, s: 0 },
+            Self::Right => CubeCoordinates { q: 1, r: 0, s: -1 },
+            Self::DownRight => CubeCoordinates { q: 0, r: 1, s: -1 },
+            Self::DownLeft => CubeCoordinates { q: -1, r: 1, s: 0 },
+            Self::Left => CubeCoordinates { q: -1, r: 0, s: 1 },
+            Self::UpLeft => CubeCoordinates { q: 0, r: -1, s: 1 },
+            Self::UpRight => CubeCoordinates { q: 1, r: -1, s: 0 },
         }
     }
 
+    #[must_use]
     pub fn angle(&self) -> i32 {
         (*self as i32) * 60
     }
 
-    pub fn with_neighbors(&self) -> [CubeDirection; 3] {
+    #[must_use]
+    pub fn with_neighbors(&self) -> [Self; 3] {
         [self.rotated_by(-1), *self, self.rotated_by(1)]
     }
 
-    pub fn opposite(&self) -> CubeDirection {
+    #[must_use]
+    pub fn opposite(&self) -> Self {
         match self {
-            CubeDirection::Right => CubeDirection::Left,
-            CubeDirection::DownRight => CubeDirection::UpLeft,
-            CubeDirection::DownLeft => CubeDirection::UpRight,
-            CubeDirection::Left => CubeDirection::Right,
-            CubeDirection::UpLeft => CubeDirection::DownRight,
-            CubeDirection::UpRight => CubeDirection::DownLeft,
+            Self::Right => Self::Left,
+            Self::DownRight => Self::UpLeft,
+            Self::DownLeft => Self::UpRight,
+            Self::Left => Self::Right,
+            Self::UpLeft => Self::DownRight,
+            Self::UpRight => Self::DownLeft,
         }
     }
 
-    pub fn turn_count_to(&self, target: CubeDirection) -> i32 {
+    #[must_use]
+    pub fn turn_count_to(&self, target: Self) -> i32 {
         let diff = ((target as i32) - (*self as i32)).rem_euclid(6);
         if diff > 3 {
             diff - 6_i32
@@ -274,31 +296,34 @@ impl CubeDirection {
         }
     }
 
-    pub fn rotated_by(&self, turns: i32) -> CubeDirection {
+    #[must_use]
+    pub fn rotated_by(&self, turns: i32) -> Self {
         Self::VALUES[((*self as i32) + turns).rem_euclid(6) as usize]
     }
 
+    #[must_use]
     pub fn ordinal(&self) -> i32 {
         match self {
-            CubeDirection::Right => 0,
-            CubeDirection::DownRight => 1,
-            CubeDirection::DownLeft => 2,
-            CubeDirection::Left => 3,
-            CubeDirection::UpLeft => 4,
-            CubeDirection::UpRight => 5,
+            Self::Right => 0,
+            Self::DownRight => 1,
+            Self::DownLeft => 2,
+            Self::Left => 3,
+            Self::UpLeft => 4,
+            Self::UpRight => 5,
         }
     }
 
+    #[must_use]
     pub fn __repr__(&self) -> String {
         format!(
             "CubeDirection::{}",
             match self {
-                CubeDirection::Right => "Right",
-                CubeDirection::DownRight => "DownRight",
-                CubeDirection::DownLeft => "DownLeft",
-                CubeDirection::Left => "Left",
-                CubeDirection::UpLeft => "UpLeft",
-                CubeDirection::UpRight => "UpRight",
+                Self::Right => "Right",
+                Self::DownRight => "DownRight",
+                Self::DownLeft => "DownLeft",
+                Self::Left => "Left",
+                Self::UpLeft => "UpLeft",
+                Self::UpRight => "UpRight",
             }
         )
     }
@@ -310,12 +335,12 @@ impl fmt::Display for CubeDirection {
             f,
             "{}",
             match self {
-                CubeDirection::Right => "Right",
-                CubeDirection::DownRight => "DownRight",
-                CubeDirection::DownLeft => "DownLeft",
-                CubeDirection::Left => "Left",
-                CubeDirection::UpLeft => "UpLeft",
-                CubeDirection::UpRight => "UpRight",
+                Self::Right => "Right",
+                Self::DownRight => "DownRight",
+                Self::DownLeft => "DownLeft",
+                Self::Left => "Left",
+                Self::UpLeft => "UpLeft",
+                Self::UpRight => "UpRight",
             }
         )
     }

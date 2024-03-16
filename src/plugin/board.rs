@@ -23,17 +23,20 @@ pub struct Board {
 #[pymethods]
 impl Board {
     #[new]
+    #[must_use]
     pub fn new(segments: Vec<Segment>, next_direction: CubeDirection) -> Self {
-        Board {
+        Self {
             segments,
             next_direction,
         }
     }
 
+    #[must_use]
     pub fn get_segment(&self, index: usize) -> Option<Segment> {
         self.segments.get(index).cloned()
     }
 
+    #[must_use]
     pub fn segment_with_index_at(&self, coords: CubeCoordinates) -> Option<(usize, Segment)> {
         self.segments
             .iter()
@@ -42,6 +45,7 @@ impl Board {
             .map(|(i, s)| (i, s.clone()))
     }
 
+    #[must_use]
     pub fn get(&self, coords: &CubeCoordinates) -> Option<Field> {
         for segment in &self.segments {
             if segment.contains(*coords) {
@@ -51,25 +55,24 @@ impl Board {
         None
     }
 
+    #[must_use]
     pub fn does_field_have_stream(&self, coords: &CubeCoordinates) -> bool {
-        self.segment_with_index_at(*coords)
-            .map(|(i, s)| {
-                let next_dir: CubeCoordinates = self
-                    .segments
-                    .get(i + 1)
-                    .map(|s| s.direction.vector())
-                    .unwrap_or_else(|| self.next_direction.vector());
-                [
-                    s.center - s.direction.vector(),
-                    s.center,
-                    s.center + next_dir,
-                    s.center + next_dir * 2,
-                ]
-                .contains(coords)
-            })
-            .unwrap_or(false)
+        self.segment_with_index_at(*coords).is_some_and(|(i, s)| {
+            let next_dir: CubeCoordinates = self
+                .segments
+                .get(i + 1)
+                .map_or_else(|| self.next_direction.vector(), |s| s.direction.vector());
+            [
+                s.center - s.direction.vector(),
+                s.center,
+                s.center + next_dir,
+                s.center + next_dir * 2,
+            ]
+            .contains(coords)
+        })
     }
 
+    #[must_use]
     pub fn get_field_in_direction(
         &self,
         direction: &CubeDirection,
@@ -92,6 +95,7 @@ impl Board {
         }
     }
 
+    #[must_use]
     pub fn get_coordinate_by_index(
         &self,
         segment_index: usize,
@@ -103,6 +107,7 @@ impl Board {
         self.segments[segment_index].local_to_global(coord)
     }
 
+    #[must_use]
     pub fn segment_distance(
         &self,
         coordinate1: &CubeCoordinates,
@@ -113,17 +118,20 @@ impl Board {
         i32::abs((segment_index1 as i32) - (segment_index2 as i32))
     }
 
+    #[must_use]
     pub fn segment_index(&self, coordinate: &CubeCoordinates) -> Option<usize> {
         self.segments
             .iter()
             .position(|segment| segment.contains(*coordinate))
     }
 
+    #[must_use]
     pub fn find_segment(&self, coordinate: &CubeCoordinates) -> Option<Segment> {
         let index = self.segment_index(coordinate)?;
         self.segments.get(index).cloned()
     }
 
+    #[must_use]
     pub fn neighboring_fields(&self, coords: &CubeCoordinates) -> Vec<Option<Field>> {
         CubeDirection::VALUES
             .iter()
@@ -131,6 +139,7 @@ impl Board {
             .collect()
     }
 
+    #[must_use]
     pub fn neighboring_coordinates(
         &self,
         coords: &CubeCoordinates,
@@ -146,6 +155,7 @@ impl Board {
             .collect()
     }
 
+    #[must_use]
     pub fn effective_speed(&self, ship: &Ship) -> i32 {
         let speed = ship.speed;
         if self.does_field_have_stream(&ship.position) {
@@ -155,12 +165,13 @@ impl Board {
         }
     }
 
+    #[must_use]
     pub fn is_sandbank(&self, coords: &CubeCoordinates) -> bool {
         self.get(coords)
-            .map(|field| field.field_type == FieldType::Sandbank)
-            .unwrap_or(false)
+            .is_some_and(|field| field.field_type == FieldType::Sandbank)
     }
 
+    #[must_use]
     pub fn pickup_passenger(&self, state: &GameState) -> GameState {
         let new_state: GameState = state.clone();
         let mut ship = new_state.current_ship;
@@ -222,6 +233,7 @@ impl Board {
     /// board.find_nearest_field_types(CubeCoordinates(0, 0), FieldType.Water)
     /// ```
     ///
+    #[must_use]
     pub fn find_nearest_field_types(
         &self,
         start_coordinates: &CubeCoordinates,
@@ -261,7 +273,7 @@ impl Board {
                     queue.push(QueueItem {
                         coordinates: coord,
                         distance: distance + 1,
-                    })
+                    });
                 });
         }
 

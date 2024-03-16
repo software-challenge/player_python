@@ -19,9 +19,10 @@ pub struct Advance {
 #[pymethods]
 impl Advance {
     #[new]
+    #[must_use]
     pub fn new(distance: i32) -> Self {
         debug!("New Advance with distance: {}", distance);
-        Advance { distance }
+        Self { distance }
     }
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
