@@ -25,32 +25,17 @@ jobs:
       - name: Run Clippy
         run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Set up Python and create a virtual environment
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      - name: Create and activate virtual environment
+      # Install dependencies and run unittests within the virtual environment
+      - name: Setup and run tests in virtual environment
         run: |
           python -m venv venv
           source venv/bin/activate
-
-      # Install and run Ruff - Python linter
-      - name: Install Ruff
-        run: pip install ruff
-
-      - name: Run Ruff
-        run: ruff .
-
-      # Python unittests within the virtual environment
-      - name: Install dependencies for unittests
-        run: |
+          pip install ruff
+          ruff .
           pip install maturin
           maturin develop
+          python -m unittest discover -s tests -p '*.py'
 
-      - name: Run unittests
-        run: python -m unittest discover -s tests -p '*.py'
 
       # Build and test steps for Rust
       - name: Build
