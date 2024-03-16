@@ -36,6 +36,8 @@ jobs:
         run: ruff .
 
       # Python unittests
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=$GITHUB_WORKSPACE/python" >> $GITHUB_ENV
       - name: Install project dependencies
         run: pip install -r requirements.txt
       - name: Run unittests
