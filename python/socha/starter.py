@@ -136,6 +136,7 @@ class Starter:
         package_name = "socha"
         try:
             installed_version = pkg_resources.get_distribution(package_name).version
+            # trunk-ignore(bandit/B310)
             response = urllib.request.urlopen(
                 f"https://pypi.org/pypi/{package_name}/json"
             )
