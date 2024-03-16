@@ -39,7 +39,7 @@ jobs:
       - name: Install Maturin
         run: pip install maturin
       - name: Maturin develop
-        run: maturing develop
+        run: maturin develop
       - name: Run unittests
         run: python -m unittest discover -s tests -p '*.py'
 
