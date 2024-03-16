@@ -37,7 +37,7 @@ impl IntoPy<PyObject> for Action {
 impl Action {
     pub fn perform(
         &self,
-        game_state: &mut GameState,
+        game_state: &GameState,
     ) -> Result<(Option<Ship>, Option<Ship>), PyErr> {
         match self {
             Self::Accelerate(accelerate) => accelerate

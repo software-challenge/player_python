@@ -223,9 +223,9 @@ mod tests {
 
     #[test]
     fn test_perform_insufficient_coal() {
-        let (accelerate, game_state) = setup(2);
+        let (accelerate, mut game_state) = setup(2);
 
-        let mute_state: &mut GameState = &mut game_state.clone();
+        let mute_state: &mut GameState = &mut game_state;
         mute_state.current_ship.coal = 0;
         mute_state.other_ship.coal = 0;
 
