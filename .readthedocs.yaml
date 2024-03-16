@@ -28,6 +28,6 @@ sphinx:
   fail_on_warning: false
 
 # Python requirements required to build your docs
-python:
-   install:
-   - requirements: docs/requirements.txt
+python-requirements:
+  install:
+    - requirements: docs/requirements.txt

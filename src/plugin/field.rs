@@ -14,8 +14,9 @@ pub struct Passenger {
 #[pymethods]
 impl Passenger {
     #[new]
+    #[must_use]
     pub fn new(direction: CubeDirection, passenger: i32) -> Self {
-        Passenger {
+        Self {
             direction,
             passenger,
         }
@@ -51,19 +52,22 @@ pub struct Field {
 #[pymethods]
 impl Field {
     #[new]
+    #[must_use]
     pub fn new(field_type: FieldType, passenger: Option<Passenger>) -> Self {
-        Field {
+        Self {
             field_type,
             passenger,
         }
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.field_type == FieldType::Sandbank
             || self.field_type == FieldType::Water
             || self.field_type == FieldType::Goal
     }
 
+    #[must_use]
     pub fn is_field_type(&self, field_type: FieldType) -> bool {
         self.field_type == field_type
     }

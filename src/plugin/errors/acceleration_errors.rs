@@ -1,5 +1,5 @@
-use pyo3::{pyclass, PyErr, pymethods};
 use pyo3::exceptions::PyValueError;
+use pyo3::{pyclass, pymethods, PyErr};
 
 use crate::plugin::constants::PluginConstants;
 
@@ -14,18 +14,25 @@ pub enum AccelerationProblem {
 }
 
 #[pymethods]
-impl  AccelerationProblem {
+impl AccelerationProblem {
+    #[must_use]
     pub fn message(&self) -> String {
         match self {
-            AccelerationProblem::ZeroAcc => String::from("Es kann nicht um den Wert 0 beschleunigt werden."),
-            AccelerationProblem::AboveMaxSpeed => {
-                format!("Die maximale Geschwindigkeit von {} darf nicht überschritten werden.", PluginConstants::MAX_SPEED)
+            Self::ZeroAcc => String::from("Es kann nicht um den Wert 0 beschleunigt werden."),
+            Self::AboveMaxSpeed => {
+                format!(
+                    "Die maximale Geschwindigkeit von {} darf nicht überschritten werden.",
+                    PluginConstants::MAX_SPEED
+                )
             }
-            AccelerationProblem::BelowMinSpeed => {
-                format!("Die minimale Geschwindigkeit von {} darf nicht unterschritten werden.", PluginConstants::MIN_SPEED)
+            Self::BelowMinSpeed => {
+                format!(
+                    "Die minimale Geschwindigkeit von {} darf nicht unterschritten werden.",
+                    PluginConstants::MIN_SPEED
+                )
             }
-            AccelerationProblem::InsufficientCoal => String::from("Nicht genug Kohle für die Aktion vorhanden."),
-            AccelerationProblem::OnSandbank => String::from("Auf einer Sandbank kann nicht beschleunigt werden."),
+            Self::InsufficientCoal => String::from("Nicht genug Kohle für die Aktion vorhanden."),
+            Self::OnSandbank => String::from("Auf einer Sandbank kann nicht beschleunigt werden."),
         }
     }
 }

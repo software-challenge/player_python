@@ -1,6 +1,6 @@
 use pyo3::prelude::*;
 
-use crate::plugin::coordinate::{ CubeCoordinates, CubeDirection };
+use crate::plugin::coordinate::{CubeCoordinates, CubeDirection};
 use crate::plugin::field::Field;
 
 use super::coordinate::CartesianCoordinate;
@@ -19,18 +19,21 @@ pub struct Segment {
 #[pymethods]
 impl Segment {
     #[new]
+    #[must_use]
     pub fn new(direction: CubeDirection, center: CubeCoordinates, fields: Vec<Vec<Field>>) -> Self {
-        Segment {
+        Self {
             direction,
             center,
             fields,
         }
     }
 
+    #[must_use]
     pub fn tip(&self) -> CubeCoordinates {
         self.center + self.direction.vector() * ((self.fields.len() as i32) / 2)
     }
 
+    #[must_use]
     pub fn get(&self, coordinates: CubeCoordinates) -> Option<Field> {
         let local: CubeCoordinates = self.global_to_local(coordinates);
 
@@ -38,7 +41,7 @@ impl Segment {
         self.fields
             .get(local_cart.x as usize)
             .and_then(|c| c.get(local_cart.y as usize))
-            .cloned()
+            .copied()
     }
 
     pub fn set(&mut self, coordinates: CubeCoordinates, field: Field) {
@@ -52,14 +55,17 @@ impl Segment {
         }
     }
 
+    #[must_use]
     pub fn local_to_global(&self, coordinates: CubeCoordinates) -> CubeCoordinates {
         coordinates.rotated_by(CubeDirection::Right.turn_count_to(self.direction)) + self.center
     }
 
+    #[must_use]
     pub fn global_to_local(&self, coordinates: CubeCoordinates) -> CubeCoordinates {
         (coordinates - self.center).rotated_by(self.direction.turn_count_to(CubeDirection::Right))
     }
 
+    #[must_use]
     pub fn contains(&self, coordinates: CubeCoordinates) -> bool {
         self.get(coordinates).is_some()
     }
@@ -73,21 +79,20 @@ impl Segment {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(
-            format!(
-                "Segment(direction={:?}, center={:?}, fields={:?})",
-                self.direction,
-                self.center,
-                self.fields
-            )
-        )
+        Ok(format!(
+            "Segment(direction={:?}, center={:?}, fields={:?})",
+            self.direction, self.center, self.fields
+        ))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::plugin::{ coordinate::{ CubeCoordinates, CubeDirection }, field::FieldType };
+    use crate::plugin::{
+        coordinate::{CubeCoordinates, CubeDirection},
+        field::FieldType,
+    };
 
     #[test]
     fn test_cube_coords() {
@@ -157,10 +162,22 @@ mod tests {
             center: CubeCoordinates::new(3, 0),
             fields: vec![vec![Field::new(FieldType::Water, None); 4]; 5],
         };
-        assert_eq!(segment.local_to_global(CubeCoordinates::new(3, 0)), CubeCoordinates::new(0, 0));
-        assert_eq!(segment.local_to_global(CubeCoordinates::new(2, 0)), CubeCoordinates::new(1, 0));
-        assert_eq!(segment.local_to_global(CubeCoordinates::new(1, 0)), CubeCoordinates::new(2, 0));
-        assert_eq!(segment.local_to_global(CubeCoordinates::new(0, 0)), CubeCoordinates::new(3, 0));
+        assert_eq!(
+            segment.local_to_global(CubeCoordinates::new(3, 0)),
+            CubeCoordinates::new(0, 0)
+        );
+        assert_eq!(
+            segment.local_to_global(CubeCoordinates::new(2, 0)),
+            CubeCoordinates::new(1, 0)
+        );
+        assert_eq!(
+            segment.local_to_global(CubeCoordinates::new(1, 0)),
+            CubeCoordinates::new(2, 0)
+        );
+        assert_eq!(
+            segment.local_to_global(CubeCoordinates::new(0, 0)),
+            CubeCoordinates::new(3, 0)
+        );
         assert_eq!(
             segment.local_to_global(CubeCoordinates::new(-1, 0)),
             CubeCoordinates::new(4, 0)
@@ -186,10 +203,22 @@ mod tests {
             center: CubeCoordinates::new(3, 0),
             fields: vec![vec![Field::new(FieldType::Water, None); 4]; 5],
         };
-        assert_eq!(segment.global_to_local(CubeCoordinates::new(0, 0)), CubeCoordinates::new(3, 0));
-        assert_eq!(segment.global_to_local(CubeCoordinates::new(1, 0)), CubeCoordinates::new(2, 0));
-        assert_eq!(segment.global_to_local(CubeCoordinates::new(2, 0)), CubeCoordinates::new(1, 0));
-        assert_eq!(segment.global_to_local(CubeCoordinates::new(3, 0)), CubeCoordinates::new(0, 0));
+        assert_eq!(
+            segment.global_to_local(CubeCoordinates::new(0, 0)),
+            CubeCoordinates::new(3, 0)
+        );
+        assert_eq!(
+            segment.global_to_local(CubeCoordinates::new(1, 0)),
+            CubeCoordinates::new(2, 0)
+        );
+        assert_eq!(
+            segment.global_to_local(CubeCoordinates::new(2, 0)),
+            CubeCoordinates::new(1, 0)
+        );
+        assert_eq!(
+            segment.global_to_local(CubeCoordinates::new(3, 0)),
+            CubeCoordinates::new(0, 0)
+        );
         assert_eq!(
             segment.global_to_local(CubeCoordinates::new(4, 0)),
             CubeCoordinates::new(-1, 0)
@@ -207,7 +236,4 @@ mod tests {
             CubeCoordinates::new(-4, 0)
         );
     }
-
-    #[test]
-    fn test_contains() {}
 }

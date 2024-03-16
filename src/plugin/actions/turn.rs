@@ -16,9 +16,10 @@ pub struct Turn {
 #[pymethods]
 impl Turn {
     #[new]
+    #[must_use]
     pub fn new(direction: CubeDirection) -> Self {
         debug!("Creating Turn with direction: {}", direction);
-        Turn { direction }
+        Self { direction }
     }
 
     pub fn perform(&self, state: &GameState) -> Result<Ship, PyErr> {
@@ -58,6 +59,7 @@ impl Turn {
         Ok(current_ship)
     }
 
+    #[must_use]
     pub fn coal_cost(&self, ship: &Ship) -> i32 {
         self.direction
             .turn_count_to(self.direction)

@@ -16,8 +16,8 @@ pub enum TeamEnum {
 impl TeamEnum {
     pub fn __repr__(&self) -> PyResult<String> {
         Ok(match self {
-            TeamEnum::One => "TeamEnum.One".to_string(),
-            TeamEnum::Two => "TeamEnum.Two".to_string(),
+            Self::One => "TeamEnum.One".to_string(),
+            Self::Two => "TeamEnum.Two".to_string(),
         })
     }
 }
@@ -51,6 +51,7 @@ pub struct Ship {
 impl Ship {
     #[new]
     #[allow(clippy::too_many_arguments)]
+    #[must_use]
     pub fn new(
         position: CubeCoordinates,
         team: TeamEnum,
@@ -62,7 +63,7 @@ impl Ship {
         free_turns: Option<i32>,
         movement: Option<i32>,
     ) -> Self {
-        Ship {
+        Self {
             team,
             position,
             direction: direction.unwrap_or(CubeDirection::Right),
@@ -76,10 +77,12 @@ impl Ship {
         }
     }
 
+    #[must_use]
     pub fn can_turn(&self) -> bool {
         self.free_turns > 0 || self.coal > 0
     }
 
+    #[must_use]
     pub fn max_acc(&self) -> i32 {
         (self.coal + self.free_acc).min(PluginConstants::MAX_SPEED - self.speed)
     }
@@ -94,6 +97,7 @@ impl Ship {
         self.movement = self.speed;
     }
 
+    #[must_use]
     pub fn resolve_direction(&self, reverse: bool) -> CubeDirection {
         if reverse {
             self.direction.opposite()

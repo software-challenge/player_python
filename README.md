@@ -1,3 +1,4 @@
+<!-- trunk-ignore-all(markdownlint/MD041) -->
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
 # Python Client for the Software-Challenge Germany 2024
@@ -8,13 +9,10 @@
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> **Be warned!** This package is currently experimental and has still a few known bugs. But please try it out and let us know if anything comes up.
-
 > Hey there! To help you out, it's best to start by checking out the
 > [documentation for this client](https://socha-python-client.readthedocs.io/en/)
 > before you ask any questions or open an issue.
 > It'll provide you with some helpful information!
-
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
@@ -244,14 +242,15 @@ my_player/
 The `my_player` directory or whatever you named yours just needs to be packaged as a ZIP archive,
 and your player is ready to be uploaded. Congratulations! 🥳🎉
 
-
 ## Local Development
+
 > 🏗️ This part is currently still unfinished and subject to change.
 
 This package was mostly written in Rust, which gives a significant performance boost compared to a natural Python program.
-However, this leads to considerable effort, as so-called bindings have to be created. These allow Python to access the functions in Rust. To realize this, [PyO3](https://github.com/PyO3/pyo3) is used here with the help of [Maturin](https://github.com/PyO3/maturin). 
+However, this leads to considerable effort, as so-called bindings have to be created. These allow Python to access the functions in Rust. To realize this, [PyO3](https://github.com/PyO3/pyo3) is used here with the help of [Maturin](https://github.com/PyO3/maturin).
 
 If local development is desired, the following things must be installed beforehand:
+
 - [Rust Compiler with Cargo](https://www.rust-lang.org/tools/install),
 - [Python 3.10 or later](https://www.python.org/downloads/),
 - and [Maturin](https://github.com/PyO3/maturin) in a virtual environment in this repository.
