@@ -1148,9 +1148,9 @@ mod tests {
 
         assert_eq!(game_state.determine_ahead_team().team, TeamEnum::One);
 
-        let _move: Move = Move::new(vec![Action::Advance(Advance::new(1))]);
+        let game_move: Move = Move::new(vec![Action::Advance(Advance::new(1))]);
 
-        let new_state: GameState = game_state.perform_move(_move).unwrap();
+        let new_state: GameState = game_state.perform_move(game_move).unwrap();
 
         assert_eq!(new_state.determine_ahead_team().team, TeamEnum::One);
 
