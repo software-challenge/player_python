@@ -171,6 +171,8 @@ you can of course pass start arguments.
 | **-v, --verbose**     | Verbose option for logging.                                                                   |
 | **--auto-reconnect**  | Automatically reconnect to the server if the connection is lost.                              |
 | **-b, --build**       | Builds this script into a package with all its dependencies.                                  |
+| **-d, --directory**   | The directory where the package should be built.                                              |
+| **-a, --architecture**| The architecture of the package.                                                              |
 
 ## Preparing Your Player for the Competition
 
@@ -182,7 +184,7 @@ because the system will run on a docker container without access to the internet
 > All you need is a `requirements.txt` file that lists all your dependencies.
 > To start, simply run the following command in your terminal:
 >
-> `$ python <your_main_script>.py --build <your_directory_name>`
+> `$ python <your_main_script>.py --build -directory <your_directory_name> -architecture <target architecture>`
 >
 > This will trigger the package to do its magic and build your project.
 

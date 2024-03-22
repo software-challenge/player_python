@@ -33,7 +33,9 @@ class Starter:
         headless: bool = False,
         log: bool = False,
         verbose: bool = False,
-        build: str = None,
+        build: bool = False,
+        directory: str = None,
+        architecture: str = None,
         log_level: int = logging.INFO,
     ):
         """
@@ -66,9 +68,11 @@ class Starter:
 
         self.check_socha_version()
 
+        self.directory: str = args.directory or directory
+        self.architecture: str = args.architecture or architecture
         self.build: str = args.build or build
         if self.build:
-            builder = SochaPackageBuilder(self.build)
+            builder = SochaPackageBuilder(self.directory, self.architecture)
             builder.build_package()
             exit(0)
 
@@ -222,6 +226,20 @@ class Starter:
         parser.add_argument(
             "-b",
             "--build",
+            action="store_true",
             help="Builds the this script into a package with all its dependencies.",
         )
+
+        parser.add_argument(
+            "-d",
+            "--directory",
+            help="Specifies the name of the directory for the build package.",
+        )
+
+        parser.add_argument(
+            "-a",
+            "--architecture",
+            help="Specifies the build architecture (e.g.: manylinux1_x86_64).",
+        )
+
         return parser.parse_args()

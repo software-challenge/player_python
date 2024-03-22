@@ -14,8 +14,9 @@ import zipfile
 
 class SochaPackageBuilder:
 
-    def __init__(self, package_name):
+    def __init__(self, package_name, architecture):
         self.package_name = package_name
+        self.architecture = architecture
         self.dependencies_dir = "dependencies"
         self.packages_dir = "packages"
         self.cache_dir = ".pip_cache"
@@ -47,6 +48,7 @@ class SochaPackageBuilder:
                     "-m",
                     "pip",
                     "download",
+                    f"--platform={self.architecture}",
                     "--only-binary=:all:",
                     "-d",
                     f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}",
