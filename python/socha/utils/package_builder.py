@@ -49,6 +49,7 @@ class SochaPackageBuilder:
                     "pip",
                     "download",
                     f"--platform={self.architecture}",
+                    "--python-version 310",
                     "--only-binary=:all:",
                     "-d",
                     f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}",

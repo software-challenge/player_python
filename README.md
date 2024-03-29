@@ -176,6 +176,10 @@ you can of course pass start arguments.
 
 ## Preparing Your Player for the Competition
 
+> Please note that the competition system runs on a Linux system with an `x86_64` architecture.
+> To use your client on the competition system, you will need to download the socha package
+> built for the `manylinux2014_x86_64` platform and the Python version `310`.
+
 To ensure that your player is usable for the competition system,
 you need to download all the dependencies that your client uses
 because the system will run on a docker container without access to the internet and sudo permission.
@@ -193,7 +197,7 @@ If you want to do it manually, follow the steps below to download the dependenci
 1. Open your terminal or console wherever you want to create your directory that you will upload.
 2. Type `mkdir my_player` to create a new directory named `my_player`. You can name yours whatever you want.
 3. Enter the directory using `cd my_player`.
-4. Run the command: `pip download socha xsdata==22.7 -d dependencies` in the directory.
+4. Run the command: `pip download socha --only-binary=:all: --platform manylinux2014_x86_64 --python-version 310 -d dependencies` in the directory.
    This command downloads the dependencies you need into the folder `dependencies`.
 5. Ensure to add all your dependencies that your client uses.
 6. After the download, create a last directory using `mkdir .pip_cache`.
