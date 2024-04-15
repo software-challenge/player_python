@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 use std::mem::swap;
 
-use log::{ debug, info };
+use log::debug;
 use pyo3::exceptions::PyBaseException;
 use pyo3::prelude::*;
 

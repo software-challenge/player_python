@@ -314,6 +314,8 @@ class Board:
             board.find_nearest_field_types(CubeCoordinates(0, 0), FieldType.Water)
             ```
         """
+    
+    def pretty_print(self) -> None: ...
 
 
 class TeamPoints:
