@@ -1,6 +1,7 @@
 from typing import List
 
 from socha import _socha
+import socha
 from socha._socha import CubeCoordinates, Field, FieldType, GameState, Move, TeamEnum
 from socha.api.protocol.protocol import (
     Acceleration,
@@ -10,6 +11,7 @@ from socha.api.protocol.protocol import (
     Data,
     Goal,
     Island,
+    LastMove,
     Passenger,
     Push,
     Sandbank,
@@ -43,7 +45,8 @@ def _convert_board(protocol_board: Board) -> _socha.Board:
                         Field(
                             FieldType.Passenger,
                             _socha.Passenger(
-                                direction_from_string(field.direction), field.passenger
+                                direction_from_string(
+                                    field.direction), field.passenger
                             ),
                         )
                     )
@@ -144,49 +147,28 @@ def _merge_advances(actions):
     return new_actions
 
 
-def if_last_game_state(message, last_game_state) -> GameState:
-    """
-    Constructs a GameState from the provided message, ensuring to reflect the
-    current state based on the ships' positions, teams, and other attributes.
+def convert_to_moves(last_move: LastMove | None) -> Move:
+    if last_move is None:
+        return None
 
-    Args:
-        message: The input message containing the current game state.
-        last_game_state: The last game state to be updated.
+    actions = []
 
-    Returns:
-        GameState: The constructed game state from the message.
-    """
-    try:
-        last_game_state.board = _convert_board(message.data.class_binding.board)
-        actions = message.data.class_binding.last_move.actions.actions
-        new_actions = _merge_advances(
-            [
-                (
-                    _socha.Accelerate(acc=a.acc)
-                    if isinstance(a, Acceleration)
-                    else (
-                        _socha.Advance(distance=a.distance)
-                        if isinstance(a, Advance)
-                        else (
-                            _socha.Push(direction=direction_from_string(a.direction))
-                            if isinstance(a, Push)
-                            else _socha.Turn(
-                                direction=direction_from_string(a.direction)
-                            )
-                        )
-                    )
-                )
-                for a in actions
-            ]
-        )
+    for action in last_move.actions.actions:
+        if isinstance(action, Acceleration):
+            actions.append(socha._socha.Accelerate(action.acc))
+        elif isinstance(action, Advance):
+            actions.append(socha._socha.Advance(action.distance))
+        elif isinstance(action, Push):
+            actions.append(socha._socha.Push(
+                direction_from_string(action.direction)))
+        elif isinstance(action, Turn):
+            actions.append(socha._socha.Turn(
+                direction_from_string(action.direction)))
 
-        last_move = Move(actions=new_actions)
-        return last_game_state.perform_move(last_move)
-    except Exception:
-        return if_not_last_game_state(message)
+    return Move(actions)
 
 
-def if_not_last_game_state(message) -> GameState:
+def message_to_state(message) -> GameState:
     """
     Constructs a GameState from the provided message, ensuring to reflect the
     current state based on the ships' positions, teams, and other attributes.
@@ -200,7 +182,8 @@ def if_not_last_game_state(message) -> GameState:
 
     def create_ship(ship_data, team_enum_value) -> _socha.Ship:
         """Helper function to create a ship from the ship data."""
-        position = CubeCoordinates(q=ship_data.position.q, r=ship_data.position.r)
+        position = CubeCoordinates(
+            q=ship_data.position.q, r=ship_data.position.r)
         team = TeamEnum.One if team_enum_value == "ONE" else TeamEnum.Two
         return _socha.Ship(
             position=position,
@@ -228,5 +211,5 @@ def if_not_last_game_state(message) -> GameState:
         turn=message.data.class_binding.turn,
         current_ship=first_ship if current_team_enum == TeamEnum.One else second_ship,
         other_ship=second_ship if current_team_enum == TeamEnum.One else first_ship,
-        last_move=None,
+        last_move=convert_to_moves(message.data.class_binding.last_move),
     )

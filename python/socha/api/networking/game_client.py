@@ -12,8 +12,7 @@ from typing import List, Union
 from socha._socha import GameState, Move
 from socha.api.networking.utils import (
     handle_move,
-    if_last_game_state,
-    if_not_last_game_state,
+    message_to_state,
 )
 from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
 from socha.api.protocol.protocol import (
@@ -190,7 +189,8 @@ class GameClient(XMLProtocolInterface):
         logging.info(
             f"Creating game with {player_1}, {player_2} and game type '{game_type}'"
         )
-        self.send(Prepare(game_type=game_type, pause=pause, slot=[player_1, player_2]))
+        self.send(Prepare(game_type=game_type,
+                  pause=pause, slot=[player_1, player_2]))
 
     def observe(self, room_id: str):
         logging.info(f"Observing game room '{room_id}'")
@@ -224,10 +224,12 @@ class GameClient(XMLProtocolInterface):
         """
 
         if isinstance(message, Joined):
-            logging.log(15, f"Game joined received with room id '{message.room_id}'")
+            logging.log(
+                15, f"Game joined received with room id '{message.room_id}'")
             self._game_handler.on_game_joined(room_id=message.room_id)
         elif isinstance(message, Left):
-            logging.log(15, f"Game left received with room id '{message.room_id}'")
+            logging.log(
+                15, f"Game left received with room id '{message.room_id}'")
             self._game_handler.on_game_left()
         elif isinstance(message, Prepared):
             logging.log(
@@ -239,8 +241,10 @@ class GameClient(XMLProtocolInterface):
                 reservations=message.reservation,
             )
         elif isinstance(message, Observed):
-            logging.log(15, f"Game observing received with room id '{message.room_id}'")
-            self._game_handler.on_observed(game_client=self, room_id=message.room_id)
+            logging.log(
+                15, f"Game observing received with room id '{message.room_id}'")
+            self._game_handler.on_observed(
+                game_client=self, room_id=message.room_id)
         elif isinstance(message, Room) and not self.headless:
             room_id = message.room_id
 
@@ -251,17 +255,20 @@ class GameClient(XMLProtocolInterface):
                 self._game_handler.on_error(str(message))
                 self.stop()
             elif isinstance(message.data.class_binding, MoveRequest):
-                logging.log(15, f"Move request received for room id '{room_id}'")
+                logging.log(
+                    15, f"Move request received for room id '{room_id}'")
                 self._on_move_request(room_id)
             elif isinstance(message.data.class_binding, State):
                 logging.log(15, f"State received for room id '{room_id}'")
                 self._on_state(message)
             elif isinstance(message.data.class_binding, Result):
                 logging.log(15, f"Result received for room id '{room_id}'")
-                self._game_handler.history[-1].append(message.data.class_binding)
+                self._game_handler.history[-1].append(
+                    message.data.class_binding)
                 self._game_handler.on_game_over(message.data.class_binding)
             else:
-                logging.log(15, f"Room message received for room id '{room_id}'")
+                logging.log(
+                    15, f"Room message received for room id '{room_id}'")
                 self._game_handler.on_room_message(message.data.class_binding)
         else:
             room_id = message.room_id
@@ -281,17 +288,9 @@ class GameClient(XMLProtocolInterface):
             logging.error(f"{move_response} is not a valid move.")
 
     def _on_state(self, message):
-        last_game_state = None
-        for item in self._game_handler.history[-1][::-1]:
-            if isinstance(item, GameState):
-                last_game_state = item
-                break
-        if last_game_state:
-            _game_state = if_last_game_state(message, last_game_state)
-        else:
-            _game_state = if_not_last_game_state(message)
-        self._game_handler.history[-1].append(_game_state)
-        self._game_handler.on_update(_game_state)
+        _state = message_to_state(message)
+        self._game_handler.history[-1].append(_state)
+        self._game_handler.on_update(_state)
 
     def start(self):
         """
@@ -329,9 +328,11 @@ class GameClient(XMLProtocolInterface):
             )
             self._game_handler.while_disconnected(player_client=self)
         if self.auto_reconnect:
-            logging.info("The server left. Client tries to reconnect to the server.")
+            logging.info(
+                "The server left. Client tries to reconnect to the server.")
             for _ in range(3):
-                logging.info("Try to establish a connection with the server...")
+                logging.info(
+                    "Try to establish a connection with the server...")
                 try:
                     self.connect()
                     if self.network_interface.connected:
@@ -375,8 +376,10 @@ class GameClient(XMLProtocolInterface):
                     while_waiting.start()
                     gc.collect()
                 elif self.running:
-                    logging.error(f"Received a object of unknown class: {response}")
-                    raise NotImplementedError("Received object of unknown class.")
+                    logging.error(
+                        f"Received a object of unknown class: {response}")
+                    raise NotImplementedError(
+                        "Received object of unknown class.")
             else:
                 self._game_handler.while_disconnected(player_client=self)
 
