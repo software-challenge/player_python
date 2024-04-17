@@ -372,7 +372,7 @@ impl GameState {
             if has_removed {
                 self.current_ship.passengers += 1;
                 self.current_ship.points = self
-                    .ship_points(self.other_ship)
+                    .ship_points(self.current_ship)
                     .expect("Could not calculate other ship's points");
             }
         }
