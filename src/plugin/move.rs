@@ -1,23 +1,23 @@
 use pyo3::*;
 
-use super::actions::Action;
+use super::action::Action;
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
 pub struct Move {
     #[pyo3(get, set)]
-    pub actions: Vec<Action>,
+    pub action: Action,
 }
 
 #[pymethods]
 impl Move {
     #[new]
     #[must_use]
-    pub fn new(actions: Vec<Action>) -> Self {
-        Self { actions }
+    pub fn new(action: Action) -> Self {
+        Self { action }
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("Move(actions={:?})", self.actions))
+        Ok(format!("Move(actions={:?})", self.action))
     }
 }

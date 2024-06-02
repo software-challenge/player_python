@@ -3,7 +3,7 @@ use pyo3::*;
 use crate::calculates_carrots;
 
 use super::{
-    actions::card::Card,
+    action::card::Card,
     constants::PluginConstants,
     errors::{ FieldNonexistentError, MissingCarrotsError, NoSaladError },
 };

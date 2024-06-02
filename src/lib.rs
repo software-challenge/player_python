@@ -10,6 +10,11 @@ use crate::plugin::hare::TeamEnum;
 use crate::plugin::hare::Hare;
 use crate::plugin::board::Board;
 use crate::plugin::game_state::GameState;
+use crate::plugin::action::advance::Advance;
+use crate::plugin::action::card::Card;
+use crate::plugin::action::eat_salad::EatSalad;
+use crate::plugin::action::exchange_carrots::ExchangeCarrots;
+use crate::plugin::action::fall_back::FallBack;
 
 #[pyfunction]
 pub fn calculates_carrots(distance: usize) -> i32 {
@@ -22,6 +27,12 @@ fn _socha(m: &Bound<'_, PyModule>) -> PyResult<()> {
     pyo3_log::init();
 
     m.add_function(wrap_pyfunction!(calculates_carrots, m)?)?;
+
+    m.add_class::<Advance>()?;
+    m.add_class::<Card>()?;
+    m.add_class::<EatSalad>()?;
+    m.add_class::<ExchangeCarrots>()?;
+    m.add_class::<FallBack>()?;
 
     m.add_class::<PluginConstants>()?;
     m.add_class::<Field>()?;

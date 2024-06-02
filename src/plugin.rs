@@ -1,4 +1,4 @@
-pub mod actions;
+pub mod action;
 pub mod board;
 pub mod constants;
 pub mod errors;

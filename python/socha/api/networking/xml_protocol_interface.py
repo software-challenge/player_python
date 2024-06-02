@@ -4,9 +4,10 @@ Here are all incoming byte streams and all outgoing protocol objects handheld.
 
 import contextlib
 import logging
-from typing import Any, Callable, Iterator
+from typing import Any, Callable, Iterator, List
 
-from socha._socha import TeamEnum
+from python.socha.api.networking.utils import map_card
+from socha._socha import TeamEnum, Advance, Card, ExchangeCarrots, FallBack, EatSalad
 from socha.api.networking.network_socket import NetworkSocket
 from socha.api.protocol.protocol import (
     Close,
@@ -14,6 +15,7 @@ from socha.api.protocol.protocol import (
     MoveRequest,
     Result,
     WelcomeMessage,
+    Cards
 )
 from socha.api.protocol.protocol_packet import ProtocolPacket
 from xsdata.formats.dataclass.context import XmlContext
@@ -22,6 +24,9 @@ from xsdata.formats.dataclass.parsers.config import ParserConfig
 from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
+
+
+
 
 
 def custom_class_factory(clazz, params: dict):
@@ -54,6 +59,19 @@ def custom_class_factory(clazz, params: dict):
                 originalMessage=params.get("original_message"),
             )
             return clazz(class_binding=error_object, **params)
+        elif params.get("class_value") == "sc.plugin2025.Advance":
+            advance_object = Advance(distance=params.get(
+                "distance"), cards=map_card(params.get("cards")))
+            return clazz(class_binding=advance_object, **params)
+        elif params.get("class_value") == "sc.plugin2025.ExchangeCarrots":
+            exchange_object = ExchangeCarrots(value=params.get("value"))
+            return clazz(class_binding=exchange_object, **params)
+        elif params.get("class_value") == "sc.plugin2025.FallBack":
+            back_object = FallBack()
+            return clazz(class_binding=back_object, **params)
+        elif params.get("class_value") == "sc.plugin2025.EatSalad":
+            salad_object = EatSalad()
+            return clazz(class_binding=salad_object, **params)
 
     return clazz(**params)
 
@@ -78,7 +96,8 @@ class XMLProtocolInterface:
             handler=XmlEventHandler, context=context, config=deserialize_config
         )
 
-        serialize_config = SerializerConfig(pretty_print=True, xml_declaration=False)
+        serialize_config = SerializerConfig(
+            pretty_print=True, xml_declaration=False)
         self.serializer = XmlSerializer(config=serialize_config)
 
     def connect(self):
@@ -110,7 +129,8 @@ class XMLProtocolInterface:
             cls = self._deserialize_object(receiving)
             return cls
         except OSError:
-            logging.error("An OSError occurred while receiving data from the server.")
+            logging.error(
+                "An OSError occurred while receiving data from the server.")
             self.running = False
             raise
         except Exception as e:
