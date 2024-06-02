@@ -1,77 +1,48 @@
-use pyo3::FromPyObject;
-use pyo3::Python;
-use pyo3::{IntoPy, PyErr, PyObject};
+pub mod card;
+pub mod advance;
+pub mod eat_salad;
+pub mod exchange_carrots;
+pub mod fall_back;
 
-use crate::plugin::actions::push::Push;
-use crate::plugin::actions::turn::Turn;
+use card::Card;
+use advance::Advance;
+use eat_salad::EatSalad;
+use exchange_carrots::ExchangeCarrots;
+use fall_back::FallBack;
 
-use self::{accelerate::Accelerate, advance::Advance};
+use pyo3::*;
 
 use super::game_state::GameState;
-use super::ship::Ship;
 
-pub mod accelerate;
-pub mod advance;
-pub mod push;
-pub mod turn;
-
-#[derive(PartialEq, PartialOrd, Eq, Hash, Clone, Debug, Copy, FromPyObject)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash, FromPyObject)]
 pub enum Action {
-    Accelerate(Accelerate),
+    Card(Card),
     Advance(Advance),
-    Push(Push),
-    Turn(Turn),
+    EatSalad(EatSalad),
+    ExchangeCarrots(ExchangeCarrots),
+    FallBack(FallBack),
+}
+
+impl Action {
+    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
+        match self {
+            Self::Card(card) => card.perform(state),
+            Self::Advance(advance) => advance.perform(state),
+            Self::EatSalad(eat_salad) => eat_salad.perform(state),
+            Self::ExchangeCarrots(exchange_carrots) => exchange_carrots.perform(state),
+            Self::FallBack(fall_back) => fall_back.perform(state),
+        }
+    }
 }
 
 impl IntoPy<PyObject> for Action {
     fn into_py(self, py: Python) -> PyObject {
         match self {
-            Self::Accelerate(accelerate) => accelerate.into_py(py),
+            Self::Card(accelerate) => accelerate.into_py(py),
             Self::Advance(advance) => advance.into_py(py),
-            Self::Push(push) => push.into_py(py),
-            Self::Turn(turn) => turn.into_py(py),
+            Self::EatSalad(eat_salad) => eat_salad.into_py(py),
+            Self::ExchangeCarrots(exchange_carrots) => exchange_carrots.into_py(py),
+            Self::FallBack(fall_back) => fall_back.into_py(py),
         }
-    }
-}
-
-impl Action {
-    pub fn perform(
-        &self,
-        game_state: &GameState,
-    ) -> Result<(Option<Ship>, Option<Ship>), PyErr> {
-        match self {
-            Self::Accelerate(accelerate) => accelerate
-                .perform(game_state)
-                .map(|ship| (Some(ship), None)),
-            Self::Advance(advance) => advance.perform(game_state).map(|ship| (Some(ship), None)),
-            Self::Push(push) => push
-                .perform(game_state)
-                .map(|(ship1, ship2)| (Some(ship1), Some(ship2))),
-            Self::Turn(turn) => turn.perform(game_state).map(|ship| (Some(ship), None)),
-        }
-    }
-}
-
-impl From<Accelerate> for Action {
-    fn from(acc: Accelerate) -> Self {
-        Self::Accelerate(acc)
-    }
-}
-
-impl From<Turn> for Action {
-    fn from(turn: Turn) -> Self {
-        Self::Turn(turn)
-    }
-}
-
-impl From<Advance> for Action {
-    fn from(advance: Advance) -> Self {
-        Self::Advance(advance)
-    }
-}
-
-impl From<Push> for Action {
-    fn from(push: Push) -> Self {
-        Self::Push(push)
     }
 }

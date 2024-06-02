@@ -1,11 +1,9 @@
 pub mod actions;
 pub mod board;
 pub mod constants;
-pub mod coordinate;
 pub mod errors;
 pub mod field;
 pub mod game_state;
 pub mod r#move;
-pub mod segment;
-pub mod ship;
 pub mod test;
+pub mod hare;
