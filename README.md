@@ -9,17 +9,14 @@
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> Hey there! To help you out, it's best to start by checking out the
-> [documentation for this client](https://socha-python-client.readthedocs.io/en/)
-> before you ask any questions or open an issue.
-> It'll provide you with some helpful information!
+> This package is currently in early stage of development!
 
 This repository contains the Python package for the
 [Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
 have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
 
 > This year it is the game
-> **[Mississippi Queen](https://docs.software-challenge.de/spiele/mississippi-queen)**.
+> **[Hase und Igel]()**.
 
 ## Table of Contents
 
