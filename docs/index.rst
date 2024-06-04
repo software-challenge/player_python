@@ -1,19 +1,13 @@
+.. raw:: html
+
+   <!-- trunk-ignore-all(markdownlint/MD041) -->
+
 Python Client for the Software-Challenge Germany 2024
 =====================================================
 
 |Read the Docs| |PyPI| |PyPI - Python Version| |Discord| |Documentation|
 
-   **Be warned!** This package is currently experimental and has still a
-   few known bugs. But please try it out and let us know if anything
-   comes up.
-
-..
-
-   Hey there! To help you out, it's best to start by checking out the
-   `documentation for this
-   client <https://socha-python-client.readthedocs.io/en/>`__ before you
-   ask any questions or open an issue. It'll provide you with some
-   helpful information!
+   This package is currently in early stage of development!
 
 This repository contains the Python package for the `Software-Challenge
 Germany <https://www.software-challenge.de>`__, a programming
@@ -21,8 +15,7 @@ competition for students. The students have to develop an artificial
 intelligence that plays and competes against other opponents in an
 annually changing game.
 
-   This year it is the game `Mississippi
-   Queen <https://docs.software-challenge.de/spiele/mississippi-queen>`__.
+   This year it is the game `Hase und Igel <>`__.
 
 Table of Contents
 -----------------
@@ -58,6 +51,13 @@ presented, which installs the packages inside the folder.
    -  Windows: ``> winget install -e --id Python.Python.3.10``
    -  Debian: ``$ sudo apt install python3.10``
    -  Arch: ``$ sudo pacman -S python``
+
+..
+
+   In some rare cases there maybe a `broken or missing installation of
+   ``setuptools`` <https://github.com/maxblan/socha-python-client/issues/40>`__.
+   If this is the case on your machine you can install it again with
+   ``pip install -I setuptools``.
 
 Globally
 ~~~~~~~~
@@ -180,38 +180,49 @@ start arguments.
    Note that any arguments passed as startup parameters will override
    those in the code, including the ones you set yourself.
 
-+-----------------------+---------------------------------------------+
-| **Command**           | **Description**                             |
-+=======================+=============================================+
-| **--help**            | Prints the help message.                    |
-+-----------------------+---------------------------------------------+
-| **-h, --host**        | The host to connect to. The default is      |
-|                       | 'localhost'.                                |
-+-----------------------+---------------------------------------------+
-| **-p, --port**        | The port of the host. The default is 13050. |
-+-----------------------+---------------------------------------------+
-| **-r, --reservation** | Reservation code for a prepared game.       |
-+-----------------------+---------------------------------------------+
-| **-R, --room**        | Room Id the client will try to connect.     |
-+-----------------------+---------------------------------------------+
-| **-s, --survive**     | If present, the client will keep running,   |
-|                       | even if the connection to the server is     |
-|                       | terminated.                                 |
-+-----------------------+---------------------------------------------+
-| **-l, --log**         | If present, the client will write a log     |
-|                       | file to the current directory.              |
-+-----------------------+---------------------------------------------+
-| **-v, --verbose**     | Verbose option for logging.                 |
-+-----------------------+---------------------------------------------+
-| **--auto-reconnect**  | Automatically reconnect to the server if    |
-|                       | the connection is lost.                     |
-+-----------------------+---------------------------------------------+
-| **-b, --build**       | Builds this script into a package with all  |
-|                       | its dependencies.                           |
-+-----------------------+---------------------------------------------+
++------------------------+--------------------------------------------+
+| **Command**            | **Description**                            |
++========================+============================================+
+| **--help**             | Prints the help message.                   |
++------------------------+--------------------------------------------+
+| **-h, --host**         | The host to connect to. The default is     |
+|                        | 'localhost'.                               |
++------------------------+--------------------------------------------+
+| **-p, --port**         | The port of the host. The default is       |
+|                        | 13050.                                     |
++------------------------+--------------------------------------------+
+| **-r, --reservation**  | Reservation code for a prepared game.      |
++------------------------+--------------------------------------------+
+| **-R, --room**         | Room Id the client will try to connect.    |
++------------------------+--------------------------------------------+
+| **-s, --survive**      | If present, the client will keep running,  |
+|                        | even if the connection to the server is    |
+|                        | terminated.                                |
++------------------------+--------------------------------------------+
+| **-l, --log**          | If present, the client will write a log    |
+|                        | file to the current directory.             |
++------------------------+--------------------------------------------+
+| **-v, --verbose**      | Verbose option for logging.                |
++------------------------+--------------------------------------------+
+| **--auto-reconnect**   | Automatically reconnect to the server if   |
+|                        | the connection is lost.                    |
++------------------------+--------------------------------------------+
+| **-b, --build**        | Builds this script into a package with all |
+|                        | its dependencies.                          |
++------------------------+--------------------------------------------+
+| **-d, --directory**    | The directory where the package should be  |
+|                        | built.                                     |
++------------------------+--------------------------------------------+
+| **-a, --architecture** | The architecture of the package.           |
++------------------------+--------------------------------------------+
 
 Preparing Your Player for the Competition
 -----------------------------------------
+
+   Please note that the competition system runs on a Linux system with
+   an ``x86_64`` architecture. To use your client on the competition
+   system, you will need to download the socha package built for the
+   ``manylinux2014_x86_64`` platform and the Python version ``310``.
 
 To ensure that your player is usable for the competition system, you
 need to download all the dependencies that your client uses because the
@@ -223,7 +234,7 @@ sudo permission.
    file that lists all your dependencies. To start, simply run the
    following command in your terminal:
 
-   ``$ python <your_main_script>.py --build <your_directory_name>``
+   ``$ python <your_main_script>.py --build -directory <your_directory_name> -architecture <target architecture>``
 
    This will trigger the package to do its magic and build your project.
 
@@ -235,7 +246,8 @@ dependencies:
 2. Type ``mkdir my_player`` to create a new directory named
    ``my_player``. You can name yours whatever you want.
 3. Enter the directory using ``cd my_player``.
-4. Run the command: ``pip download socha xsdata==22.7 -d dependencies``
+4. Run the command:
+   ``pip download socha --only-binary=:all: --platform manylinux2014_x86_64 --python-version 310 -d dependencies``
    in the directory. This command downloads the dependencies you need
    into the folder ``dependencies``.
 5. Ensure to add all your dependencies that your client uses.
