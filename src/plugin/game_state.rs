@@ -16,10 +16,13 @@ use super::r#move::Move;
 
 #[pyclass]
 pub struct GameState {
+    #[pyo3(get, set)]
     pub board: Board,
+    #[pyo3(get, set)]
     pub turn: usize,
     player_one: Hare,
     player_two: Hare,
+    #[pyo3(get, set)]
     pub moves: BTreeMap<usize, Move>,
 }
 
@@ -42,11 +45,11 @@ impl GameState {
         }
     }
 
-    pub fn get_current(&self) -> Hare {
+    pub fn get_current_player(&self) -> Hare {
         if self.turn % 2 == 0 { self.player_one.clone() } else { self.player_two.clone() }
     }
 
-    pub fn set_current(&mut self, player: Hare) {
+    pub fn set_current_player(&mut self, player: Hare) {
         if self.turn % 2 == 0 {
             self.player_one = player;
         } else {
@@ -54,14 +57,14 @@ impl GameState {
         }
     }
 
-    pub fn get_opponent(&self, player: &Hare) -> Hare {
+    pub fn get_other_player(&self, player: &Hare) -> Hare {
         if player.team == self.player_one.team {
             return self.player_two.clone();
         }
         self.player_one.clone()
     }
 
-    pub fn set_opponent(&mut self, player: Hare) {
+    pub fn set_other_player(&mut self, player: Hare) {
         if player.team == self.player_one.team {
             self.player_two = player;
         } else {
@@ -70,7 +73,7 @@ impl GameState {
     }
 
     pub fn is_ahead(&self, player: &Hare) -> bool {
-        player.position > self.get_opponent(player).position
+        player.position > self.get_other_player(player).position
     }
 
     pub fn can_exchange_carrots(&self, player: &Hare, count: i32) -> Result<bool, PyErr> {
@@ -103,7 +106,7 @@ impl GameState {
 
     pub fn get_fall_back(&self, player: &Hare) -> Option<usize> {
         match self.board.get_previous_field(Field::Hedgehog, player.position) {
-            Some(i) if self.get_opponent(player).position != i => Some(i),
+            Some(i) if self.get_other_player(player).position != i => Some(i),
             Some(_) => None,
             None => None,
         }
@@ -129,7 +132,7 @@ impl GameState {
             }
         };
 
-        if field != Field::Goal && new_position == self.get_opponent(player).position {
+        if field != Field::Goal && new_position == self.get_other_player(player).position {
             return Err(FieldOccupiedError::new_err("Field is occupied by opponent"));
         }
 

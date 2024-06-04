@@ -9,13 +9,10 @@ import threading
 import time
 from typing import List, Union
 
-from socha._socha import GameState, Move
-from socha.api.networking.utils import (
-    handle_move,
-    message_to_state,
-)
-from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
-from socha.api.protocol.protocol import (
+from python.socha._socha import GameState, Move
+
+from python.socha.api.networking.xml_protocol_interface import XMLProtocolInterface
+from python.socha.api.protocol.protocol import (
     Authenticate,
     Cancel,
     Error,
@@ -36,7 +33,10 @@ from socha.api.protocol.protocol import (
     State,
     Step,
 )
-from socha.api.protocol.protocol_packet import ProtocolPacket
+
+from python.socha.api.networking.utils import handle_move, message_to_state
+from python.socha.api.protocol.protocol import Errorpacket
+from python.socha.api.protocol.protocol_packet import ProtocolPacket
 
 
 class IClientHandler:
@@ -210,6 +210,7 @@ class GameClient(XMLProtocolInterface):
 
     def send_message_to_room(self, room_id: str, message):
         logging.log(15, f"Sending message to room '{room_id}'")
+        logging.debug(f"Message is '{message}'")
         self.send(Room(room_id=room_id, data=message))
 
     def _on_object(self, message):
@@ -223,7 +224,13 @@ class GameClient(XMLProtocolInterface):
             None
         """
 
-        if isinstance(message, Joined):
+        if isinstance(message, Errorpacket):
+            logging.error(
+                f"An error occurred while handling the request: {message}"
+            )
+            self._game_handler.on_error(str(message))
+            self.stop()
+        elif isinstance(message, Joined):
             logging.log(
                 15, f"Game joined received with room id '{message.room_id}'")
             self._game_handler.on_game_joined(room_id=message.room_id)
@@ -247,14 +254,7 @@ class GameClient(XMLProtocolInterface):
                 game_client=self, room_id=message.room_id)
         elif isinstance(message, Room) and not self.headless:
             room_id = message.room_id
-
-            if isinstance(message.data.class_binding, Error):
-                logging.error(
-                    f"An error occurred while handling the request: {message}"
-                )
-                self._game_handler.on_error(str(message))
-                self.stop()
-            elif isinstance(message.data.class_binding, MoveRequest):
+            if isinstance(message.data.class_binding, MoveRequest):
                 logging.log(
                     15, f"Move request received for room id '{room_id}'")
                 self._on_move_request(room_id)
@@ -262,7 +262,8 @@ class GameClient(XMLProtocolInterface):
                 logging.log(15, f"State received for room id '{room_id}'")
                 self._on_state(message)
             elif isinstance(message.data.class_binding, Result):
-                logging.log(15, f"Result received for room id '{room_id}'")
+                logging.info(f"Result received for room id '{room_id}'")
+                logging.info(f"Result was '{message.data.class_binding}'")
                 self._game_handler.history[-1].append(
                     message.data.class_binding)
                 self._game_handler.on_game_over(message.data.class_binding)

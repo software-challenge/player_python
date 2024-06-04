@@ -1,12 +1,12 @@
 
 from typing import List
 from socha import _socha
-from socha._socha import GameState
-from socha.api.protocol.protocol import (
+from python.socha.api.protocol.protocol import (
     Board,
     Cards,
     ScPlugin2025Hare,
     State,
+    Data
 )
 
 
@@ -41,7 +41,7 @@ def map_board(protocol_board: Board) -> _socha.Board:
     return _socha.Board(track=track)
 
 
-def map_card(cards: Cards) -> List[_socha.Card]:
+def map_xml_to_card(cards: Cards) -> List[_socha.Card]:
     return_cards:  List[_socha.Card] = []
     for card in cards.sc_plugin2025_card:
         if card == "EAT_SALAD":
@@ -50,14 +50,41 @@ def map_card(cards: Cards) -> List[_socha.Card]:
             return_cards.append(_socha.Card.HurryAhead)
         elif card == "FALL_BACK":
             return_cards.append(_socha.Card.FallBack)
+        elif card == "SWAP_CARROTS":
+            return_cards.append(_socha.Card.SwapCarrots)
     return return_cards
 
 
-def handle_move(move_response):
+def map_card_to_xml(cards: List[_socha.Card]) -> Cards:
+    return_cards: Cards = Cards()
+    for card in cards:
+        if card == _socha.Card.EatSalad:
+            return_cards.sc_plugin2025_card.append("EAT_SALAD")
+        elif card == _socha.Card.FallBack:
+            return_cards.sc_plugin2025_card.append("FALL_BACK")
+        elif card == _socha.Card.HurryAhead:
+            return_cards.sc_plugin2025_card.append("HURRY_AHEAD")
+        elif card == _socha.Card.SwapCarrots:
+            return_cards.sc_plugin2025_card.append("SWAP_CARROTS")
+    return return_cards
+
+
+def handle_move(move_response: _socha.Move):
     print(move_response)
+    if (isinstance(move_response.action, _socha.Advance)):
+        advance: _socha.Advance = move_response.action
+        return Data(class_value="sc.plugin2025.Advance", distance=advance.distance, cards=map_card_to_xml(advance.cards))
+    elif (isinstance(move_response.action, _socha.EatSalad)):
+        return Data(class_value="sc.plugin2025.EatSalad")
+    elif (isinstance(move_response.action, _socha.ExchangeCarrots)):
+        exchangeCarrots: _socha.ExchangeCarrots = move_response.action
+        return Data(class_value="sc.plugin2025.ExchangeCarrots", value=exchangeCarrots.value)
+    elif (isinstance(move_response.action, _socha.FallBack)):
+        return Data(class_value="sc.plugin2025.FallBack")
+    print("RETURN NONE")
 
 
-def message_to_state(message) -> GameState:
+def message_to_state(message) -> _socha.GameState:
     """
     Constructs a GameState from the provided message, ensuring to reflect the
     current state based on the ships' positions, teams, and other attributes.
@@ -72,7 +99,7 @@ def message_to_state(message) -> GameState:
 
     def create_hare(hare: ScPlugin2025Hare) -> _socha.Hare:
         return _socha.Hare(
-            cards=map_card(cards=hare.cards),
+            cards=map_xml_to_card(cards=hare.cards),
             carrots=hare.carrots,
             position=hare.position,
             salad_eaten=hare.salad_eaten,

@@ -22,7 +22,7 @@ pub enum Action {
 }
 
 impl Action {
-    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         match self {
             Self::Advance(advance) => advance.perform(state),
             Self::EatSalad(eat_salad) => eat_salad.perform(state),

@@ -4,29 +4,25 @@ Here are all incoming byte streams and all outgoing protocol objects handheld.
 
 import contextlib
 import logging
-from typing import Any, Callable, Iterator, List
+from typing import Any, Callable, Iterator
 
-from python.socha.api.networking.utils import map_card
-from socha._socha import TeamEnum, Advance, Card, ExchangeCarrots, FallBack, EatSalad
-from socha.api.networking.network_socket import NetworkSocket
-from socha.api.protocol.protocol import (
+from python.socha.api.networking.utils import map_xml_to_card
+from socha import _socha
+from python.socha.api.networking.network_socket import NetworkSocket
+from python.socha.api.protocol.protocol import (
     Close,
     Error,
     MoveRequest,
     Result,
-    WelcomeMessage,
-    Cards
+    WelcomeMessage
 )
-from socha.api.protocol.protocol_packet import ProtocolPacket
+from python.socha.api.protocol.protocol_packet import ProtocolPacket
 from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.parsers.config import ParserConfig
 from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
-
-
-
 
 
 def custom_class_factory(clazz, params: dict):
@@ -37,7 +33,8 @@ def custom_class_factory(clazz, params: dict):
             ...
         if params.get("class_value") == "welcomeMessage":
             welcome_message = WelcomeMessage(
-                TeamEnum.One if params.get("name") == "ONE" else TeamEnum.Two
+                _socha.TeamEnum.One if params.get(
+                    "name") == "ONE" else _socha.TeamEnum.Two
             )
             return clazz(class_binding=welcome_message, **params)
         elif params.get("class_value") == "memento":
@@ -60,17 +57,17 @@ def custom_class_factory(clazz, params: dict):
             )
             return clazz(class_binding=error_object, **params)
         elif params.get("class_value") == "sc.plugin2025.Advance":
-            advance_object = Advance(distance=params.get(
-                "distance"), cards=map_card(params.get("cards")))
+            advance_object = _socha.Advance(distance=params.get(
+                "distance"), cards=map_xml_to_card(params.get("cards")))
             return clazz(class_binding=advance_object, **params)
         elif params.get("class_value") == "sc.plugin2025.ExchangeCarrots":
-            exchange_object = ExchangeCarrots(value=params.get("value"))
+            exchange_object = _socha.ExchangeCarrots(value=params.get("value"))
             return clazz(class_binding=exchange_object, **params)
         elif params.get("class_value") == "sc.plugin2025.FallBack":
-            back_object = FallBack()
+            back_object = _socha.FallBack()
             return clazz(class_binding=back_object, **params)
         elif params.get("class_value") == "sc.plugin2025.EatSalad":
-            salad_object = EatSalad()
+            salad_object = _socha.EatSalad()
             return clazz(class_binding=salad_object, **params)
 
     return clazz(**params)

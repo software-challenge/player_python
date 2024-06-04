@@ -1,31 +1,9 @@
-import logging
-import random
-from typing import List
-
 # not all imports are currently used, but they might be in the future and it shows all available functionalities
+import logging
 from socha import (
-    Accelerate,
-    AccelerationProblem,
-    Advance,
-    AdvanceInfo,
-    AdvanceProblem,
-    Board,
-    CartesianCoordinate,
-    CubeCoordinates,
-    CubeDirection,
-    Field,
-    FieldType,
     GameState,
     Move,
-    Passenger,
-    Push,
-    PushProblem,
-    Segment,
-    Ship,
-    TeamEnum,
-    TeamPoints,
-    Turn,
-    TurnProblem,
+    Advance
 )
 from socha.api.networking.game_client import IClientHandler
 from socha.starter import Starter
@@ -37,9 +15,7 @@ class Logic(IClientHandler):
     # this method is called every time the server is requesting a new move
     # this method should always be implemented otherwise the client will be disqualified
     def calculate_move(self) -> Move:
-        logging.info("Calculate move...")
-        possible_moves: List[Move] = self.game_state.possible_moves()
-        return possible_moves[random.randint(0, len(possible_moves) - 1)]
+        return Move(action=Advance(distance=1, cards=[]))
 
     # this method is called every time the server has sent a new game state update
     # this method should be implemented to keep the game state up to date

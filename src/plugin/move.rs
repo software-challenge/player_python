@@ -18,6 +18,6 @@ impl Move {
     }
 
     fn __repr__(&self) -> PyResult<String> {
-        Ok(format!("Move(actions={:?})", self.action))
+        Ok(format!("Move(action={:?})", self.action))
     }
 }

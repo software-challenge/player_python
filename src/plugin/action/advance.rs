@@ -11,7 +11,9 @@ use super::card::Card;
 #[pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Advance {
+    #[pyo3(get, set)]
     distance: usize,
+    #[pyo3(get, set)]
     cards: Vec<Card>,
 }
 
@@ -23,8 +25,8 @@ impl Advance {
         Self { distance, cards }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
-        let mut player = state.get_current();
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+        let mut player = state.get_current_player();
 
         state.can_advance_to(self.distance, &player)?;
         player.advance_by(self.distance)?;
@@ -48,12 +50,13 @@ impl Advance {
                             return Err(CannotPlayCardError::new_err("Card cannot be played"));
                         }
                     }
-                    last_card = Some(card);
-                    card.perform(state)?;
                 }
                 _ => {}
             }
+            last_card = Some(card);
+            card.perform(state)?;
         }
+        state.set_current_player(player);
         Ok(())
     }
 }

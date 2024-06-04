@@ -8,12 +8,13 @@ pub struct FallBack {}
 
 #[pymethods]
 impl FallBack {
-    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
-        let mut player = state.get_current();
-        match state.get_fall_back(&player) {
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+        let mut current = state.get_current_player();
+        match state.get_fall_back(&current) {
             Some(i) => {
-                player.carrots += 10 * ((player.position - i) as i32);
-                player.position = i;
+                current.carrots += 10 * ((current.position - i) as i32);
+                current.position = i;
+                state.set_current_player(current);
                 Ok(())
             }
             None => Err(CannotEnterFieldError::new_err("Field not found")),

@@ -114,8 +114,6 @@ class Move:
 class GameState:
     board: Board
     turn: int
-    player_one: Hare
-    player_two: Hare
     moves: Dict[int, Move]
 
     def __init__(self, board: Board, turn: int, player_one: Hare, player_two: Hare, moves: Dict[int, Move]):
@@ -125,16 +123,16 @@ class GameState:
         self.player_two = player_two
         self.moves = moves
 
-    def get_current(self) -> Hare:
+    def get_current_player(self) -> Hare:
         ...
 
-    def set_current(self, player: Hare) -> None:
+    def set_current_player(self, player: Hare) -> None:
         ...
 
-    def get_opponent(self, player: Hare) -> Hare:
+    def get_other_player(self, player: Hare) -> Hare:
         ...
 
-    def set_opponent(self, player: Hare) -> None:
+    def set_other_player(self, player: Hare) -> None:
         ...
 
     def is_ahead(self, player: Hare) -> bool:

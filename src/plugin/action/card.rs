@@ -26,20 +26,22 @@ impl Card {
         }
     }
 
-    fn play(&self, state: &GameState) -> Result<(), PyErr> {
-        let mut current = state.get_current();
-        let mut opponent = state.get_opponent(&current);
+    fn play(&self, state: &mut GameState) -> Result<(), PyErr> {
+        let mut current = state.get_current_player();
+        let mut other = state.get_other_player(&current);
         match self {
-            Card::FallBack => state.move_to_field(&mut current, opponent.position - 1)?,
-            Card::HurryAhead => state.move_to_field(&mut current, opponent.position + 1)?,
-            Card::EatSalad => state.get_current().eat_salad()?,
-            Card::SwapCarrots => swap(&mut current.carrots, &mut opponent.carrots),
+            Card::FallBack => state.move_to_field(&mut current, other.position - 1)?,
+            Card::HurryAhead => state.move_to_field(&mut current, other.position + 1)?,
+            Card::EatSalad => state.get_current_player().eat_salad()?,
+            Card::SwapCarrots => swap(&mut current.carrots, &mut other.carrots),
         }
+        state.set_current_player(current);
+        state.set_other_player(other);
         Ok(())
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
-        let mut current = state.get_current();
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+        let mut current = state.get_current_player();
 
         let field = state.board
             .get_field(current.position)
@@ -55,6 +57,7 @@ impl Card {
             .ok_or_else(|| CardNotOwnedError::new_err(""))?;
 
         current.cards.remove(index);
+        state.set_current_player(current);
 
         self.play(state)?;
 

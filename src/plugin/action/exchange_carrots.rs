@@ -17,9 +17,11 @@ impl ExchangeCarrots {
         Self { value }
     }
 
-    pub fn perform(&self, state: &GameState) -> Result<(), PyErr> {
-        if state.can_exchange_carrots(&state.get_current(), self.value)? {
-            state.get_current().carrots += self.value;
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+        let mut current = state.get_current_player();
+        if state.can_exchange_carrots(&state.get_current_player(), self.value)? {
+            current.carrots += self.value;
+            state.set_current_player(current);
             return Ok(());
         }
         Err(CannotExchangeCarrotsError::new_err("Cannot exhange carrots"))

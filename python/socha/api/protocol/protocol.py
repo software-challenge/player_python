@@ -1,18 +1,10 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from socha._socha import TeamEnum
-from socha.api.protocol.protocol_packet import (
-    AdminLobbyRequest,
-    LobbyRequest,
-    ProtocolPacket,
-    ResponsePacket,
-)
-from socha.api.protocol.room_message import (
-    ObservableRoomMessage,
-    RoomMessage,
-    RoomOrchestrationMessage,
-)
+from python.socha._socha import TeamEnum
+
+from python.socha.api.protocol.protocol_packet import AdminLobbyRequest, LobbyRequest, ProtocolPacket, ResponsePacket
+from python.socha.api.protocol.room_message import ObservableRoomMessage, RoomMessage, RoomOrchestrationMessage
 
 
 @dataclass
@@ -146,7 +138,7 @@ class Players:
 
 
 @dataclass
-class State:
+class State(ObservableRoomMessage):
     class Meta:
         name = "state"
 
@@ -692,14 +684,21 @@ class OriginalMessage:
         metadata={
             "name": "class",
             "type": "Attribute",
-        },
+            "required": True,
+        }
     )
-
-    actions: Optional[any] = field(
+    distance: Optional[int] = field(
         default=None,
         metadata={
             "type": "Element",
-        },
+            "required": True,
+        }
+    )
+    cards: Optional[Cards] = field(
+        default=None,
+        metadata={
+            "type": "Element",
+        }
     )
 
 
@@ -734,6 +733,13 @@ class Data:
         metadata={
             "type": "Element",
         }
+    )
+    original_message: Optional[OriginalMessage] = field(
+        default=None,
+        metadata={
+            "name": "originalMessage",
+            "type": "Element",
+        },
     )
     scores: Optional[Scores] = field(
         default=None,

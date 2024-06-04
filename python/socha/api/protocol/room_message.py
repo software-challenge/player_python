@@ -1,4 +1,4 @@
-from socha.api.protocol.protocol_packet import ProtocolPacket
+from python.socha.api.protocol.protocol_packet import ProtocolPacket
 
 
 class RoomMessage(ProtocolPacket):

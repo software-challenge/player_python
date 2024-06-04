@@ -9,8 +9,8 @@ import logging
 import urllib.request
 
 import pkg_resources
-from socha.api.networking.game_client import GameClient, IClientHandler
-from socha.utils.package_builder import SochaPackageBuilder
+from python.socha.api.networking.game_client import GameClient, IClientHandler
+from python.socha.utils.package_builder import SochaPackageBuilder
 
 
 class Starter:
