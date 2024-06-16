@@ -28,7 +28,7 @@ impl Advance {
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         let mut player = state.clone_current_player();
 
-        player.advance_by(&state, self.distance)?;
+        player.advance_by(state, self.distance)?;
 
         let mut last_card: Option<&Card> = None;
         let mut card_bought = false;

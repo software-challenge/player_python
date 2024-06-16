@@ -11,6 +11,6 @@ impl EatSalad {
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         let mut current = state.clone_current_player();
         current.eat_salad(state)?;
-        return Ok(());
+        Ok(())
     }
 }

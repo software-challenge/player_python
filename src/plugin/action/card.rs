@@ -33,7 +33,7 @@ impl Card {
         match self {
             Card::FallBack => current.move_to_field(state, other.position - 1)?,
             Card::HurryAhead => current.move_to_field(state, other.position + 1)?,
-            Card::EatSalad => current.eat_salad(&state)?,
+            Card::EatSalad => current.eat_salad(state)?,
             Card::SwapCarrots => swap(&mut current.carrots, &mut other.carrots),
         }
         state.update_current_player(current);
