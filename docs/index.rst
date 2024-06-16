@@ -123,20 +123,6 @@ This should satisfy the dependencies and you can start right away.
 Getting Started
 ---------------
 
-If you want to start with the Software-Challenge Python Client, you have
-to import some dependencies first.
-
-The following are all possible imports which are available. You won't
-need every, but for the sake of completeness all are listed.
-
-.. code:: python
-
-   from socha import Accelerate, AccelerationProblem, Advance, AdvanceInfo, AdvanceProblem, Board
-   from socha import CartesianCoordinate, CubeCoordinates, CubeDirection, Field, FieldType, GameState
-   from socha import Move, Passenger, Push, PushProblem, Segment, Ship, TeamEnum, TeamPoints, Turn, TurnProblem
-   from socha.api.networking.game_client import IClientHandler
-   from socha.starter import Starter
-
 If you now want to develop and implement your logic, then the structure
 of the class should look like this.
 
@@ -146,7 +132,7 @@ of the class should look like this.
        gameState: GameState
 
        def calculate_move(self) -> Move:
-           return Move([Advance(1)])
+           return Move(action=Advance(distance=1, cards=[]))
 
        def on_update(self, state: GameState):
            self.gameState = state
