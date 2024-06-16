@@ -1,76 +1,61 @@
 from enum import Enum
-from typing import Dict, List, Optional
-
+from typing import List, Optional
 
 class Card:
-    FallBack: Card
-    HurryAhead: Card
-    EatSalad: Card
-    SwapCarrots: Card
+    FallBack: int = 0
+    HurryAhead: int = 1
+    EatSalad: int = 2
+    SwapCarrots: int = 3
 
     def __init__(self) -> None: ...
-
     def moves(self) -> bool: ...
-
     def play(self, state: GameState) -> None: ...
 
-
 class Advance:
+    distance: int
+    cards: List[Card]
+
     def __init__(self, distance: int, cards: List[Card]): ...
-
     def perform(self, state: GameState) -> None: ...
-
 
 class EatSalad:
     def __init__(self) -> None: ...
-
     def perform(self, state: GameState) -> None: ...
-
 
 class ExchangeCarrots:
+    value: int
+
     def __init__(self, value: int) -> None: ...
-
     def perform(self, state: GameState) -> None: ...
-
 
 class FallBack:
     def perform(self, state: GameState) -> None: ...
 
-
 class Field(Enum):
-    Position1: int
-    Position2: int
-    Hedgehog: int
-    Salad: int
-    Carrots: int
-    Hare: int
-    Market: int
-    Goal: int
-    Start: int
-
+    Position1: int = 0
+    Position2: int = 1
+    Hedgehog: int = 2
+    Salad: int = 3
+    Carrots: int = 4
+    Hare: int = 5
+    Market: int = 6
+    Goal: int = 7
+    Start: int = 8
 
 class Board:
     track: list[Field]
 
     def __init__(self, track: list[Field]) -> None: ...
-
     def get_field(self, index: int) -> Optional[Field]: ...
-
-    def find_field(self, field: Field, start: int,
-                   end: int) -> Optional[int]: ...
-
-    def get_previous_field(
-        self, field: Field, index: int) -> Optional[int]: ...
-
+    def find_field(self, field: Field, start: int, end: int) -> Optional[int]: ...
+    def get_previous_field(self, field: Field, index: int) -> Optional[int]: ...
     def get_next_field(self, field: Field, index: int) -> Optional[int]: ...
 
-
 class TeamEnum(Enum):
-    One: int
-    Two: int
+    One: int = 0
+    Two: int = 1
 
     def __repr__(self) -> str: ...
-
 
 class Hare:
     team: TeamEnum
@@ -87,71 +72,55 @@ class Hare:
         carrots: Optional[int] = None,
         salads: Optional[int] = None,
         salad_eaten: Optional[bool] = None,
-        position: Optional[int] = None
+        position: Optional[int] = None,
     ) -> None: ...
-
     def is_in_goal(self) -> bool: ...
-
     def can_enter_goal(self) -> bool: ...
-
-    def advance_by(self, distance: int) -> None: ...
-
+    def advance_by(self, state: GameState, distance: int) -> None: ...
+    def exchange_carrots(self, state: GameState, carrots: int) -> None: ...
     def consume_carrots(self, carrots: int) -> None: ...
-
-    def eat_salad(self) -> None: ...
-
+    def eat_salad(self, state: GameState) -> None: ...
+    def move_to_field(self, state: GameState, new_position: int) -> None: ...
+    def get_fall_back(self, state: GameState) -> Optional[int]: ...
+    def fall_back(self, state: GameState) -> None: ...
+    def is_ahead(self, state: GameState) -> bool: ...
 
 class Move:
     action: Advance | EatSalad | ExchangeCarrots | FallBack
 
-    def __init__(self, action: Advance | EatSalad | ExchangeCarrots | FallBack) -> None:
-        ...
-
-    def __repr__(self) -> str:
-        ...
-
+    def __init__(
+        self, action: Advance | EatSalad | ExchangeCarrots | FallBack
+    ) -> None: ...
+    def perform(self, state: GameState) -> None: ...
+    def __repr__(self) -> str: ...
 
 class GameState:
     board: Board
     turn: int
-    moves: Dict[int, Move]
 
-    def __init__(self, board: Board, turn: int, player_one: Hare, player_two: Hare, moves: Dict[int, Move]):
-        self.board = board
-        self.turn = turn
-        self.player_one = player_one
-        self.player_two = player_two
-        self.moves = moves
+    def __init__(
+        self, board: Board, turn: int, player_one: Hare, player_two: Hare
+    ) -> None: ...
+    def perform_move(self, move: Move) -> GameState: ...
+    def clone_current_player(self) -> Hare: ...
+    def update_current_player(self, player: Hare) -> None: ...
+    def clone_other_player(self) -> Hare: ...
+    def update_other_player(self, player: Hare) -> None: ...
 
-    def get_current_player(self) -> Hare:
-        ...
+class RulesEngine:
+    @staticmethod
+    def calculates_carrots(distance: int) -> int: ...
+    @staticmethod
+    def can_exchange_carrots(board: Board, player: Hare, count: int) -> bool: ...
+    @staticmethod
+    def can_eat_salad(board: Board, player: Hare) -> bool: ...
+    @staticmethod
+    def can_advance_to(
+        board: Board, new_position: int, player: Hare, other_player: Hare
+    ) -> None: ...
 
-    def set_current_player(self, player: Hare) -> None:
-        ...
-
-    def get_other_player(self, player: Hare) -> Hare:
-        ...
-
-    def set_other_player(self, player: Hare) -> None:
-        ...
-
-    def is_ahead(self, player: Hare) -> bool:
-        ...
-
-    def can_exchange_carrots(self, player: Hare, count: int) -> bool:
-        ...
-
-    def must_eat_salad(self, player: Hare) -> bool:
-        ...
-
-    def eat_salad(self, player: Hare) -> None:
-        ...
-
-    def get_fall_back(self, player: Hare) -> Optional[int]:
-        ...
-
-    def move_to_field(self, player: Hare, new_position: int) -> None:
-        ...
-
-    def can_advance_to(self, new_position: int, player: Hare) -> None:
-        ...
+class PluginConstants:
+    NUM_FIELDS: int
+    INITIAL_SALADS: int
+    INITIAL_CARROTS: int
+    ROUND_LIMIT: int

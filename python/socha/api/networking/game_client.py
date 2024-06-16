@@ -9,10 +9,10 @@ import threading
 import time
 from typing import List, Union
 
-from python.socha._socha import GameState, Move
+from socha._socha import GameState, Move
 
-from python.socha.api.networking.xml_protocol_interface import XMLProtocolInterface
-from python.socha.api.protocol.protocol import (
+from socha.api.networking.xml_protocol_interface import XMLProtocolInterface
+from socha.api.protocol.protocol import (
     Authenticate,
     Cancel,
     Error,
@@ -34,9 +34,9 @@ from python.socha.api.protocol.protocol import (
     Step,
 )
 
-from python.socha.api.networking.utils import handle_move, message_to_state
-from python.socha.api.protocol.protocol import Errorpacket
-from python.socha.api.protocol.protocol_packet import ProtocolPacket
+from socha.api.networking.utils import handle_move, message_to_state
+from socha.api.protocol.protocol import Errorpacket
+from socha.api.protocol.protocol_packet import ProtocolPacket
 
 
 class IClientHandler:
@@ -99,7 +99,7 @@ class IClientHandler:
         If the client is running on survive mode it'll be running until shut downed manually.
         """
 
-    def while_disconnected(self, player_client: "GameClient") -> None:
+    def while_disconnected(self, player_client: 'GameClient') -> None:
         """
         The client loop will keep calling this method while there is no active connection to a game server.
         This can be used to do tasks after a game is finished and the server left.
@@ -109,7 +109,7 @@ class IClientHandler:
         :return: True if the client should shut down. False if the client should continue to run.
         """
 
-    def on_create_game(self, game_client: "GameClient") -> None:
+    def on_create_game(self, game_client: 'GameClient') -> None:
         """
         This method will be called if the client is in admin mode and the client has authenticated with the server.
         The client can now create a game.
@@ -118,7 +118,7 @@ class IClientHandler:
         """
 
     def on_prepared(
-        self, game_client: "GameClient", room_id: str, reservations: List[str]
+        self, game_client: 'GameClient', room_id: str, reservations: List[str]
     ) -> None:
         """
         This method will be called if the client is in admin mode and the client has created a game.
@@ -128,7 +128,7 @@ class IClientHandler:
         :param reservations: The reservations of the game.
         """
 
-    def on_observed(self, game_client: "GameClient", room_id: str):
+    def on_observed(self, game_client: 'GameClient', room_id: str):
         """
         This method will be called if the client is in admin mode and the client is observing a game.
 
@@ -170,7 +170,7 @@ class GameClient(XMLProtocolInterface):
         self.headless = headless
 
     def join_game(self):
-        logging.info("Joining game")
+        logging.info('Joining game')
         self.send(Join())
 
     def join_game_room(self, room_id: str):
@@ -189,8 +189,7 @@ class GameClient(XMLProtocolInterface):
         logging.info(
             f"Creating game with {player_1}, {player_2} and game type '{game_type}'"
         )
-        self.send(Prepare(game_type=game_type,
-                  pause=pause, slot=[player_1, player_2]))
+        self.send(Prepare(game_type=game_type, pause=pause, slot=[player_1, player_2]))
 
     def observe(self, room_id: str):
         logging.info(f"Observing game room '{room_id}'")
@@ -225,18 +224,14 @@ class GameClient(XMLProtocolInterface):
         """
 
         if isinstance(message, Errorpacket):
-            logging.error(
-                f"An error occurred while handling the request: {message}"
-            )
+            logging.error(f'An error occurred while handling the request: {message}')
             self._game_handler.on_error(str(message))
             self.stop()
         elif isinstance(message, Joined):
-            logging.log(
-                15, f"Game joined received with room id '{message.room_id}'")
+            logging.log(15, f"Game joined received with room id '{message.room_id}'")
             self._game_handler.on_game_joined(room_id=message.room_id)
         elif isinstance(message, Left):
-            logging.log(
-                15, f"Game left received with room id '{message.room_id}'")
+            logging.log(15, f"Game left received with room id '{message.room_id}'")
             self._game_handler.on_game_left()
         elif isinstance(message, Prepared):
             logging.log(
@@ -248,15 +243,12 @@ class GameClient(XMLProtocolInterface):
                 reservations=message.reservation,
             )
         elif isinstance(message, Observed):
-            logging.log(
-                15, f"Game observing received with room id '{message.room_id}'")
-            self._game_handler.on_observed(
-                game_client=self, room_id=message.room_id)
+            logging.log(15, f"Game observing received with room id '{message.room_id}'")
+            self._game_handler.on_observed(game_client=self, room_id=message.room_id)
         elif isinstance(message, Room) and not self.headless:
             room_id = message.room_id
             if isinstance(message.data.class_binding, MoveRequest):
-                logging.log(
-                    15, f"Move request received for room id '{room_id}'")
+                logging.log(15, f"Move request received for room id '{room_id}'")
                 self._on_move_request(room_id)
             elif isinstance(message.data.class_binding, State):
                 logging.log(15, f"State received for room id '{room_id}'")
@@ -264,12 +256,10 @@ class GameClient(XMLProtocolInterface):
             elif isinstance(message.data.class_binding, Result):
                 logging.info(f"Result received for room id '{room_id}'")
                 logging.info(f"Result was '{message.data.class_binding}'")
-                self._game_handler.history[-1].append(
-                    message.data.class_binding)
+                self._game_handler.history[-1].append(message.data.class_binding)
                 self._game_handler.on_game_over(message.data.class_binding)
             else:
-                logging.log(
-                    15, f"Room message received for room id '{room_id}'")
+                logging.log(15, f"Room message received for room id '{room_id}'")
                 self._game_handler.on_room_message(message.data.class_binding)
         else:
             room_id = message.room_id
@@ -282,11 +272,11 @@ class GameClient(XMLProtocolInterface):
         if move_response:
             response = handle_move(move_response)
             logging.info(
-                f"Sent {move_response} after {round(time.time() - start_time, ndigits=3)} seconds."
+                f'Sent {move_response} after {round(time.time() - start_time, ndigits=3)} seconds.'
             )
             self.send_message_to_room(room_id, response)
         else:
-            logging.error(f"{move_response} is not a valid move.")
+            logging.error(f'{move_response} is not a valid move.')
 
     def _on_state(self, message):
         _state = message_to_state(message)
@@ -324,20 +314,18 @@ class GameClient(XMLProtocolInterface):
         self.network_interface.close()
         if self.survive:
             logging.info(
-                "The server left. Client is in survive mode and keeps running.\n"
-                "Please shutdown the client manually."
+                'The server left. Client is in survive mode and keeps running.\n'
+                'Please shutdown the client manually.'
             )
             self._game_handler.while_disconnected(player_client=self)
         if self.auto_reconnect:
-            logging.info(
-                "The server left. Client tries to reconnect to the server.")
+            logging.info('The server left. Client tries to reconnect to the server.')
             for _ in range(3):
-                logging.info(
-                    "Try to establish a connection with the server...")
+                logging.info('Try to establish a connection with the server...')
                 try:
                     self.connect()
                     if self.network_interface.connected:
-                        logging.info("Reconnected to server.")
+                        logging.info('Reconnected to server.')
                         break
                 except Exception as e:
                     logging.exception(e)
@@ -348,7 +336,7 @@ class GameClient(XMLProtocolInterface):
                 time.sleep(1)
             self.join()
             return
-        logging.info("The server left.")
+        logging.info('The server left.')
         self.stop()
 
     def _client_loop(self):
@@ -363,7 +351,7 @@ class GameClient(XMLProtocolInterface):
                 if not response:
                     continue
                 elif isinstance(response, ProtocolPacket):
-                    logging.debug(f"Received new object: {response}")
+                    logging.debug(f'Received new object: {response}')
                     if while_waiting:
                         while_waiting.join(timeout=0.0)
                     if isinstance(response, Left):
@@ -377,21 +365,19 @@ class GameClient(XMLProtocolInterface):
                     while_waiting.start()
                     gc.collect()
                 elif self.running:
-                    logging.error(
-                        f"Received a object of unknown class: {response}")
-                    raise NotImplementedError(
-                        "Received object of unknown class.")
+                    logging.error(f'Received a object of unknown class: {response}')
+                    raise NotImplementedError('Received object of unknown class.')
             else:
                 self._game_handler.while_disconnected(player_client=self)
 
-        logging.info("Done.")
+        logging.info('Done.')
         sys.exit(0)
 
     def stop(self):
         """
         Disconnects from the server and stops the client loop.
         """
-        logging.info("Shutting down...")
+        logging.info('Shutting down...')
         if self.network_interface.connected:
             self.disconnect()
         self.running = False

@@ -1,7 +1,7 @@
-use pyo3::{ pyclass, pymethods, PyErr };
+use pyo3::{pyclass, pymethods, PyErr};
 
 use crate::plugin::{
-    errors::{ CannotPlayCardError, MustBuyOneCardError },
+    errors::{CannotPlayCardError, MustBuyOneCardError},
     field::Field,
     game_state::GameState,
 };
@@ -26,10 +26,9 @@ impl Advance {
     }
 
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
-        let mut player = state.get_current_player();
+        let mut player = state.clone_current_player();
 
-        state.can_advance_to(self.distance, &player)?;
-        player.advance_by(self.distance)?;
+        player.advance_by(&state, self.distance)?;
 
         let mut last_card: Option<&Card> = None;
         let mut card_bought = false;
@@ -56,7 +55,7 @@ impl Advance {
             last_card = Some(card);
             card.perform(state)?;
         }
-        state.set_current_player(player);
+        state.update_current_player(player);
         Ok(())
     }
 }

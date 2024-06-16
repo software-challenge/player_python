@@ -3,7 +3,7 @@ use std::mem::swap;
 use pyo3::*;
 
 use crate::plugin::{
-    errors::{ CannotEnterFieldError, CannotPlayCardError, CardNotOwnedError },
+    errors::{CannotEnterFieldError, CannotPlayCardError, CardNotOwnedError},
     field::Field,
     game_state::GameState,
 };
@@ -27,23 +27,25 @@ impl Card {
     }
 
     fn play(&self, state: &mut GameState) -> Result<(), PyErr> {
-        let mut current = state.get_current_player();
-        let mut other = state.get_other_player(&current);
+        let mut current = state.clone_current_player();
+        let mut other = state.clone_other_player();
+
         match self {
-            Card::FallBack => state.move_to_field(&mut current, other.position - 1)?,
-            Card::HurryAhead => state.move_to_field(&mut current, other.position + 1)?,
-            Card::EatSalad => state.get_current_player().eat_salad()?,
+            Card::FallBack => current.move_to_field(state, other.position - 1)?,
+            Card::HurryAhead => current.move_to_field(state, other.position + 1)?,
+            Card::EatSalad => current.eat_salad(&state)?,
             Card::SwapCarrots => swap(&mut current.carrots, &mut other.carrots),
         }
-        state.set_current_player(current);
-        state.set_other_player(other);
+        state.update_current_player(current);
+        state.update_other_player(other);
         Ok(())
     }
 
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
-        let mut current = state.get_current_player();
+        let mut current = state.clone_current_player();
 
-        let field = state.board
+        let field = state
+            .board
             .get_field(current.position)
             .ok_or_else(|| CannotEnterFieldError::new_err("Field not found"))?;
 
@@ -51,13 +53,14 @@ impl Card {
             return Err(CannotPlayCardError::new_err(""));
         }
 
-        let index = current.cards
+        let index = current
+            .cards
             .iter()
             .position(|card| card == self)
             .ok_or_else(|| CardNotOwnedError::new_err(""))?;
 
         current.cards.remove(index);
-        state.set_current_player(current);
+        state.update_current_player(current);
 
         self.play(state)?;
 

@@ -1,5 +1,5 @@
-pub mod card;
 pub mod advance;
+pub mod card;
 pub mod eat_salad;
 pub mod exchange_carrots;
 pub mod fall_back;

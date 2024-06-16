@@ -1,10 +1,10 @@
 from dataclasses import dataclass, field
 from typing import List, Optional
 
-from python.socha._socha import TeamEnum
+from socha._socha import TeamEnum
 
-from python.socha.api.protocol.protocol_packet import AdminLobbyRequest, LobbyRequest, ProtocolPacket, ResponsePacket
-from python.socha.api.protocol.room_message import ObservableRoomMessage, RoomMessage, RoomOrchestrationMessage
+from socha.api.protocol.protocol_packet import AdminLobbyRequest, LobbyRequest, ProtocolPacket, ResponsePacket
+from socha.api.protocol.room_message import ObservableRoomMessage, RoomMessage, RoomOrchestrationMessage
 
 
 @dataclass
@@ -12,28 +12,12 @@ class Cards:
     class Meta:
         name = "cards"
 
-    sc_plugin2025_card: List[str] = field(
+    card: List[str] = field(
         default_factory=list,
         metadata={
-            "name": "sc.plugin2025.Card",
             "type": "Element",
             "min_occurs": 1,
-        }
-    )
-
-
-@dataclass
-class Track:
-    class Meta:
-        name = "track"
-
-    sc_plugin2025_field: List[str] = field(
-        default_factory=list,
-        metadata={
-            "name": "sc.plugin2025.Field",
-            "type": "Element",
-            "min_occurs": 1,
-        }
+        },
     )
 
 
@@ -42,19 +26,19 @@ class Board:
     class Meta:
         name = "board"
 
-    track: Optional[Track] = field(
-        default=None,
+    fields: List[str] = field(
+        default_factory=list,
         metadata={
             "type": "Element",
-            "required": True,
-        }
+            "min_occurs": 1,
+        },
     )
     size: Optional[int] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -66,45 +50,45 @@ class ScPlugin2025Hare:
     team: Optional[str] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
     )
     position: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
     )
     salads: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
     )
     carrots: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
     )
     salad_eaten: Optional[bool] = field(
         default=None,
         metadata={
             "name": "saladEaten",
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
     )
     cards: Optional[Cards] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
 
 
@@ -123,21 +107,6 @@ class Player:
 
 
 @dataclass
-class Players:
-    class Meta:
-        name = "players"
-
-    sc_plugin2025_hare: List[ScPlugin2025Hare] = field(
-        default_factory=list,
-        metadata={
-            "name": "sc.plugin2025.Hare",
-            "type": "Element",
-            "min_occurs": 1,
-        }
-    )
-
-
-@dataclass
 class State(ObservableRoomMessage):
     class Meta:
         name = "state"
@@ -148,36 +117,37 @@ class State(ObservableRoomMessage):
             "name": "class",
             "type": "Attribute",
             "required": True,
-        }
+        },
     )
     start_team: Optional[str] = field(
         default=None,
         metadata={
             "name": "startTeam",
-            "type": "Element",
+            "type": "Attribute",
             "required": True,
-        }
+        },
+    )
+    turn: Optional[int] = field(
+        default=None,
+        metadata={
+            "type": "Attribute",
+            "required": True,
+        },
     )
     board: Optional[Board] = field(
         default=None,
         metadata={
             "type": "Element",
             "required": True,
-        }
+        },
     )
-    turn: Optional[int] = field(
-        default=None,
+    sc_plugin2025_hare: List[ScPlugin2025Hare] = field(
+        default_factory=list,
         metadata={
+            "name": "sc.plugin2025.Hare",
             "type": "Element",
-            "required": True,
-        }
-    )
-    players: Optional[Players] = field(
-        default=None,
-        metadata={
-            "type": "Element",
-            "required": True,
-        }
+            "min_occurs": 1,
+        },
     )
 
 

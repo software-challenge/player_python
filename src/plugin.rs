@@ -7,3 +7,4 @@ pub mod game_state;
 pub mod r#move;
 pub mod test;
 pub mod hare;
+pub mod rules_engine;

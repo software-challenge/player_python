@@ -1,6 +1,6 @@
 use pyo3::*;
 
-use super::action::Action;
+use super::{action::Action, game_state::GameState};
 
 #[pyclass]
 #[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
@@ -15,6 +15,10 @@ impl Move {
     #[must_use]
     pub fn new(action: Action) -> Self {
         Self { action }
+    }
+
+    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+        self.action.perform(state)
     }
 
     fn __repr__(&self) -> PyResult<String> {

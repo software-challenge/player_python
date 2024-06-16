@@ -6,17 +6,17 @@ import contextlib
 import logging
 from typing import Any, Callable, Iterator
 
-from python.socha.api.networking.utils import map_xml_to_card
+from socha.api.networking.utils import map_xml_to_card
 from socha import _socha
-from python.socha.api.networking.network_socket import NetworkSocket
-from python.socha.api.protocol.protocol import (
+from socha.api.networking.network_socket import NetworkSocket
+from socha.api.protocol.protocol import (
     Close,
     Error,
     MoveRequest,
     Result,
     WelcomeMessage
 )
-from python.socha.api.protocol.protocol_packet import ProtocolPacket
+from socha.api.protocol.protocol_packet import ProtocolPacket
 from xsdata.formats.dataclass.context import XmlContext
 from xsdata.formats.dataclass.parsers import XmlParser
 from xsdata.formats.dataclass.parsers.config import ParserConfig
@@ -56,17 +56,17 @@ def custom_class_factory(clazz, params: dict):
                 originalMessage=params.get("original_message"),
             )
             return clazz(class_binding=error_object, **params)
-        elif params.get("class_value") == "sc.plugin2025.Advance":
+        elif params.get("class_value") == "Advance":
             advance_object = _socha.Advance(distance=params.get(
                 "distance"), cards=map_xml_to_card(params.get("cards")))
             return clazz(class_binding=advance_object, **params)
-        elif params.get("class_value") == "sc.plugin2025.ExchangeCarrots":
+        elif params.get("class_value") == "ExchangeCarrots":
             exchange_object = _socha.ExchangeCarrots(value=params.get("value"))
             return clazz(class_binding=exchange_object, **params)
-        elif params.get("class_value") == "sc.plugin2025.FallBack":
+        elif params.get("class_value") == "FallBack":
             back_object = _socha.FallBack()
             return clazz(class_binding=back_object, **params)
-        elif params.get("class_value") == "sc.plugin2025.EatSalad":
+        elif params.get("class_value") == "EatSalad":
             salad_object = _socha.EatSalad()
             return clazz(class_binding=salad_object, **params)
 

@@ -1,10 +1,10 @@
 [build-system]
-requires = ["maturin==1.5.1"]
+requires = ["maturin==1.6.0"]
 build-backend = "maturin"
 
 [project]
 name = "socha"
-version = "3.0.0"
+version = "3.1.0"
 authors = [{ name = "maxblan", email = "stu222782@mail.uni-kiel.de" }]
 description = "This is the package for the Software-Challenge Germany 2024. This Season the game will be 'Mississippi Queen'."
 readme = "README.md"
@@ -25,18 +25,15 @@ classifiers = [
   "Programming Language :: Rust",
   "Typing :: Typed",
 ]
+
+[project.urls]
 homepage = "https://software-challenge.de/"
 repository = "https://github.com/FalconsSky/socha-python-client"
 documentation = "https://software-challenge-python-client.readthedocs.io/en/latest/"
-
-[project.urls]
-"Bug Tracker" = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
+bug-tracker = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
 
 [tool.maturin]
 python-source = "python"
 module-name = "socha._socha"
 exclude = [".github", "docs", "tests", "logic.py", "readthedocs.yaml"]
 features = ["pyo3/extension-module"]
-
-[tool.ruff]
-exclude = ["logic.py", "python/socha/__init__.py"]
