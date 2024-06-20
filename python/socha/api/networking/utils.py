@@ -55,7 +55,9 @@ def map_xml_to_card(cards: Cards) -> List[_socha.Card]:
     return return_cards
 
 
-def map_card_to_xml(cards: List[_socha.Card]) -> Cards:
+def map_card_to_xml(cards: List[_socha.Card]) -> None | Cards:
+    if not cards:
+        return None
     return_cards: Cards = Cards()
     for card in cards:
         if card == _socha.Card.EatSalad:
@@ -73,17 +75,17 @@ def handle_move(move_response: _socha.Move):
     if isinstance(move_response.action, _socha.Advance):
         advance: _socha.Advance = move_response.action
         return Data(
-            class_value='Advance',
+            class_value='advance',
             distance=advance.distance,
             cards=map_card_to_xml(advance.cards),
         )
     elif isinstance(move_response.action, _socha.EatSalad):
-        return Data(class_value='EatSalad')
+        return Data(class_value='eatsalad')
     elif isinstance(move_response.action, _socha.ExchangeCarrots):
         exchangeCarrots: _socha.ExchangeCarrots = move_response.action
-        return Data(class_value='ExchangeCarrots', value=exchangeCarrots.value)
+        return Data(class_value='exchangecarrots', value=exchangeCarrots.amount)
     elif isinstance(move_response.action, _socha.FallBack):
-        return Data(class_value='FallBack')
+        return Data(class_value='fallback')
 
 
 def message_to_state(message: Room) -> _socha.GameState:

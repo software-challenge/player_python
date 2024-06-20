@@ -732,7 +732,7 @@ class Data:
     distance: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
         }
     )
     cards: Optional[Cards] = field(
@@ -741,10 +741,10 @@ class Data:
             "type": "Element",
         }
     )
-    value: Optional[int] = field(
+    amount: Optional[int] = field(
         default=None,
         metadata={
-            "type": "Element",
+            "type": "Attribute",
         }
     )
 

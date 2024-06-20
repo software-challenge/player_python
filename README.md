@@ -1,7 +1,7 @@
 <!-- trunk-ignore-all(markdownlint/MD041) -->
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
-# Python Client for the Software-Challenge Germany 2024
+# Python Client for the Software-Challenge Germany 2025
 
 [![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/en/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)

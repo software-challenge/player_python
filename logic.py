@@ -19,11 +19,11 @@ class Logic(IClientHandler):
 
     # this method is called every time the server has sent a new game state update
     # this method should be implemented to keep the game state up to date
-    def on_update(self, state: GameState):
+    def on_update(self, state: GameState) -> None:
         self.game_state = state
 
 
 if __name__ == "__main__":
-    Starter(logic=Logic(), log_level=logging.DEBUG)
+    Starter(logic=Logic())
     # if u wanna have more insights, u can set the logging level to debug:
     # Starter(logic=Logic(), log_level=logging.DEBUG)
