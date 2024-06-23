@@ -1,7 +1,6 @@
-<!-- trunk-ignore-all(markdownlint/MD041) -->
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
-# Python Client for the Software-Challenge Germany 2025
+# Python-Client für die Software-Challenge Germany 2025
 
 [![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/en/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
@@ -9,112 +8,97 @@
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
 [![Documentation](https://img.shields.io/badge/Software--Challenge%20-Documentation-%234299e1)](https://docs.software-challenge.de/)
 
-> This package is currently in early stage of development!
+> Dieses Paket befindet sich derzeit in einem frühen Entwicklungsstadium!
 
-This repository contains the Python package for the
-[Software-Challenge Germany](https://www.software-challenge.de), a programming competition for students. The students
-have to develop an artificial intelligence that plays and competes against other opponents in an annually changing game.
+Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany](https://www.software-challenge.de), einem Programmierwettbewerb für Schülerinnen und Schüler. Dabei muss eine künstliche Intelligenz entwickelt werden, die in einem jährlich wechselnden Spiel gegen andere Gegner antritt.
 
-> This year it is the game
-> **[Hase und Igel]()**.
+> In diesem Jahr ist es das Spiel **[Hase und Igel](https://docs.software-challenge.de/spiele/25_hase-und-igel)**.
 
-## Table of Contents
+## Inhaltsverzeichnis
 
 - [Installation](#installation)
-  - [Globally](#globally)
-  - [Virtual Environment](#virtual-environment)
-- [Getting Started](#getting-started)
-  - [Start Arguments](#start-arguments)
-- [Preparing Your Player for the Competition](#preparing-your-player-for-the-competition)
-- [Local Development](#local-development)
+  - [Global](#global)
+  - [Virtuelle Umgebung](#virtuelle-umgebung)
+- [Erste Schritte](#erste-schritte)
+  - [Startargumente](#start-arguments)
+- [Vorbereitung des Spielers auf den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
+- [Lokale Entwicklung](#lokale-entwicklung)
 
 ## Installation
 
-Two methods are presented here to install the `socha` client.
-The first one is the fastest to get started right away.
-However,
-this method will not make it possible to run your player in the competition system,
-since there is no Internet connection that allows you to download packages.
-Therefore,
-the possibility of a virtual environment is presented,
-which installs the packages inside the folder.
+Es gibt zwei Methoden, um den `socha`-Client zu installieren. Die erste Methode ist die schnellste, um sofort loslegen zu können. Diese Methode eignet sich jedoch nicht, um den Player im Wettbewerbssystem zu betreiben, da es keine Internetverbindung gibt, über die Pakete heruntergeladen werden können. Daher wird die Installation in einer virtuellen Umgebung empfohlen, bei der die Pakete in einem Ordner installiert werden.
 
-> Pleas make sure that you have at least **Python 3.10** installed.
-> Check with `$ python -V` or `$ python3 -V`.
+> Bitte sicherstellen, dass mindestens **Python 3.10** installiert ist. Dies kann mit `$ python -V` oder `$ python3 -V` überprüft werden.
 >
-> If not present you can install python with the following commands:
+> Falls Python nicht vorhanden ist, kann es mit folgenden Befehlen installiert werden:
 >
 > - Windows: `> winget install -e --id Python.Python.3.10`
 > - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
-> In some rare cases there maybe a [broken or missing installation of `setuptools`](https://github.com/maxblan/socha-python-client/issues/40). If this is the case on your machine you can install it again with `pip install -I setuptools`.
+> In seltenen Fällen kann es zu einer [fehlerhaften oder fehlenden Installation von `setuptools`](https://github.com/maxblan/socha-python-client/issues/40) kommen. In diesem Fall kann `setuptools` mit `pip install -I setuptools` erneut installiert werden.
 
-### Globally
+### Global
 
-The installation is quite simple with pip.
+Die Installation ist mit pip recht einfach.
 
 ```shell
 $ pip install socha
 ```
 
-If you want to install the package manually, then you have to download the release of your choice, unpack the package
-and then run `setup.py` with Python.
+Wenn das Paket manuell installiert werden soll, muss die gewünschte Version heruntergeladen, das Paket entpackt und dann `setup.py` mit Python ausgeführt werden.
 
 ```shell
 $ python setup.py install --user
 ```
 
-This should satisfy the dependencies and you can start right away.
+Damit sollten die Abhängigkeiten erfüllt sein und das Paket ist sofort einsatzbereit.
 
-### Virtual Environment
+### Virtuelle Umgebung
 
-To create a virtual environment,
-you should first create a directory in which you want to develop your player
-and than enter that directory.
+Um eine virtuelle Umgebung zu erstellen, sollte zunächst ein Verzeichnis erstellt und betreten werden, in dem der Player entwickelt werden soll.
 
 ```shell
 $ mkdir my_player
 $ cd my_player
 ```
 
-Now you can create the virtual environment (venv).
+Nun kann die virtuelle Umgebung (venv) erstellt werden.
 
 ```shell
 $ python -m venv venv/
 ```
 
-This takes a moment. After the _venv_ is created, you can open it.
+Nach Erstellung der _venv_ kann sie aktiviert werden.
 
-On Linux:
+Unter Linux:
 
 ```shell
 $ source venv/bin/activate
 ```
 
-On Windows:
+Unter Windows:
 
 ```bash
 > Set-ExecutionPolicy Unrestricted -Scope Process
-> .\venv\Scripts\activate
+> .venv\Scripts\activate
 ```
 
-It should open the _venv_ and you can now install packages and run your scripts here.
-To develop your player you just have to install the package socha with `pip`.
+Die _venv_ sollte nun geöffnet sein und Pakete können installiert sowie Skripte ausgeführt werden. Um den Player zu entwickeln, muss das Paket socha mit `pip` installiert werden.
 
 ```shell
 (venv) $ pip install socha
 ```
 
-This should satisfy the dependencies and you can start right away.
+Damit sollten die Abhängigkeiten erfüllt sein und das Paket ist sofort einsatzbereit.
 
-## Getting Started
+## Erste Schritte
 
-If you now want to develop and implement your logic, then the structure of the class should look like this.
+Die Struktur der Klasse zur Entwicklung und Implementierung der Logik sollte wie folgt aussehen:
 
 ```python
 class Logic(IClientHandler):
-    gameState: GameState
+    GameState: GameState
 
     def calculate_move(self) -> Move:
         return Move(action=Advance(distance=1, cards=[]))
@@ -123,128 +107,112 @@ class Logic(IClientHandler):
         self.gameState = state
 ```
 
-The above example is the simplest working Logic you can build. As you can see the Logic must inherit from
-the `IClientHandler`, so that you can overwrite its methods and the api knows where to find your logic.
+Das obige Beispiel zeigt die einfachste funktionierende Logik. Die Logik muss von `IClientHandler` erben, damit dessen Methoden überschrieben werden können und die API weiß, wo die Logik zu finden ist.
 
-If you're done with your version of an working player, than you have to finish your file with this function, where you
-call the Starter with your desired arguments. The following starts the client with the default arguments.
+Wenn eine funktionierende Version des Players fertiggestellt ist, sollte die Datei mit dieser Funktion beendet werden, um den Starter mit den gewünschten Argumenten aufzurufen. Der folgende Code startet den Client mit den Standardargumenten.
 
 ```python
 if __name__ == "__main__":
-    Starter(Logic())
+    Starter(Logik())
 ```
 
-> If you want a complete file as an example, you can take a look at this [`logic.py`](https://github.com/maxblan/socha-python-client/blob/master/logic.py).
+> Ein komplettes Beispiel ist in dieser [`logic.py`](https://github.com/maxblan/socha-python-client/blob/master/logic.py) zu finden.
 
-### Start arguments
+### Startargumente
 
-If you want to run your logic from the console,
-you can of course pass start arguments.
+Falls die Logik von der Konsole aus ausgeführt werden soll, können Startargumente übergeben werden.
 
-> Note that any arguments passed as startup parameters will override those in the code,
-> including the ones you set yourself.
+> Beachten, dass alle als Startparameter übergebenen Argumente die im Code gesetzten überschreiben, einschließlich derjenigen, die selbst gesetzt wurden.
 
-| **Command**           | **Description**                                                                               |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| **--help**            | Prints the help message.                                                                      |
-| **-h, --host**        | The host to connect to. The default is 'localhost'.                                           |
-| **-p, --port**        | The port of the host. The default is 13050.                                                   |
-| **-r, --reservation** | Reservation code for a prepared game.                                                         |
-| **-R, --room**        | Room Id the client will try to connect.                                                       |
-| **-s, --survive**     | If present, the client will keep running, even if the connection to the server is terminated. |
-| **-l, --log**         | If present, the client will write a log file to the current directory.                        |
-| **-v, --verbose**     | Verbose option for logging.                                                                   |
-| **--auto-reconnect**  | Automatically reconnect to the server if the connection is lost.                              |
-| **-b, --build**       | Builds this script into a package with all its dependencies.                                  |
-| **-d, --directory**   | The directory where the package should be built.                                              |
-| **-a, --architecture**| The architecture of the package.                                                              |
+| **Befehl**             | **Beschreibung**                                                                                 |
+|------------------------|--------------------------------------------------------------------------------------------------|
+| **--help**             | Druckt die Hilfemeldung.                                                                         |
+| **-h, --host**         | Der Host, zu dem eine Verbindung hergestellt werden soll. Die Vorgabe ist 'localhost'.           |
+| **-p, --port**         | Der Port des Hosts. Die Vorgabe ist 13050.                                                       |
+| **-r, --reservation**  | Reservierungscode für ein vorbereitetes Spiel.                                                   |
+| **-R, --room**         | Raumnummer, mit der der Client versucht, eine Verbindung herzustellen.                           |
+| **-s, --survive**      | Falls vorhanden, läuft der Client weiter, auch wenn die Verbindung zum Server unterbrochen wird. |
+| **-l, --log**          | Falls vorhanden, schreibt der Client eine Protokolldatei in das aktuelle Verzeichnis.            |
+| **-v, --verbose**      | Ausführliche Option für die Protokollierung.                                                     |
+| **--auto-reconnect**   | Verbindet sich automatisch wieder mit dem Server, wenn die Verbindung unterbrochen wird.         |
+| **-b, --build**        | Baut dieses Skript zu einem Paket mit all seinen Abhängigkeiten.                                 |
+| **-d, --directory**    | Das Verzeichnis, in dem das Paket erstellt werden soll.                                          |
+| **-a, --architecture** | Die Architektur des Pakets.                                                                      |
 
-## Preparing Your Player for the Competition
+## Vorbereitung des Spielers für den Wettbewerb
 
-> Please note that the competition system runs on a Linux system with an `x86_64` architecture.
-> To use your client on the competition system, you will need to download the socha package
-> built for the `manylinux2014_x86_64` platform and the Python version `310`.
+> Das Wettbewerbssystem läuft auf einem Linux-System mit einer `x86_64`-Architektur. Um den Client auf dem Wettbewerbssystem zu verwenden, muss das Socha-Paket für die Plattform `manylinux2014_x86_64` und die Python-Version `310` heruntergeladen werden.
 
-To ensure that your player is usable for the competition system,
-you need to download all the dependencies that your client uses
-because the system will run on a docker container without access to the internet and sudo permission.
+Um sicherzustellen, dass der Player im Wettbewerbssystem verwendbar ist, müssen alle Abhängigkeiten heruntergeladen werden, da das System auf einem Docker-Container ohne Internetzugang und sudo-Berechtigung ausgeführt wird.
 
-> The package has made things easier for you! You can use it to handle almost everything by itself.
-> All you need is a `requirements.txt` file that lists all your dependencies.
-> To start, simply run the following command in your terminal:
+> Das Paket erleichtert die Vorbereitung! Eine Datei `requirements.txt`, die alle Abhängigkeiten auflistet, wird benötigt. Zum Starten folgenden Befehl im Terminal ausführen:
 >
-> `$ python <your_main_script>.py --build -directory <your_directory_name> -architecture <target architecture>`
+> `$ python <Ihr_Hauptskript>.py --build -Verzeichnis <Ihr_Verzeichnisname> -Architektur <Zielarchitektur>`
 >
-> This will trigger the package to do its magic and build your project.
+> Dadurch wird das Paket aktiviert und das Projekt erstellt.
 
-If you want to do it manually, follow the steps below to download the dependencies:
+Falls eine manuelle Vorgehensweise bevorzugt wird, folgen diese Schritte zum Herunterladen der Abhängigkeiten:
 
-1. Open your terminal or console wherever you want to create your directory that you will upload.
-2. Type `mkdir my_player` to create a new directory named `my_player`. You can name yours whatever you want.
-3. Enter the directory using `cd my_player`.
-4. Run the command: `pip download socha --only-binary=:all: --platform manylinux2014_x86_64 --python-version 310 -d dependencies` in the directory.
-   This command downloads the dependencies you need into the folder `dependencies`.
-5. Ensure to add all your dependencies that your client uses.
-6. After the download, create a last directory using `mkdir .pip_cache`.
+1. Terminal oder Konsole an dem Ort öffnen, an dem das Verzeichnis erstellt werden soll, das hochgeladen wird.
+2. `mkdir my_player` eingeben, um ein neues Verzeichnis namens `my_player` zu erstellen. Der Verzeichnisname kann beliebig gewählt werden.
+3. Mit `cd my_player` in das Verzeichnis wechseln.
+4. Den Befehl `pip download socha --only-binary=:all: --platform manylinux2014_x86_64 --python-version 310 -d dependencies` im Verzeichnis ausführen, um die benötigten Abhängigkeiten in den Ordner `dependencies` herunterzuladen.
+5. Alle Abhängigkeiten hinzufügen, die der Client verwendet.
+6. Ein letztes Verzeichnis mit `mkdir .pip_cache` erstellen.
 
-Once you have downloaded all the dependencies,
-you need to create a shell script that uses the contest system as the entry point for your player.
-It **must** be named `start.sh` and must be on the top level of your directory; otherwise, it cannot be found.
-Follow the steps below to create your shell script:
+Nach dem Herunterladen der Abhängigkeiten muss ein Shell-Skript erstellt werden, das als Einstiegspunkt für den Player verwendet wird. Es **muss** den Namen `start.sh` tragen und sich auf der obersten Ebene des Verzeichnisses befinden, sonst kann es nicht gefunden werden.
 
-1. Ensure that you create your shell script in a UNIX-Environment, or if you use Windows,
-   you can do this with WSL or Notepad++. If you use Notepad++,
-   you need to go to _Bearbeiten->Format Zeilenende->Unix(LF)_.
-   This step ensures that your line endings are `LS` only without `CR`, which may cause problems on the contest system.
+Um das Shell-Skript zu erstellen, sind folgende Schritte notwendig:
 
-2. Ensure that your shell script has the following structure:
+1. Das Shell-Skript in einer UNIX-Umgebung erstellen.
+
+ Unter Windows kann WSL oder Notepad++ verwendet werden. In Notepad++ zu _Bearbeiten->Format Zeilenende->Unix(LF)_ wechseln, um sicherzustellen, dass die Zeilenenden nur `LS` ohne `CR` sind.
+
+2. Das Shell-Skript sollte die folgende Struktur haben:
 
 ```shell
 #!/bin/sh
 
-# Exit immediately if any command fails
+# Sofortiges Beenden, wenn ein Befehl fehlschlägt
 set -e
 
-# Sets the environment variable, which specifies the location for pip to store its cache files
+# Setzt die Umgebungsvariable, die den Ort angibt, an dem pip seine Cache-Dateien speichert
 export XDG_CACHE_HOME=./my_player/.pip_cache
 
-# Sets the environment variable, which adds the directory to the list of paths that Python searches for modules and packages when they are imported.
+# Setzt die Umgebungsvariable, die das Verzeichnis zur Liste der Pfade hinzufügt, die Python nach Modulen und Paketen durchsucht, wenn diese importiert werden.
 export PYTHONPATH=./my_player/packages:$PYTHONPATH
 
-# Install the socha package
+# Installieren Sie das Paket socha
 pip install --no-index --find-links=./my_player/dependencies/ ./my_player/dependencies/socha-1.0.1-py3-none-any.whl ./my_player/dependencies/xsdata-22.7-py3-none-any.whl --target=./my_player/packages/ --cache-dir=./my_player/.pip_cache
 
-# Run the logic.py script with start arguments
+# Das Skript logic.py mit Startargumenten ausführen
 python3 ./my_player/logic.py "$@"
 ```
 
-3. Ensure that you add all your dependencies that your client is using to this script.
+3. Alle Abhängigkeiten, die der Client verwendet, zu diesem Skript hinzufügen.
 
-Once you have created your shell script, you should have a directory structure that looks like this:
+Nach Erstellung des Shell-Skripts sollte die Verzeichnisstruktur wie folgt aussehen:
 
 ```
 my_player/
 ├── .pip_cache/
-├── dependencies/
-├── logic.py
+├─── dependencies/
+├─── logic.py
 └── start.sh
 ```
 
-The `my_player` directory or whatever you named yours just needs to be packaged as a ZIP archive,
-and your player is ready to be uploaded. Congratulations! 🥳🎉
+Das Verzeichnis `my_player` (oder wie auch immer es benannt wurde) muss nur noch als ZIP-Archiv verpackt werden, und der Player ist bereit zum Hochladen. Herzlichen Glückwunsch! 🥳🎉
 
-## Local Development
+## Lokale Entwicklung
 
-> 🏗️ This part is currently still unfinished and subject to change.
+> 🏗️ Dieser Teil ist derzeit noch unfertig und kann sich noch ändern.
 
-This package was mostly written in Rust, which gives a significant performance boost compared to a natural Python program.
-However, this leads to considerable effort, as so-called bindings have to be created. These allow Python to access the functions in Rust. To realize this, [PyO3](https://github.com/PyO3/pyo3) is used here with the help of [Maturin](https://github.com/PyO3/maturin).
+Dieses Paket wurde größtenteils in Rust geschrieben, was einen deutlichen Leistungsschub im Vergleich zu einem nativen Python-Programm bringt. Allerdings führt dies zu einem erheblichen Aufwand, da sogenannte Bindings erstellt werden müssen, die es Python ermöglichen, auf die Funktionen in Rust zuzugreifen. Hierfür wird [PyO3](https://github.com/PyO3/pyo3) mit Hilfe von [Maturin](https://github.com/PyO3/maturin) verwendet.
 
-If local development is desired, the following things must be installed beforehand:
+Für eine lokale Entwicklung müssen folgende Dinge installiert werden:
 
-- [Rust Compiler with Cargo](https://www.rust-lang.org/tools/install),
-- [Python 3.10 or later](https://www.python.org/downloads/),
-- and [Maturin](https://github.com/PyO3/maturin) in a virtual environment in this repository.
+- [Rust Compiler mit Cargo](https://www.rust-lang.org/tools/install),
+- [Python 3.10 oder höher](https://www.python.org/downloads/),
+- und [Maturin](https://github.com/PyO3/maturin) in einer virtuellen Umgebung in diesem Repository.
 
-If everything has been installed successfully, then the command `maturin develop` must be executed in a virtual environment.
-Now you can use a logic written in Python and make changes in the Rust code. Each time a change is made, `maturin develop` must be executed again to make the change visible to the Python code.
+Nach erfolgreicher Installation muss der Befehl `maturin develop` in einer virtuellen Umgebung ausgeführt werden. Dann kann eine in Python geschriebene Logik verwendet und Änderungen im Rust-Code vorgenommen werden. Nach jeder Änderung muss `maturin develop` erneut ausgeführt werden, damit die Änderungen für den Python-Code sichtbar werden.
