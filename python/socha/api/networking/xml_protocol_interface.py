@@ -6,7 +6,7 @@ import contextlib
 import logging
 from typing import Any, Callable, Iterator
 
-from socha.api.networking.utils import map_xml_to_card
+from socha.api.networking.utils import map_string_to_card
 from socha import _socha
 from socha.api.networking.network_socket import NetworkSocket
 from socha.api.protocol.protocol import (
@@ -14,7 +14,7 @@ from socha.api.protocol.protocol import (
     Error,
     MoveRequest,
     Result,
-    WelcomeMessage
+    WelcomeMessage,
 )
 from socha.api.protocol.protocol_packet import ProtocolPacket
 from xsdata.formats.dataclass.context import XmlContext
@@ -24,56 +24,67 @@ from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
+from socha.api.protocol.protocol import Data, LastAction
+
+
+def map_object(data: Data | LastAction, params: dict):
+    try:
+        params.pop('class_binding')
+    except KeyError:
+        ...
+    if params.get('class_value') == 'welcomeMessage':
+        welcome_message = WelcomeMessage(
+            _socha.TeamEnum.One if params.get('name') == 'ONE' else _socha.TeamEnum.Two
+        )
+        return data(class_binding=welcome_message, **params)
+    elif params.get('class_value') == 'memento':
+        state_object = params.get('state')
+        return data(class_binding=state_object, **params)
+    elif params.get('class_value') == 'moveRequest':
+        move_request_object = MoveRequest()
+        return data(class_binding=move_request_object, **params)
+    elif params.get('class_value') == 'result':
+        result_object = Result(
+            definition=params.get('definition'),
+            scores=params.get('scores'),
+            winner=params.get('winner'),
+        )
+        return data(class_binding=result_object, **params)
+    elif params.get('class_value') == 'error':
+        error_object = Error(
+            message=params.get('message'),
+            originalMessage=params.get('original_message'),
+        )
+        return data(class_binding=error_object, **params)
+    elif params.get('class_value') == 'advance':
+        advance_object = _socha.Advance(
+            distance=params.get('distance'),
+            cards=[map_string_to_card(card) for card in params.get('card', [])],
+        )
+        return data(class_binding=advance_object, **params)
+    elif params.get('class_value') == 'exchangecarrots':
+        exchange_object = _socha.ExchangeCarrots(amount=params.get('amount'))
+        return data(class_binding=exchange_object, **params)
+    elif params.get('class_value') == 'fallback':
+        back_object = _socha.FallBack()
+        return data(class_binding=back_object, **params)
+    elif params.get('class_value') == 'eatsalad':
+        salad_object = _socha.EatSalad()
+        return data(class_binding=salad_object, **params)
+    else:
+        logging.warn('Unknown class value: %s', params.get('class_value'))
+
+    return data(**params)
+
 
 def custom_class_factory(clazz, params: dict):
-    if clazz.__name__ == "Data":
-        try:
-            params.pop("class_binding")
-        except KeyError:
-            ...
-        if params.get("class_value") == "welcomeMessage":
-            welcome_message = WelcomeMessage(
-                _socha.TeamEnum.One if params.get(
-                    "name") == "ONE" else _socha.TeamEnum.Two
-            )
-            return clazz(class_binding=welcome_message, **params)
-        elif params.get("class_value") == "memento":
-            state_object = params.get("state")
-            return clazz(class_binding=state_object, **params)
-        elif params.get("class_value") == "moveRequest":
-            move_request_object = MoveRequest()
-            return clazz(class_binding=move_request_object, **params)
-        elif params.get("class_value") == "result":
-            result_object = Result(
-                definition=params.get("definition"),
-                scores=params.get("scores"),
-                winner=params.get("winner"),
-            )
-            return clazz(class_binding=result_object, **params)
-        elif params.get("class_value") == "error":
-            error_object = Error(
-                message=params.get("message"),
-                originalMessage=params.get("original_message"),
-            )
-            return clazz(class_binding=error_object, **params)
-        elif params.get("class_value") == "Advance":
-            advance_object = _socha.Advance(distance=params.get(
-                "distance"), cards=map_xml_to_card(params.get("cards")))
-            return clazz(class_binding=advance_object, **params)
-        elif params.get("class_value") == "ExchangeCarrots":
-            exchange_object = _socha.ExchangeCarrots(value=params.get("value"))
-            return clazz(class_binding=exchange_object, **params)
-        elif params.get("class_value") == "FallBack":
-            back_object = _socha.FallBack()
-            return clazz(class_binding=back_object, **params)
-        elif params.get("class_value") == "EatSalad":
-            salad_object = _socha.EatSalad()
-            return clazz(class_binding=salad_object, **params)
+    if clazz.__name__ == 'Data' or clazz.__name__ == 'LastAction':
+        return map_object(clazz, params)
 
     return clazz(**params)
 
 
-PROTOCOL_PREFIX = "<protocol>".encode("utf-8")
+PROTOCOL_PREFIX = '<protocol>'.encode('utf-8')
 
 
 class XMLProtocolInterface:
@@ -93,8 +104,7 @@ class XMLProtocolInterface:
             handler=XmlEventHandler, context=context, config=deserialize_config
         )
 
-        serialize_config = SerializerConfig(
-            pretty_print=True, xml_declaration=False)
+        serialize_config = SerializerConfig(pretty_print=True, xml_declaration=False)
         self.serializer = XmlSerializer(config=serialize_config)
 
     def connect(self):
@@ -126,13 +136,12 @@ class XMLProtocolInterface:
             cls = self._deserialize_object(receiving)
             return cls
         except OSError:
-            logging.error(
-                "An OSError occurred while receiving data from the server.")
+            logging.error('An OSError occurred while receiving data from the server.')
             self.running = False
             raise
         except Exception as e:
             logging.error(
-                "An error occurred while receiving data from the server: %s", e
+                'An error occurred while receiving data from the server: %s', e
             )
             self.running = False
             raise
@@ -144,7 +153,7 @@ class XMLProtocolInterface:
         :param obj: The object to send. Must not be `None`.
         """
         if obj is None:
-            raise ValueError("Cannot send `None` to server")
+            raise ValueError('Cannot send `None` to server')
 
         with self._encode_context() as encode:
             shipment = (
@@ -156,10 +165,10 @@ class XMLProtocolInterface:
         try:
             self.network_interface.send(shipment)
         except Exception as e:
-            logging.exception("Error sending shipment to server: %s", e)
+            logging.exception('Error sending shipment to server: %s', e)
             raise
         else:
-            logging.debug("Sent shipment to server: %s", shipment)
+            logging.debug('Sent shipment to server: %s', shipment)
         self.first_time = False
 
     @contextlib.contextmanager
@@ -187,4 +196,4 @@ class XMLProtocolInterface:
         :param object_class: The ProtocolPacket child to serialize.
         :return: The serialized byte stream.
         """
-        return self.serializer.render(object_class).encode("utf-8")
+        return self.serializer.render(object_class).encode('utf-8')

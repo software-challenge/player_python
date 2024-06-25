@@ -1,10 +1,10 @@
+import re
 from typing import List
 from socha import _socha
 from socha.api.protocol.protocol import (
     Board,
-    Cards,
     Room,
-    ScPlugin2025Hare,
+    Hare,
     State,
     Data,
 )
@@ -20,13 +20,15 @@ def map_board(protocol_board: Board) -> _socha.Board:
     """
     track: List[_socha.Field] = []
 
-    for field in protocol_board.fields:
+    for field in protocol_board.field_value:
         if field == 'START':
             track.append(_socha.Field.Start)
         elif field == 'MARKET':
             track.append(_socha.Field.Market)
         elif field == 'HARE':
             track.append(_socha.Field.Hare)
+        elif field == 'HEDGEHOG':
+            track.append(_socha.Field.Hedgehog)
         elif field == 'CARROTS':
             track.append(_socha.Field.Carrots)
         elif field == 'POSITION_1':
@@ -37,47 +39,47 @@ def map_board(protocol_board: Board) -> _socha.Board:
             track.append(_socha.Field.Salad)
         elif field == 'GOAL':
             track.append(_socha.Field.Goal)
+        else:
+            raise ValueError(f'Unknown field type: {field}')
 
     return _socha.Board(track=track)
 
 
-def map_xml_to_card(cards: Cards) -> List[_socha.Card]:
-    return_cards: List[_socha.Card] = []
-    for card in cards.card:
-        if card == 'EAT_SALAD':
-            return_cards.append(_socha.Card.EatSalad)
-        elif card == 'HURRY_AHEAD':
-            return_cards.append(_socha.Card.HurryAhead)
-        elif card == 'FALL_BACK':
-            return_cards.append(_socha.Card.FallBack)
-        elif card == 'SWAP_CARROTS':
-            return_cards.append(_socha.Card.SwapCarrots)
-    return return_cards
+def map_card_to_string(card: _socha.Card) -> str:
+    if card == _socha.Card.EatSalad:
+        return 'EAT_SALAD'
+    elif card == _socha.Card.HurryAhead:
+        return 'HURRY_AHEAD'
+    elif card == _socha.Card.FallBack:
+        return 'FALL_BACK'
+    elif card == _socha.Card.SwapCarrots:
+        return 'SWAP_CARROTS'
+    else:
+        raise ValueError(f'Unknown card type: {card}')
 
 
-def map_card_to_xml(cards: List[_socha.Card]) -> None | Cards:
-    if not cards:
-        return None
-    return_cards: Cards = Cards()
-    for card in cards:
-        if card == _socha.Card.EatSalad:
-            return_cards.sc_plugin2025_card.append('EAT_SALAD')
-        elif card == _socha.Card.FallBack:
-            return_cards.sc_plugin2025_card.append('FALL_BACK')
-        elif card == _socha.Card.HurryAhead:
-            return_cards.sc_plugin2025_card.append('HURRY_AHEAD')
-        elif card == _socha.Card.SwapCarrots:
-            return_cards.sc_plugin2025_card.append('SWAP_CARROTS')
-    return return_cards
+def map_string_to_card(card: str) -> _socha.Card:
+    card = re.sub(r'[^A-Za-z0-9_]', '', card)
+
+    if card == 'EAT_SALAD':
+        return _socha.Card.EatSalad
+    elif card == 'HURRY_AHEAD':
+        return _socha.Card.HurryAhead
+    elif card == 'FALL_BACK':
+        return _socha.Card.FallBack
+    elif card == 'SWAP_CARROTS':
+        return _socha.Card.SwapCarrots
+    else:
+        raise ValueError(f'Unknown card type: {card}')
 
 
-def handle_move(move_response: _socha.Move):
+def handle_move(move_response: _socha.Move) -> Data:
     if isinstance(move_response.action, _socha.Advance):
         advance: _socha.Advance = move_response.action
         return Data(
             class_value='advance',
             distance=advance.distance,
-            cards=map_card_to_xml(advance.cards),
+            card=[map_card_to_string(card) for card in advance.cards],
         )
     elif isinstance(move_response.action, _socha.EatSalad):
         return Data(class_value='eatsalad')
@@ -86,6 +88,8 @@ def handle_move(move_response: _socha.Move):
         return Data(class_value='exchangecarrots', value=exchangeCarrots.amount)
     elif isinstance(move_response.action, _socha.FallBack):
         return Data(class_value='fallback')
+    else:
+        raise ValueError(f'Unknown move response action: {move_response.action}')
 
 
 def message_to_state(message: Room) -> _socha.GameState:
@@ -101,19 +105,23 @@ def message_to_state(message: Room) -> _socha.GameState:
     """
     state: State = message.data.class_binding
 
-    def create_hare(hare: ScPlugin2025Hare) -> _socha.Hare:
+    def create_hare(hare: Hare) -> _socha.Hare:
         return _socha.Hare(
-            cards=map_xml_to_card(cards=hare.cards),
+            cards=[map_string_to_card(card) for card in hare.cards.card]
+            if hare.cards
+            else [],
             carrots=hare.carrots,
             position=hare.position,
-            salad_eaten=hare.salad_eaten,
+            last_move=_socha.Move(action=hare.last_action.class_binding)
+            if hare.last_action
+            else None,
             salads=hare.salads,
             team=_socha.TeamEnum.One if hare.team == 'ONE' else _socha.TeamEnum.Two,
         )
 
     return _socha.GameState(
         board=map_board(state.board),
-        player_one=create_hare(state.sc_plugin2025_hare[0]),
-        player_two=create_hare(state.sc_plugin2025_hare[1]),
+        player_one=create_hare(state.hare[0]),
+        player_two=create_hare(state.hare[1]),
         turn=state.turn,
     )

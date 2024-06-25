@@ -5,7 +5,10 @@ use crate::plugin::errors::{
     MissingCarrotsError,
 };
 
-use super::{board::Board, errors::CannotEnterFieldError, field::Field, hare::Hare};
+use super::{
+    action::Action, board::Board, errors::CannotEnterFieldError, field::Field, hare::Hare,
+    r#move::Move,
+};
 
 #[pyclass]
 pub struct RulesEngine;
@@ -31,7 +34,13 @@ impl RulesEngine {
     #[staticmethod]
     pub fn can_eat_salad(board: &Board, player: &Hare) -> Result<bool, PyErr> {
         match board.get_field(player.position) {
-            Some(f) => Ok(f == Field::Salad && !player.salad_eaten),
+            Some(Field::Salad) => Ok(!matches!(
+                player.last_move,
+                Some(Move {
+                    action: Action::EatSalad(_)
+                })
+            )),
+            Some(_) => Ok(false),
             None => Err(CannotEnterFieldError::new_err("Field not found")),
         }
     }
@@ -43,8 +52,6 @@ impl RulesEngine {
         player: &Hare,
         other_player: &Hare,
     ) -> Result<(), PyErr> {
-        assert!(new_position > player.position);
-
         if new_position == 0 {
             return Err(CannotEnterFieldError::new_err("Cannot jump to position 0"));
         }

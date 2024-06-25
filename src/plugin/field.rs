@@ -22,3 +22,21 @@ pub enum Field {
     /// Das Startfeld
     Start,
 }
+
+// display
+
+impl std::fmt::Display for Field {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Field::Position1 => write!(f, "1"),
+            Field::Position2 => write!(f, "2"),
+            Field::Hedgehog => write!(f, "I"),
+            Field::Salad => write!(f, "S"),
+            Field::Carrots => write!(f, "C"),
+            Field::Hare => write!(f, "H"),
+            Field::Market => write!(f, "M"),
+            Field::Goal => write!(f, "G"),
+            Field::Start => write!(f, "S"),
+        }
+    }
+}

@@ -42,3 +42,14 @@ impl IntoPy<PyObject> for Action {
         }
     }
 }
+
+impl std::fmt::Display for Action {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Advance(advance) => write!(f, "{}", advance),
+            Self::EatSalad(eat_salad) => write!(f, "{}", eat_salad),
+            Self::ExchangeCarrots(exchange_carrots) => write!(f, "{}", exchange_carrots),
+            Self::FallBack(fall_back) => write!(f, "{}", fall_back),
+        }
+    }
+}

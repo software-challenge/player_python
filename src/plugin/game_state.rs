@@ -11,8 +11,8 @@ pub struct GameState {
     pub board: Board,
     #[pyo3(get, set)]
     pub turn: usize,
-    pub player_one: Hare,
-    pub player_two: Hare,
+    player_one: Hare,
+    player_two: Hare,
 }
 
 #[pymethods]
@@ -30,6 +30,7 @@ impl GameState {
     pub fn perform_move(&self, r#move: &Move) -> Result<GameState, PyErr> {
         let mut new_state = self.clone();
         r#move.perform(&mut new_state)?;
+        new_state.turn += 1;
         Ok(new_state)
     }
 
@@ -41,14 +42,6 @@ impl GameState {
         }
     }
 
-    pub fn update_current_player(&mut self, player: Hare) {
-        if self.turn % 2 == 0 {
-            self.player_one = player;
-        } else {
-            self.player_two = player;
-        }
-    }
-
     pub fn clone_other_player(&self) -> Hare {
         if self.turn % 2 != 0 {
             self.player_one.clone()
@@ -57,11 +50,25 @@ impl GameState {
         }
     }
 
-    pub fn update_other_player(&mut self, player: Hare) {
+    pub fn update_player(&mut self, player: Hare) {
         if player.team == self.player_one.team {
-            self.player_two = player;
-        } else {
             self.player_one = player;
+        } else {
+            self.player_two = player;
         }
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("{:?}", self)
+    }
+}
+
+impl std::fmt::Display for GameState {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "GameState(board={}, turn={}, player_one={}, player_two={})",
+            self.board, self.turn, self.player_one, self.player_two
+        )
     }
 }

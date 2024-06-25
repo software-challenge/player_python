@@ -30,11 +30,30 @@ impl Board {
 
     /// Finds the previous occurrence of the specified field before the given index.
     pub fn get_previous_field(&self, field: Field, index: usize) -> Option<usize> {
-        if index == 0 { None } else { (0..index).rev().find(|&i| self.track.get(i) == Some(&field)) }
+        if index == 0 {
+            None
+        } else {
+            (0..index)
+                .rev()
+                .find(|&i| self.track.get(i) == Some(&field))
+        }
     }
 
     /// Finds the next occurrence of the specified field after the given index.
     pub fn get_next_field(&self, field: Field, index: usize) -> Option<usize> {
         (index + 1..self.track.len()).find(|&i| self.track.get(i) == Some(&field))
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("{:?}", self)
+    }
+}
+
+impl std::fmt::Display for Board {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for field in &self.track {
+            write!(f, "{}", field)?;
+        }
+        Ok(())
     }
 }

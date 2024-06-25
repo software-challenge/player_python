@@ -12,9 +12,9 @@ use super::card::Card;
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
 pub struct Advance {
     #[pyo3(get, set)]
-    distance: usize,
+    pub distance: usize,
     #[pyo3(get, set)]
-    cards: Vec<Card>,
+    pub cards: Vec<Card>,
 }
 
 #[pymethods]
@@ -39,7 +39,7 @@ impl Advance {
                     if card_bought {
                         return Err(MustBuyOneCardError::new_err("Only one card allowed to buy"));
                     }
-                    player.consume_carrots(10)?;
+                    player.consume_carrots(state, 10)?;
                     card_bought = true;
                     player.cards.push(*card);
                 }
@@ -49,13 +49,29 @@ impl Advance {
                             return Err(CannotPlayCardError::new_err("Card cannot be played"));
                         }
                     }
+
+                    last_card = Some(card);
+                    card.perform(state)?;
                 }
                 _ => {}
             }
-            last_card = Some(card);
-            card.perform(state)?;
         }
-        state.update_current_player(player);
+
+        state.update_player(player);
         Ok(())
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("{:?}", self)
+    }
+}
+
+impl std::fmt::Display for Advance {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Advance(distance={}, cards={:?})",
+            self.distance, self.cards
+        )
     }
 }

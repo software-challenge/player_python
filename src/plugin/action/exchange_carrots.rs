@@ -22,4 +22,14 @@ impl ExchangeCarrots {
         current.exchange_carrots(state, self.amount)?;
         Ok(())
     }
+
+    fn __repr__(&self) -> PyResult<String> {
+        Ok(format!("{:?}", self))
+    }
+}
+
+impl std::fmt::Display for ExchangeCarrots {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "ExchangeCarrots(amount={})", self.amount)
+    }
 }
