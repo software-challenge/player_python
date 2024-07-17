@@ -1,0 +1,7 @@
+
+  <prepare gameType="swc_2025_hase_und_igel" pause="true">
+    <slot displayName="Spieler 1" canTimeout="true" reserved="true"/>
+    <slot displayName="Spieler 2" canTimeout="true" reserved="true"/>
+  </prepare>
+  <observe roomId="7436c247-5a67-4eca-9b17-fceab576b083"/>
+  <pause roomId="7436c247-5a67-4eca-9b17-fceab576b083" pause="false"/>

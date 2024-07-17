@@ -1,0 +1,102 @@
+<protocol>
+  <joinPrepared reservationCode="e3143664-a1bd-4cdf-8be3-2427f923ba63"/>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="10"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="6"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="2"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="4"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="1">
+      <card>SWAP_CARROTS</card>
+    </data>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="5">
+      <card>SWAP_CARROTS</card>
+    </data>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="2"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="2"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="2"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="7"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="2"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="4"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="15">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7436c247-5a67-4eca-9b17-fceab576b083">
+    <data class="advance" distance="3"/>
+  </room>
+  <close/>
+</protocol>
