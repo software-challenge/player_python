@@ -1,7 +1,7 @@
 use pyo3::{pyclass, pymethods, PyErr};
 
 use crate::plugin::{
-    errors::{CannotPlayCardError, MustBuyOneCardError},
+    errors::{CannotPlayCardError, MustBuyOneCardError, MustPlayCardError},
     field::Field,
     game_state::GameState,
 };
@@ -30,15 +30,27 @@ impl Advance {
 
         player.advance_by(state, self.distance)?;
 
+        let current_field = state.board.get_field(player.position).unwrap();
+        if self.cards.is_empty() {
+            match current_field {
+                Field::Market | Field::Hare => {
+                    return Err(MustPlayCardError::new_err(
+                        "Cannot enter field without any cards",
+                    ));
+                }
+                _ => {}
+            }
+        }
+
         let mut last_card: Option<&Card> = None;
         let mut card_bought = false;
 
         for card in &self.cards {
-            match state.board.get_field(player.position).unwrap() {
+            match current_field {
+                Field::Market if card_bought => {
+                    return Err(MustBuyOneCardError::new_err("Only one card allowed to buy"));
+                }
                 Field::Market => {
-                    if card_bought {
-                        return Err(MustBuyOneCardError::new_err("Only one card allowed to buy"));
-                    }
                     player.consume_carrots(state, 10)?;
                     card_bought = true;
                     player.cards.push(*card);

@@ -62,7 +62,48 @@ mod tests {
     }
 
     #[test]
-    fn test_perform_buy_card_sucess() {
+    fn test_perform_success_without_cards() {
+        let board = Board::new(vec![
+            Field::Start,
+            Field::Position1,
+            Field::Position2,
+            Field::Hare,
+            Field::Hedgehog,
+            Field::Market,
+            Field::Hare,
+            Field::Position1,
+            Field::Goal,
+        ]);
+        let player_one = Hare::new(
+            TeamEnum::One,
+            Some(vec![Card::FallBack, Card::EatSalad, Card::SwapCarrots]),
+            Some(60),
+            Some(3),
+            None,
+            Some(0),
+        );
+        let player_two = Hare::new(
+            TeamEnum::Two,
+            Some(vec![Card::HurryAhead]),
+            Some(60),
+            Some(3),
+            None,
+            Some(0),
+        );
+
+        let mut state = GameState::new(board, 0, player_one, player_two);
+
+        let advance = Advance::new(2, vec![]);
+
+        let result = advance.perform(&mut state);
+        assert!(result.is_ok());
+
+        let current_player = state.clone_current_player();
+        assert_eq!(current_player.position, 2);
+    }
+
+    #[test]
+    fn test_perform_buy_card_success() {
         let cards = vec![Card::HurryAhead];
         let advance = Advance::new(2, cards.clone());
 
