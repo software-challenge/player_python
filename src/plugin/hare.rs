@@ -5,7 +5,7 @@ use pyo3::*;
 use super::{
     action::card::Card,
     constants::PluginConstants,
-    errors::{CannotEnterFieldError, FieldNonexistentError, MissingCarrotsError, NoSaladError},
+    errors::{CannotEnterFieldError, MissingCarrotsError},
     field::Field,
     game_state::GameState,
     r#move::Move,
@@ -82,20 +82,22 @@ impl Hare {
     }
 
     pub fn advance_by(&mut self, state: &mut GameState, distance: usize) -> Result<(), PyErr> {
-        RulesEngine::can_advance_to(&state.board, distance, self, &state.clone_other_player())?;
+        let new_position = self.position + distance;
+        RulesEngine::can_advance_to(
+            &state.board,
+            new_position,
+            self,
+            &state.clone_other_player(),
+        )?;
 
-        let carrots = RulesEngine::calculates_carrots(distance);
+        let needed_carrots = RulesEngine::calculates_carrots(distance);
 
-        if self.carrots - carrots < 0 {
+        if self.carrots - needed_carrots < 0 {
             return Err(MissingCarrotsError::new_err("Not enough carrots"));
         }
 
-        if self.position.checked_sub(distance).is_none() {
-            return Err(FieldNonexistentError::new_err("Cannot go on this field"));
-        }
-
-        self.carrots -= carrots;
-        self.position += distance;
+        self.carrots -= needed_carrots;
+        self.position = new_position;
 
         state.update_player(self.clone());
         Ok(())
@@ -121,9 +123,8 @@ impl Hare {
     }
 
     pub fn eat_salad(&mut self, state: &mut GameState) -> Result<(), PyErr> {
-        if self.salads < 1 {
-            return Err(NoSaladError::new_err("Not enough salads"));
-        }
+        RulesEngine::can_eat_salad(&state.board, self)?;
+
         self.salads -= 1;
         self.carrots += if self.is_ahead(state) { 10 } else { 30 };
 
@@ -162,6 +163,8 @@ impl Hare {
     pub fn fall_back(&mut self, state: &mut GameState) -> Result<(), PyErr> {
         match self.get_fall_back(state) {
             Some(i) => {
+                RulesEngine::has_to_eat_salad(&state.board, self)?;
+                
                 self.carrots += 10 * ((self.position - i) as i32);
                 self.position = i;
 

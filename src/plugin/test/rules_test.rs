@@ -49,21 +49,17 @@ mod tests {
 
         let result = RulesEngine::can_exchange_carrots(&board, &player, 10);
         assert!(result.is_ok());
-        assert!(result.unwrap());
 
         player.carrots = 5;
         let result = RulesEngine::can_exchange_carrots(&board, &player, -10);
-        assert!(result.is_ok());
-        assert!(!result.unwrap());
+        assert!(result.is_err());
 
         player.carrots = 10;
         let result = RulesEngine::can_exchange_carrots(&board, &player, -10);
         assert!(result.is_ok());
-        assert!(result.unwrap());
 
         let result = RulesEngine::can_exchange_carrots(&board, &player, 5);
-        assert!(result.is_ok());
-        assert!(!result.unwrap());
+        assert!(result.is_err());
     }
 
     #[test]
@@ -73,7 +69,6 @@ mod tests {
 
         let result = RulesEngine::can_eat_salad(&board, &player);
         assert!(result.is_ok());
-        assert!(result.unwrap());
     }
 
     #[test]
