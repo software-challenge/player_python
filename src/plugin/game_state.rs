@@ -1,6 +1,15 @@
+use itertools::Itertools;
 use pyo3::*;
 
+use super::action::advance::Advance;
+use super::action::card::Card;
+use super::action::eat_salad::EatSalad;
+use super::action::exchange_carrots::ExchangeCarrots;
+use super::action::fall_back::FallBack;
+use super::action::Action;
 use super::board::Board;
+use super::constants::PluginConstants;
+use super::field::Field;
 use super::hare::Hare;
 use super::r#move::Move;
 
@@ -56,6 +65,99 @@ impl GameState {
         } else {
             self.player_two = player;
         }
+    }
+
+    pub fn is_over(&self) -> bool {
+        let player_one_in_goal = self.player_one.is_in_goal();
+        let player_two_in_goal = self.player_two.is_in_goal();
+        let both_had_last_chance = self.turn % 2 == 0;
+        let rounds_exceeded = self.turn / 2 == PluginConstants::ROUND_LIMIT;
+
+        player_one_in_goal || player_two_in_goal && both_had_last_chance || rounds_exceeded
+    }
+
+    pub fn possible_moves(&self) -> Vec<Move> {
+        let mut moves = Vec::new();
+
+        moves.append(&mut self.possible_advance_moves());
+        moves.append(&mut self.possible_eat_salad_moves());
+        moves.append(&mut self.possible_exchange_carrots_moves());
+        moves.append(&mut self.possible_fall_back_moves());
+
+        moves
+    }
+
+    fn possible_exchange_carrots_moves(&self) -> Vec<Move> {
+        let moves: Vec<Move> = vec![
+            Move::new(Action::ExchangeCarrots(ExchangeCarrots::new(-10))),
+            Move::new(Action::ExchangeCarrots(ExchangeCarrots::new(10))),
+        ];
+
+        moves
+            .into_iter()
+            .filter(|m| m.perform(&mut self.clone()).is_ok())
+            .collect()
+    }
+
+    fn possible_fall_back_moves(&self) -> Vec<Move> {
+        let moves: Vec<Move> = vec![Move::new(Action::FallBack(FallBack::new()))];
+
+        moves
+            .into_iter()
+            .filter(|m| m.perform(&mut self.clone()).is_ok())
+            .collect()
+    }
+
+    fn possible_eat_salad_moves(&self) -> Vec<Move> {
+        let moves: Vec<Move> = vec![Move::new(Action::EatSalad(EatSalad::new()))];
+
+        moves
+            .into_iter()
+            .filter(|m| m.perform(&mut self.clone()).is_ok())
+            .collect()
+    }
+
+    fn possible_advance_moves(&self) -> Vec<Move> {
+        let current_player = self.clone_current_player();
+        let max_distance =
+            (((-1.0 + (1 + 8 * current_player.carrots) as f64).sqrt()) / 2.0) as usize;
+
+        let mut moves = Vec::new();
+
+        for distance in 1..=max_distance {
+            if let Some(Field::Hare) = self.board.get_field(current_player.position + distance) {
+                for k in 0..current_player.cards.len() {
+                    for combination in current_player.cards.iter().combinations(k) {
+                        moves.push(Move::new(Action::Advance(Advance::new(
+                            distance,
+                            combination.iter().map(|&c| *c).collect(),
+                        ))));
+                    }
+                }
+            }
+
+            if self.board.get_field(current_player.position + distance) == Some(Field::Market) {
+                let cards = vec![
+                    Card::FallBack,
+                    Card::HurryAhead,
+                    Card::EatSalad,
+                    Card::SwapCarrots,
+                ];
+                for card in cards {
+                    moves.push(Move::new(Action::Advance(Advance::new(
+                        distance,
+                        vec![card],
+                    ))));
+                }
+            }
+
+            moves.push(Move::new(Action::Advance(Advance::new(distance, vec![]))));
+        }
+
+        moves
+            .into_iter()
+            .filter(|m| m.perform(&mut self.clone()).is_ok())
+            .collect()
     }
 
     pub fn __repr__(&self) -> String {
