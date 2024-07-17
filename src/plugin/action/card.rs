@@ -34,8 +34,22 @@ impl Card {
         other: &mut Hare,
     ) -> Result<(), PyErr> {
         match self {
-            Card::FallBack => current.move_to_field(state, other.position - 1)?,
-            Card::HurryAhead => current.move_to_field(state, other.position + 1)?,
+            Card::FallBack => {
+                if current.position < other.position {
+                    return Err(CannotPlayCardError::new_err(
+                        "You can only play this card if you are ahead of the other player",
+                    ));
+                }
+                current.move_to_field(state, other.position - 1)?;
+            }
+            Card::HurryAhead => {
+                if current.position > other.position {
+                    return Err(CannotPlayCardError::new_err(
+                        "You can only play this card if you are behind the other player",
+                    ));
+                }
+                current.move_to_field(state, other.position + 1)?;
+            }
             Card::EatSalad => current.eat_salad(state)?,
             Card::SwapCarrots => swap(&mut current.carrots, &mut other.carrots),
         }
