@@ -123,8 +123,6 @@ impl Hare {
     }
 
     pub fn eat_salad(&mut self, state: &mut GameState) -> Result<(), PyErr> {
-        RulesEngine::can_eat_salad(&state.board, self)?;
-
         self.salads -= 1;
         self.carrots += if self.is_ahead(state) { 10 } else { 30 };
 
@@ -164,7 +162,7 @@ impl Hare {
         match self.get_fall_back(state) {
             Some(i) => {
                 RulesEngine::has_to_eat_salad(&state.board, self)?;
-                
+
                 self.carrots += 10 * ((self.position - i) as i32);
                 self.position = i;
 
