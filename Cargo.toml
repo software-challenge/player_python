@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.21.2" }
-pyo3-log = "0.10.0"
+pyo3-log = "0.11.0"
 log = "0.4.20"
 itertools = "0.13.0"
 
