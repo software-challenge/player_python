@@ -85,7 +85,7 @@ def handle_move(move_response: _socha.Move) -> Data:
         return Data(class_value='eatsalad')
     elif isinstance(move_response.action, _socha.ExchangeCarrots):
         exchangeCarrots: _socha.ExchangeCarrots = move_response.action
-        return Data(class_value='exchangecarrots', value=exchangeCarrots.amount)
+        return Data(class_value='exchangecarrots', amount=exchangeCarrots.amount)
     elif isinstance(move_response.action, _socha.FallBack):
         return Data(class_value='fallback')
     else:
@@ -113,7 +113,7 @@ def message_to_state(message: Room) -> _socha.GameState:
             carrots=hare.carrots,
             position=hare.position,
             last_move=_socha.Move(action=hare.last_action.class_binding)
-            if hare.last_action
+            if hare.last_action and hare.last_action.class_binding
             else None,
             salads=hare.salads,
             team=_socha.TeamEnum.One if hare.team == 'ONE' else _socha.TeamEnum.Two,
