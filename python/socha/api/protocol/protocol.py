@@ -81,6 +81,39 @@ class LastAction:
 
 
 @dataclass
+class LastMove:
+    class Meta:
+        name = 'lastMove'
+
+    class_value: Optional[str] = field(
+        default=None,
+        metadata={
+            'name': 'class',
+            'type': 'Attribute',
+            'required': True,
+        },
+    )
+    distance: Optional[int] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
+        },
+    )
+    card: Optional[str] = field(
+        default=None,
+        metadata={
+            'type': 'Element',
+        },
+    )
+    amount: Optional[int] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
+        },
+    )
+
+
+@dataclass
 class Hare:
     class Meta:
         name = 'hare'
@@ -181,9 +214,15 @@ class State(ObservableRoomMessage):
     hare: List[Hare] = field(
         default_factory=list,
         metadata={
-            'name': 'hare',
             'type': 'Element',
             'min_occurs': 1,
+        },
+    )
+    last_move: Optional[LastMove] = field(
+        default=None,
+        metadata={
+            'name': 'lastMove',
+            'type': 'Element',
         },
     )
 
@@ -225,6 +264,21 @@ class Errorpacket(ProtocolPacket):
         metadata={
             'name': 'originalRequest',
             'type': 'Element',
+        },
+    )
+
+
+@dataclass
+class Joined:
+    class Meta:
+        name = 'joined'
+
+    room_id: Optional[str] = field(
+        default=None,
+        metadata={
+            'name': 'roomId',
+            'type': 'Attribute',
+            'required': True,
         },
     )
 
@@ -701,8 +755,8 @@ class OriginalMessage:
             'required': True,
         },
     )
-    cards: Optional[Cards] = field(
-        default=None,
+    card: List[str] = field(
+        default_factory=list,
         metadata={
             'type': 'Element',
         },
