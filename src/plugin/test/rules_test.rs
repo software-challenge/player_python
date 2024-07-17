@@ -74,7 +74,7 @@ mod tests {
     #[test]
     fn test_can_advance_to() {
         let board = create_board();
-        let mut player_one = create_player(TeamEnum::One, 1);
+        let mut player_one = create_player(TeamEnum::One, 0);
         let player_two = create_player(TeamEnum::Two, 2);
 
         assert!(RulesEngine::can_advance_to(&board, 3, &player_one, &player_two).is_ok());
