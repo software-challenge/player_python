@@ -269,21 +269,6 @@ class Errorpacket(ProtocolPacket):
 
 
 @dataclass
-class Joined:
-    class Meta:
-        name = 'joined'
-
-    room_id: Optional[str] = field(
-        default=None,
-        metadata={
-            'name': 'roomId',
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-
-
-@dataclass
 class Left(ProtocolPacket):
     """
     If the game is over the server will _send this message to the clients and closes the connection afterward.
