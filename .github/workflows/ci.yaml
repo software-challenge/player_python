@@ -31,7 +31,7 @@ jobs:
           python -m venv venv
           source venv/bin/activate
           pip install ruff
-          ruff .
+          ruff check .
           pip install maturin
           maturin develop
           python -m unittest discover -s tests -p '*.py'
