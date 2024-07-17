@@ -1,6 +1,6 @@
 [package]
 name = "_socha"
-version = "3.3.0"
+version = "3.4.0"
 edition = "2021"
 
 [lib]
@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 pyo3 = { version = "0.21.2" }
 pyo3-log = "0.10.0"
 log = "0.4.20"
+itertools = "0.13.0"
 
 [features]
 extension-module = ["pyo3/extension-module"]
