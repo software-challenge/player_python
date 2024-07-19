@@ -40,6 +40,30 @@ impl GameState {
         let mut new_state = self.clone();
         r#move.perform(&mut new_state)?;
         new_state.turn += 1;
+
+        fn update_carrots(player: &mut Hare, opponent_position: usize, board: &Board) {
+            match board.get_field(player.position) {
+                Some(Field::Position1) if player.position > opponent_position => {
+                    player.carrots += 10
+                }
+                Some(Field::Position2) if player.position > opponent_position => {
+                    player.carrots += 30
+                }
+                _ => {}
+            }
+        }
+
+        update_carrots(
+            &mut new_state.player_one,
+            new_state.player_two.position,
+            &new_state.board,
+        );
+        update_carrots(
+            &mut new_state.player_two,
+            new_state.player_one.position,
+            &new_state.board,
+        );
+
         Ok(new_state)
     }
 
