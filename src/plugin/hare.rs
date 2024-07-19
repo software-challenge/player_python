@@ -83,6 +83,7 @@ impl Hare {
 
     pub fn advance_by(&mut self, state: &mut GameState, distance: usize) -> Result<(), PyErr> {
         let new_position = self.position + distance;
+
         RulesEngine::can_advance_to(
             &state.board,
             new_position,
@@ -92,14 +93,11 @@ impl Hare {
 
         let needed_carrots = RulesEngine::calculates_carrots(distance);
 
-        if self.carrots - needed_carrots < 0 {
-            return Err(MissingCarrotsError::new_err("Not enough carrots"));
-        }
-
         self.carrots -= needed_carrots;
         self.position = new_position;
 
         state.update_player(self.clone());
+        
         Ok(())
     }
 

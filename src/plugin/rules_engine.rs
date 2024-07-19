@@ -95,22 +95,31 @@ impl RulesEngine {
     #[staticmethod]
     pub fn can_advance_to(
         board: &Board,
-        new_position: usize,
+        distance: usize,
         player: &Hare,
         other_player: &Hare,
     ) -> Result<(), PyErr> {
+        if distance == 0 {
+            return Err(CannotEnterFieldError::new_err(
+                "Advance distance cannot be 0",
+            ));
+        }
+
+        let new_position = player.position + distance;
+
         if new_position == 0 {
             return Err(CannotEnterFieldError::new_err("Cannot jump to position 0"));
         }
 
+        if player.carrots - Self::calculates_carrots(distance) < 0 {
+            return Err(MissingCarrotsError::new_err("Not enough carrots"));
+        }
+
         Self::has_to_eat_salad(board, player)?;
 
-        let field = match board.get_field(new_position) {
-            Some(f) => f,
-            None => {
-                return Err(CannotEnterFieldError::new_err("Field not found"));
-            }
-        };
+        let field = board
+            .get_field(new_position)
+            .ok_or_else(|| CannotEnterFieldError::new_err("Field not found"))?;
 
         if field != Field::Goal && new_position == other_player.position {
             return Err(FieldOccupiedError::new_err("Field is occupied by opponent"));
@@ -118,38 +127,16 @@ impl RulesEngine {
 
         match field {
             Field::Hedgehog => Err(HedgehogOnlyBackwardsError::new_err(
-                "You cannot go on Hedgehog field forwards",
+                "Cannot advance on Hedgehog field",
             )),
-            Field::Salad => {
-                if player.salads > 0 {
-                    Ok(())
-                } else {
-                    Err(FieldOccupiedError::new_err("Field is occupied by opponent"))
-                }
-            }
-            Field::Hare => {
-                if !player.cards.is_empty() {
-                    Ok(())
-                } else {
-                    Err(CardNotOwnedError::new_err("No card to play"))
-                }
-            }
-            Field::Market => {
-                if player.carrots >= 10 {
-                    Ok(())
-                } else {
-                    Err(MissingCarrotsError::new_err("Not enough carrots"))
-                }
-            }
-            Field::Goal => {
-                if player.carrots <= 10 && player.salads == 0 {
-                    Ok(())
-                } else {
-                    Err(GoalConditionsError::new_err(
-                        "Too much carrots or/and salads",
-                    ))
-                }
-            }
+            Field::Salad if player.salads > 0 => Ok(()),
+            Field::Salad => Err(FieldOccupiedError::new_err("Field is occupied by opponent")),
+            Field::Hare if !player.cards.is_empty() => Ok(()),
+            Field::Hare => Err(CardNotOwnedError::new_err("No card to play")),
+            Field::Market if player.carrots >= 10 => Ok(()),
+            Field::Market => Err(MissingCarrotsError::new_err("Not enough carrots")),
+            Field::Goal if player.carrots <= 10 && player.salads == 0 => Ok(()),
+            Field::Goal => Err(GoalConditionsError::new_err("Too many carrots or salads")),
             _ => Ok(()),
         }
     }
