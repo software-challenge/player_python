@@ -38,7 +38,10 @@ impl Advance {
                         "Cannot enter field without any cards",
                     ));
                 }
-                _ => {}
+                _ => {
+                    state.update_player(player);
+                    return Ok(());
+                }
             }
         }
 
