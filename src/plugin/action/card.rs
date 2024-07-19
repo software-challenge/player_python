@@ -9,6 +9,8 @@ use crate::plugin::{
     hare::Hare,
 };
 
+use super::Action;
+
 #[pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash, Copy)]
 pub enum Card {
@@ -51,9 +53,40 @@ impl Card {
                 current.move_to_field(state, other.position + 1)?;
             }
             Card::EatSalad => current.eat_salad(state)?,
-            Card::SwapCarrots => swap(&mut current.carrots, &mut other.carrots),
-        }
+            Card::SwapCarrots => {
+                let last_lettuce_position = state
+                    .board
+                    .get_previous_field(Field::Salad, state.board.track.len() - 1)
+                    .ok_or_else(|| {
+                        CannotPlayCardError::new_err(
+                            "Unable to find the last lettuce field position",
+                        )
+                    })?;
 
+                if current.position < last_lettuce_position {
+                    return Err(CannotPlayCardError::new_err(
+                    "You can only play this card if you are standing in front of the last lettuce field",
+                ));
+                }
+
+                if let (Some(current_last_move), Some(other_last_move)) =
+                    (&current.last_move, &other.last_move)
+                {
+                    if let (Action::Advance(current_advance), Action::Advance(other_advance)) =
+                        (&current_last_move.action, &other_last_move.action)
+                    {
+                        if current_advance.cards.contains(&Card::SwapCarrots)
+                            && other_advance.cards.contains(&Card::SwapCarrots)
+                        {
+                            return Err(CannotPlayCardError::new_err(
+                                "You can only play this card if the last similar swap card was not used in one of the last two turns",
+                            ));
+                        }
+                    }
+                }
+                swap(&mut current.carrots, &mut other.carrots);
+            }
+        }
         Ok(())
     }
 
