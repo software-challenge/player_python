@@ -28,7 +28,7 @@ impl Advance {
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         let mut player = state.clone_current_player();
 
-        player.advance_by(state, self.distance)?;
+        player.advance_by(state, self.distance as isize, self.cards.clone())?;
 
         let current_field = state.board.get_field(player.position).unwrap();
         if self.cards.is_empty() {
@@ -66,7 +66,15 @@ impl Advance {
                     }
 
                     last_card = Some(card);
-                    card.perform(state)?;
+                    let mut remaining_cards = self.cards.clone();
+
+                    if let Some(position) = player.cards.iter().position(|c| c == card) {
+                        remaining_cards.remove(position);
+                    } else {
+                        return Err(CannotPlayCardError::new_err("Card not owned"));
+                    }
+
+                    card.perform(state, remaining_cards)?;
                 }
                 _ => {}
             }

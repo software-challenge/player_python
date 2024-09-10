@@ -81,23 +81,33 @@ impl Hare {
         self.carrots <= 10 && self.salads == 0
     }
 
-    pub fn advance_by(&mut self, state: &mut GameState, distance: usize) -> Result<(), PyErr> {
-        let new_position = self.position + distance;
+    pub fn advance_by(
+        &mut self,
+        state: &mut GameState,
+        distance: isize,
+        cards: Vec<Card>,
+    ) -> Result<(), PyErr> {
+        let needed_carrots = RulesEngine::calculates_carrots(distance.unsigned_abs());
+
+        if self.carrots - needed_carrots < 0 {
+            return Err(MissingCarrotsError::new_err("Not enough carrots"));
+        }
 
         RulesEngine::can_advance_to(
             &state.board,
-            new_position,
+            distance,
             self,
             &state.clone_other_player(),
+            cards,
         )?;
 
-        let needed_carrots = RulesEngine::calculates_carrots(distance);
+        let new_position = (self.position as isize + distance) as usize;
 
         self.carrots -= needed_carrots;
         self.position = new_position;
 
         state.update_player(self.clone());
-        
+
         Ok(())
     }
 
@@ -123,23 +133,6 @@ impl Hare {
     pub fn eat_salad(&mut self, state: &mut GameState) -> Result<(), PyErr> {
         self.salads -= 1;
         self.carrots += if self.is_ahead(state) { 10 } else { 30 };
-
-        state.update_player(self.clone());
-        Ok(())
-    }
-
-    pub fn move_to_field(
-        &mut self,
-        state: &mut GameState,
-        new_position: usize,
-    ) -> Result<(), PyErr> {
-        RulesEngine::can_advance_to(
-            &state.board,
-            new_position,
-            self,
-            &state.clone_other_player(),
-        )?;
-        self.position = new_position;
 
         state.update_player(self.clone());
         Ok(())

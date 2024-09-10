@@ -7,6 +7,7 @@ use crate::plugin::{
     field::Field,
     game_state::GameState,
     hare::Hare,
+    rules_engine::RulesEngine,
 };
 
 use super::Action;
@@ -29,11 +30,36 @@ impl Card {
         }
     }
 
+    fn move_to_field(
+        &self,
+        player: &mut Hare,
+        state: &mut GameState,
+        target_position: usize,
+        cards: Vec<Card>,
+    ) -> Result<(), PyErr> {
+        println!("target_position: {}", target_position);
+        println!("player.position: {}", player.position);
+        let distance = target_position as isize - player.position as isize;
+        RulesEngine::can_advance_to(
+            &state.board,
+            distance,
+            player,
+            &state.clone_other_player(),
+            cards,
+        )?;
+
+        player.position = (player.position as isize + distance) as usize;
+
+        state.update_player(player.clone());
+        Ok(())
+    }
+
     fn play(
         &self,
         state: &mut GameState,
         current: &mut Hare,
         other: &mut Hare,
+        remaining_cards: Vec<Card>,
     ) -> Result<(), PyErr> {
         match self {
             Card::FallBack => {
@@ -42,7 +68,12 @@ impl Card {
                         "You can only play this card if you are ahead of the other player",
                     ));
                 }
-                current.move_to_field(state, other.position - 1)?;
+                self.move_to_field(
+                    current,
+                    state,
+                    other.position.saturating_sub(1),
+                    remaining_cards,
+                )?;
             }
             Card::HurryAhead => {
                 if current.position > other.position {
@@ -50,7 +81,8 @@ impl Card {
                         "You can only play this card if you are behind the other player",
                     ));
                 }
-                current.move_to_field(state, other.position + 1)?;
+                self.move_to_field(current, state, other.position + 1, remaining_cards)?;
+                // saturating add is here unnecessary because the board is finite and never larger than usize::MAX
             }
             Card::EatSalad => current.eat_salad(state)?,
             Card::SwapCarrots => {
@@ -90,7 +122,7 @@ impl Card {
         Ok(())
     }
 
-    pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
+    pub fn perform(&self, state: &mut GameState, remaining_cards: Vec<Card>) -> Result<(), PyErr> {
         let mut current = state.clone_current_player();
         let mut other = state.clone_other_player();
 
@@ -109,9 +141,9 @@ impl Card {
             .cards
             .iter()
             .position(|card| card == self)
-            .ok_or_else(|| CardNotOwnedError::new_err(""))?;
+            .ok_or_else(|| CardNotOwnedError::new_err("Card not owned"))?;
 
-        self.play(state, &mut current, &mut other)?;
+        self.play(state, &mut current, &mut other, remaining_cards)?;
 
         current.cards.remove(index);
 

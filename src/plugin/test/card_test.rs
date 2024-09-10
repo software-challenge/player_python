@@ -43,7 +43,9 @@ mod tests {
     fn test_fallback_card() {
         let mut state = create_test_game_state();
         let fallback_card = Card::FallBack;
-        assert!(fallback_card.perform(&mut state).is_ok());
+        assert!(fallback_card
+            .perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots])
+            .is_ok());
         let current_player = state.clone_current_player();
         assert_eq!(current_player.position, 2);
     }
@@ -52,8 +54,8 @@ mod tests {
     fn test_hurryahead_card() {
         let mut state = create_test_game_state();
         state.turn = 1;
-        let hurry_ahead_card = Card::HurryAhead;
-        assert!(hurry_ahead_card.perform(&mut state).is_ok());
+        let hurry_ahead_card: Card = Card::HurryAhead;
+        assert!(hurry_ahead_card.perform(&mut state, vec![]).is_ok());
         let current_player = state.clone_current_player();
         assert_eq!(current_player.position, 7);
     }
@@ -62,7 +64,9 @@ mod tests {
     fn test_eatsalad_card() {
         let mut state = create_test_game_state();
         let eat_salad_card = Card::EatSalad;
-        assert!(eat_salad_card.perform(&mut state).is_ok());
+        assert!(eat_salad_card
+            .perform(&mut state, vec![Card::FallBack, Card::SwapCarrots])
+            .is_ok());
         let current_player = state.clone_current_player();
         assert_eq!(current_player.salads, 2);
     }
@@ -71,7 +75,9 @@ mod tests {
     fn test_swapcarrots_card() {
         let mut state = create_test_game_state();
         let swap_carrots_card = Card::SwapCarrots;
-        assert!(swap_carrots_card.perform(&mut state).is_ok());
+        assert!(swap_carrots_card
+            .perform(&mut state, vec![Card::FallBack, Card::EatSalad])
+            .is_ok());
         let current_player = state.clone_current_player();
         let other_player = state.clone_other_player();
         assert_eq!(current_player.carrots, 60);
@@ -83,7 +89,7 @@ mod tests {
         let mut state = create_test_game_state();
         state.turn = 1;
         let card_not_owned = Card::FallBack;
-        let result = card_not_owned.perform(&mut state);
+        let result = card_not_owned.perform(&mut state, vec![Card::HurryAhead]);
         assert!(result.is_err());
     }
 
@@ -94,7 +100,7 @@ mod tests {
         let mut current_player = state.clone_current_player();
         current_player.position = 1;
         state.update_player(current_player);
-        let result = card.perform(&mut state);
+        let result = card.perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots]);
         assert!(result.is_err());
     }
 
@@ -103,7 +109,7 @@ mod tests {
         let mut state = create_test_game_state();
         let invalid_card = Card::FallBack;
         state.board.track.clear();
-        let result = invalid_card.perform(&mut state);
+        let result = invalid_card.perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots]);
         assert!(result.is_err());
     }
 }

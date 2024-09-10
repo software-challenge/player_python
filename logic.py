@@ -1,8 +1,10 @@
 # not all imports are currently used, but they might be in the future and it shows all available functionalities
-import logging
+import math
 import random
-from typing import List
+import time
+from typing import Optional, Tuple
 from socha import (
+    Field,
     GameState,
     Move
 )
@@ -16,9 +18,7 @@ class Logic(IClientHandler):
     # this method is called every time the server is requesting a new move
     # this method should always be implemented otherwise the client will be disqualified
     def calculate_move(self) -> Move:
-        moves: List[Move] = self.game_state.possible_moves()
-        move: Move = random.choice(moves)
-        return move
+        return random.choice(self.game_state.possible_moves())
 
     # this method is called every time the server has sent a new game state update
     # this method should be implemented to keep the game state up to date

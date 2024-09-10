@@ -6,7 +6,7 @@ use crate::plugin::errors::{
 };
 
 use super::{
-    action::{eat_salad::EatSalad, Action},
+    action::{card::Card, eat_salad::EatSalad, Action},
     board::Board,
     errors::{CannotEnterFieldError, NoSaladError},
     field::Field,
@@ -95,9 +95,10 @@ impl RulesEngine {
     #[staticmethod]
     pub fn can_advance_to(
         board: &Board,
-        distance: usize,
+        distance: isize,
         player: &Hare,
         other_player: &Hare,
+        cards: Vec<Card>,
     ) -> Result<(), PyErr> {
         if distance == 0 {
             return Err(CannotEnterFieldError::new_err(
@@ -105,14 +106,10 @@ impl RulesEngine {
             ));
         }
 
-        let new_position = player.position + distance;
+        let new_position = (player.position as isize + distance) as usize;
 
         if new_position == 0 {
             return Err(CannotEnterFieldError::new_err("Cannot jump to position 0"));
-        }
-
-        if player.carrots - Self::calculates_carrots(distance) < 0 {
-            return Err(MissingCarrotsError::new_err("Not enough carrots"));
         }
 
         Self::has_to_eat_salad(board, player)?;
@@ -131,7 +128,7 @@ impl RulesEngine {
             )),
             Field::Salad if player.salads > 0 => Ok(()),
             Field::Salad => Err(FieldOccupiedError::new_err("Field is occupied by opponent")),
-            Field::Hare if !player.cards.is_empty() => Ok(()),
+            Field::Hare if !cards.is_empty() => Ok(()),
             Field::Hare => Err(CardNotOwnedError::new_err("No card to play")),
             Field::Market if player.carrots >= 10 => Ok(()),
             Field::Market => Err(MissingCarrotsError::new_err("Not enough carrots")),
