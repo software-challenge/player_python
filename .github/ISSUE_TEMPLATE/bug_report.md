@@ -15,9 +15,9 @@ Please describe the issue you are encountering. Include as much detail as possib
 
 ## Environment
 
--   Python version: [e.g. 3.9]
--   Operating System: [e.g. Windows 10, MacOS 11, Ubuntu 20.04]
--   Version of the Python SoCha Client: [e.g. 1.0.0]
+- Python version: [e.g. 3.9]
+- Operating System: [e.g. Windows 10, MacOS 11, Ubuntu 20.04]
+- Version of the Python SoCha Client: [e.g. 1.0.0]
 
 ## Expected Behavior
 
