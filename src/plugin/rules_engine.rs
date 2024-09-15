@@ -1,14 +1,9 @@
 use pyo3::*;
 
-use crate::plugin::errors::{
-    CardNotOwnedError, FieldOccupiedError, GoalConditionsError, HedgehogOnlyBackwardsError,
-    MissingCarrotsError,
-};
-
 use super::{
     action::{card::Card, eat_salad::EatSalad, Action},
     board::Board,
-    errors::{CannotEnterFieldError, NoSaladError},
+    errors::HUIError,
     field::Field,
     hare::Hare,
     r#move::Move,
@@ -30,26 +25,22 @@ impl RulesEngine {
         match board.get_field(player.position) {
             Some(Field::Carrots) => {
                 if count != 10 && count != -10 {
-                    return Err(MissingCarrotsError::new_err(
-                        "You can only exchange 10 carrots",
-                    ));
+                    return Err(HUIError::new_err("You can only exchange 10 carrots"));
                 }
                 if count == -10 && player.carrots < 10 {
-                    return Err(MissingCarrotsError::new_err("Not enough carrots"));
+                    return Err(HUIError::new_err("Not enough carrots"));
                 }
                 Ok(())
             }
-            Some(_) => Err(CannotEnterFieldError::new_err(
-                "Field is not a carrot field",
-            )),
-            None => Err(CannotEnterFieldError::new_err("Field not found")),
+            Some(_) => Err(HUIError::new_err("Field is not a carrot field")),
+            None => Err(HUIError::new_err("Field not found")),
         }
     }
 
     #[staticmethod]
     pub fn can_eat_salad(board: &Board, player: &Hare) -> Result<(), PyErr> {
         if player.salads < 1 {
-            return Err(NoSaladError::new_err("No salad to eat"));
+            return Err(HUIError::new_err("No salad to eat"));
         }
 
         match board.get_field(player.position) {
@@ -63,11 +54,9 @@ impl RulesEngine {
             {
                 Ok(())
             }
-            Some(Field::Salad) => Err(CannotEnterFieldError::new_err(
-                "Cannot eat salad twice in a row",
-            )),
-            Some(_) => Err(CannotEnterFieldError::new_err("Field is not a salad")),
-            None => Err(CannotEnterFieldError::new_err("Field not found")),
+            Some(Field::Salad) => Err(HUIError::new_err("Cannot eat salad twice in a row")),
+            Some(_) => Err(HUIError::new_err("Field is not a salad")),
+            None => Err(HUIError::new_err("Field not found")),
         }
     }
 
@@ -80,9 +69,7 @@ impl RulesEngine {
                         action: Action::EatSalad(EatSalad::new()),
                     })
                 {
-                    Err(CannotEnterFieldError::new_err(
-                        "Cannot advance without eating salad",
-                    ))
+                    Err(HUIError::new_err("Cannot advance without eating salad"))
                 } else {
                     Ok(())
                 }
@@ -93,7 +80,7 @@ impl RulesEngine {
     }
 
     #[staticmethod]
-    pub fn can_advance_to(
+    pub fn can_move_to(
         board: &Board,
         distance: isize,
         player: &Hare,
@@ -101,39 +88,35 @@ impl RulesEngine {
         cards: Vec<Card>,
     ) -> Result<(), PyErr> {
         if distance == 0 {
-            return Err(CannotEnterFieldError::new_err(
-                "Advance distance cannot be 0",
-            ));
+            return Err(HUIError::new_err("Advance distance cannot be 0"));
         }
 
         let new_position = (player.position as isize + distance) as usize;
 
         if new_position == 0 {
-            return Err(CannotEnterFieldError::new_err("Cannot jump to position 0"));
+            return Err(HUIError::new_err("Cannot jump to position 0"));
         }
 
         Self::has_to_eat_salad(board, player)?;
 
         let field = board
             .get_field(new_position)
-            .ok_or_else(|| CannotEnterFieldError::new_err("Field not found"))?;
+            .ok_or_else(|| HUIError::new_err("Field not found"))?;
 
         if field != Field::Goal && new_position == other_player.position {
-            return Err(FieldOccupiedError::new_err("Field is occupied by opponent"));
+            return Err(HUIError::new_err("Field is occupied by opponent"));
         }
 
         match field {
-            Field::Hedgehog => Err(HedgehogOnlyBackwardsError::new_err(
-                "Cannot advance on Hedgehog field",
-            )),
+            Field::Hedgehog => Err(HUIError::new_err("Cannot advance on Hedgehog field")),
             Field::Salad if player.salads > 0 => Ok(()),
-            Field::Salad => Err(FieldOccupiedError::new_err("Field is occupied by opponent")),
+            Field::Salad => Err(HUIError::new_err("Field is occupied by opponent")),
             Field::Hare if !cards.is_empty() => Ok(()),
-            Field::Hare => Err(CardNotOwnedError::new_err("No card to play")),
+            Field::Hare => Err(HUIError::new_err("No card to play")),
             Field::Market if player.carrots >= 10 => Ok(()),
-            Field::Market => Err(MissingCarrotsError::new_err("Not enough carrots")),
+            Field::Market => Err(HUIError::new_err("Not enough carrots")),
             Field::Goal if player.carrots <= 10 && player.salads == 0 => Ok(()),
-            Field::Goal => Err(GoalConditionsError::new_err("Too many carrots or salads")),
+            Field::Goal => Err(HUIError::new_err("Too many carrots or salads")),
             _ => Ok(()),
         }
     }

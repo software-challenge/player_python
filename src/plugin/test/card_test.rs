@@ -1,11 +1,12 @@
 #[cfg(test)]
 mod tests {
     use crate::plugin::{
-        action::card::Card,
+        action::{advance::Advance, card::Card, Action},
         board::Board,
         field::Field,
         game_state::GameState,
         hare::{Hare, TeamEnum},
+        r#move::Move,
     };
 
     fn create_test_game_state() -> GameState {
@@ -74,6 +75,13 @@ mod tests {
     #[test]
     fn test_swapcarrots_card() {
         let mut state = create_test_game_state();
+        let mut player_one = state.clone_current_player();
+        let mut player_two = state.clone_other_player();
+        player_one.position = 3;
+        player_two.position = 2;
+        state.update_player(player_one);
+        state.update_player(player_two);
+
         let swap_carrots_card = Card::SwapCarrots;
         assert!(swap_carrots_card
             .perform(&mut state, vec![Card::FallBack, Card::EatSalad])
@@ -82,6 +90,33 @@ mod tests {
         let other_player = state.clone_other_player();
         assert_eq!(current_player.carrots, 60);
         assert_eq!(other_player.carrots, 60);
+    }
+
+    #[test]
+    fn test_swapcarrots_card_already_occurred_last_two_rounds() {
+        let mut state = create_test_game_state();
+        let mut player_one = state.clone_current_player();
+        let mut player_two = state.clone_other_player();
+        player_one.position = 3;
+        player_two.position = 2;
+        player_one.last_move = Some(Move {
+            action: Action::Advance(Advance {
+                distance: 1,
+                cards: vec![Card::SwapCarrots],
+            }),
+        });
+        player_two.last_move = Some(Move {
+            action: Action::Advance(Advance {
+                distance: 1,
+                cards: vec![Card::SwapCarrots],
+            }),
+        });
+        state.update_player(player_one);
+        state.update_player(player_two);
+
+        let swap_carrots_card = Card::SwapCarrots;
+        let result = swap_carrots_card.perform(&mut state, vec![Card::FallBack, Card::EatSalad]);
+        assert!(result.is_err());
     }
 
     #[test]

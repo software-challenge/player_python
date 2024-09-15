@@ -77,14 +77,14 @@ mod tests {
         let mut player_one = create_player(TeamEnum::One, 0);
         let player_two = create_player(TeamEnum::Two, 2);
 
-        assert!(RulesEngine::can_advance_to(&board, 3, &player_one, &player_two, vec![Card::FallBack]).is_ok());
+        assert!(RulesEngine::can_move_to(&board, 3, &player_one, &player_two, vec![Card::FallBack]).is_ok());
 
-        assert!(RulesEngine::can_advance_to(&board, 2, &player_one, &player_two, vec![]).is_err());
+        assert!(RulesEngine::can_move_to(&board, 2, &player_one, &player_two, vec![]).is_err());
 
         player_one.carrots = 1;
-        assert!(RulesEngine::can_advance_to(&board, 5, &player_one, &player_two, vec![]).is_err());
+        assert!(RulesEngine::can_move_to(&board, 5, &player_one, &player_two, vec![]).is_err());
 
         player_one.cards = vec![];
-        assert!(RulesEngine::can_advance_to(&board, 6, &player_one, &player_two, vec![]).is_err());
+        assert!(RulesEngine::can_move_to(&board, 6, &player_one, &player_two, vec![]).is_err());
     }
 }

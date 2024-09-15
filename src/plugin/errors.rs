@@ -1,20 +1,3 @@
-use pyo3::{ exceptions::PyException, * };
+use pyo3::{exceptions::PyException, *};
 
-create_exception!(_socha, GoalConditionsError, PyException);
-create_exception!(_socha, NoSaladError, PyException);
-create_exception!(_socha, MissingCarrotsError, PyException);
-create_exception!(_socha, MustEatSaladError, PyException);
-create_exception!(_socha, CannotEnterFieldError, PyException);
-create_exception!(_socha, FieldOccupiedError, PyException);
-create_exception!(_socha, FieldNonexistentError, PyException);
-create_exception!(_socha, HedgehogOnlyBackwardsError, PyException);
-create_exception!(_socha, CannotMoveForwardError, PyException);
-create_exception!(_socha, CannotFallBackError, PyException);
-create_exception!(_socha, CannotEatSaladError, PyException);
-create_exception!(_socha, CannotExchangeCarrotsError, PyException);
-create_exception!(_socha, MustBuyOneCardError, PyException);
-create_exception!(_socha, MustPlayCardError, PyException);
-create_exception!(_socha, CardNotOwnedError, PyException);
-create_exception!(_socha, CannotPlayCardError, PyException);
-create_exception!(_socha, CannotPlayFallBackError, PyException);
-create_exception!(_socha, CannotPlayHurryAheadError, PyException);
+create_exception!(_socha, HUIError, PyException);

@@ -30,18 +30,16 @@ impl Board {
 
     /// Finds the previous occurrence of the specified field before the given index.
     pub fn get_previous_field(&self, field: Field, index: usize) -> Option<usize> {
-        if index == 0 {
-            None
-        } else {
-            (0..index)
-                .rev()
-                .find(|&i| self.track.get(i) == Some(&field))
-        }
+        self.track.iter().take(index).rposition(|&f| f == field)
     }
 
     /// Finds the next occurrence of the specified field after the given index.
     pub fn get_next_field(&self, field: Field, index: usize) -> Option<usize> {
-        (index + 1..self.track.len()).find(|&i| self.track.get(i) == Some(&field))
+        self.track
+            .iter()
+            .skip(index + 1)
+            .position(|&f| f == field)
+            .map(|i| i + index + 1)
     }
 
     pub fn __repr__(&self) -> String {

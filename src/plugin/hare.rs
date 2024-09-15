@@ -3,13 +3,8 @@ use std::fmt;
 use pyo3::*;
 
 use super::{
-    action::card::Card,
-    constants::PluginConstants,
-    errors::{CannotEnterFieldError, MissingCarrotsError},
-    field::Field,
-    game_state::GameState,
-    r#move::Move,
-    rules_engine::RulesEngine,
+    action::card::Card, constants::PluginConstants, errors::HUIError, field::Field,
+    game_state::GameState, r#move::Move, rules_engine::RulesEngine,
 };
 
 #[pyclass]
@@ -84,24 +79,24 @@ impl Hare {
     pub fn advance_by(
         &mut self,
         state: &mut GameState,
-        distance: isize,
+        distance: usize,
         cards: Vec<Card>,
     ) -> Result<(), PyErr> {
-        let needed_carrots = RulesEngine::calculates_carrots(distance.unsigned_abs());
+        let needed_carrots = RulesEngine::calculates_carrots(distance);
 
         if self.carrots - needed_carrots < 0 {
-            return Err(MissingCarrotsError::new_err("Not enough carrots"));
+            return Err(HUIError::new_err("Not enough carrots"));
         }
 
-        RulesEngine::can_advance_to(
+        RulesEngine::can_move_to(
             &state.board,
-            distance,
+            distance as isize,
             self,
             &state.clone_other_player(),
             cards,
         )?;
 
-        let new_position = (self.position as isize + distance) as usize;
+        let new_position = self.position + distance;
 
         self.carrots -= needed_carrots;
         self.position = new_position;
@@ -126,7 +121,7 @@ impl Hare {
             state.update_player(self.clone());
             Ok(())
         } else {
-            Err(MissingCarrotsError::new_err("Not enough carrots"))
+            Err(HUIError::new_err("Not enough carrots"))
         }
     }
 
@@ -160,7 +155,7 @@ impl Hare {
                 state.update_player(self.clone());
                 Ok(())
             }
-            None => Err(CannotEnterFieldError::new_err("Field not found")),
+            None => Err(HUIError::new_err("Field not found")),
         }
     }
 

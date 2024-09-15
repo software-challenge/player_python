@@ -1,10 +1,6 @@
 use pyo3::{pyclass, pymethods, PyErr};
 
-use crate::plugin::{
-    errors::{CannotPlayCardError, MustBuyOneCardError, MustPlayCardError},
-    field::Field,
-    game_state::GameState,
-};
+use crate::plugin::{errors::HUIError, field::Field, game_state::GameState};
 
 use super::card::Card;
 
@@ -28,15 +24,13 @@ impl Advance {
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         let mut player = state.clone_current_player();
 
-        player.advance_by(state, self.distance as isize, self.cards.clone())?;
+        player.advance_by(state, self.distance, self.cards.clone())?;
 
         let current_field = state.board.get_field(player.position).unwrap();
         if self.cards.is_empty() {
             match current_field {
                 Field::Market | Field::Hare => {
-                    return Err(MustPlayCardError::new_err(
-                        "Cannot enter field without any cards",
-                    ));
+                    return Err(HUIError::new_err("Cannot enter field without any cards"));
                 }
                 _ => {
                     state.update_player(player);
@@ -51,7 +45,7 @@ impl Advance {
         for card in &self.cards {
             match current_field {
                 Field::Market if card_bought => {
-                    return Err(MustBuyOneCardError::new_err("Only one card allowed to buy"));
+                    return Err(HUIError::new_err("Only one card allowed to buy"));
                 }
                 Field::Market => {
                     player.consume_carrots(state, 10)?;
@@ -61,22 +55,22 @@ impl Advance {
                 Field::Hare => {
                     if let Some(last) = last_card {
                         if !last.moves() {
-                            return Err(CannotPlayCardError::new_err("Card cannot be played"));
+                            return Err(HUIError::new_err("Card cannot be played"));
                         }
                     }
 
                     last_card = Some(card);
                     let mut remaining_cards = self.cards.clone();
 
-                    if let Some(position) = player.cards.iter().position(|c| c == card) {
+                    if let Some(position) = remaining_cards.iter().position(|c| c == card) {
                         remaining_cards.remove(position);
                     } else {
-                        return Err(CannotPlayCardError::new_err("Card not owned"));
+                        return Err(HUIError::new_err("Card not in list of cards"))?;
                     }
 
                     card.perform(state, remaining_cards)?;
                 }
-                _ => {}
+                _ => Err(HUIError::new_err("Card cannot be played on this field"))?,
             }
         }
 

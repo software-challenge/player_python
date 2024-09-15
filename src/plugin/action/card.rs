@@ -3,11 +3,7 @@ use std::mem::swap;
 use pyo3::*;
 
 use crate::plugin::{
-    errors::{CannotEnterFieldError, CannotPlayCardError, CardNotOwnedError},
-    field::Field,
-    game_state::GameState,
-    hare::Hare,
-    rules_engine::RulesEngine,
+    errors::HUIError, field::Field, game_state::GameState, hare::Hare, rules_engine::RulesEngine,
 };
 
 use super::Action;
@@ -37,10 +33,8 @@ impl Card {
         target_position: usize,
         cards: Vec<Card>,
     ) -> Result<(), PyErr> {
-        println!("target_position: {}", target_position);
-        println!("player.position: {}", player.position);
         let distance = target_position as isize - player.position as isize;
-        RulesEngine::can_advance_to(
+        RulesEngine::can_move_to(
             &state.board,
             distance,
             player,
@@ -64,7 +58,7 @@ impl Card {
         match self {
             Card::FallBack => {
                 if current.position < other.position {
-                    return Err(CannotPlayCardError::new_err(
+                    return Err(HUIError::new_err(
                         "You can only play this card if you are ahead of the other player",
                     ));
                 }
@@ -77,7 +71,7 @@ impl Card {
             }
             Card::HurryAhead => {
                 if current.position > other.position {
-                    return Err(CannotPlayCardError::new_err(
+                    return Err(HUIError::new_err(
                         "You can only play this card if you are behind the other player",
                     ));
                 }
@@ -90,14 +84,14 @@ impl Card {
                     .board
                     .get_previous_field(Field::Salad, state.board.track.len() - 1)
                     .ok_or_else(|| {
-                        CannotPlayCardError::new_err(
-                            "Unable to find the last lettuce field position",
-                        )
+                        HUIError::new_err("Unable to find the last lettuce field position")
                     })?;
 
-                if current.position < last_lettuce_position {
-                    return Err(CannotPlayCardError::new_err(
-                    "You can only play this card if you are standing in front of the last lettuce field",
+                if current.position > last_lettuce_position
+                    || other.position > last_lettuce_position
+                {
+                    return Err(HUIError::new_err(
+                    "You can only play this card if both players haven't passed the last lettuce field",
                 ));
                 }
 
@@ -108,9 +102,9 @@ impl Card {
                         (&current_last_move.action, &other_last_move.action)
                     {
                         if current_advance.cards.contains(&Card::SwapCarrots)
-                            && other_advance.cards.contains(&Card::SwapCarrots)
+                            || other_advance.cards.contains(&Card::SwapCarrots)
                         {
-                            return Err(CannotPlayCardError::new_err(
+                            return Err(HUIError::new_err(
                                 "You can only play this card if the last similar swap card was not used in one of the last two turns",
                             ));
                         }
@@ -129,10 +123,10 @@ impl Card {
         let field = state
             .board
             .get_field(current.position)
-            .ok_or_else(|| CannotEnterFieldError::new_err("Field not found"))?;
+            .ok_or_else(|| HUIError::new_err("Field not found"))?;
 
         if field != Field::Hare {
-            return Err(CannotPlayCardError::new_err(
+            return Err(HUIError::new_err(
                 "You can only play cards on the hare field",
             ));
         }
@@ -141,7 +135,7 @@ impl Card {
             .cards
             .iter()
             .position(|card| card == self)
-            .ok_or_else(|| CardNotOwnedError::new_err("Card not owned"))?;
+            .ok_or_else(|| HUIError::new_err("Card not owned"))?;
 
         self.play(state, &mut current, &mut other, remaining_cards)?;
 

@@ -57,6 +57,7 @@ mod tests {
         assert_eq!(board.get_previous_field(Field::Start, 4), Some(0));
         assert_eq!(board.get_previous_field(Field::Goal, 4), None);
         assert_eq!(board.get_previous_field(Field::Position2, 2), None);
+        assert_eq!(board.get_previous_field(Field::Position2, 3), Some(2));
     }
 
     #[test]
@@ -73,5 +74,7 @@ mod tests {
         assert_eq!(board.get_next_field(Field::Start, 0), None);
         assert_eq!(board.get_next_field(Field::Position2, 2), None);
         assert_eq!(board.get_next_field(Field::Goal, 3), Some(4));
+        assert_eq!(board.get_next_field(Field::Goal, 4), None);
+        assert_eq!(board.get_next_field(Field::Position1, 2), Some(3));
     }
 }

@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use pyo3::Python;
+
     use crate::plugin::{
         action::{advance::Advance, card::Card},
         board::Board,
@@ -127,5 +129,79 @@ mod tests {
     }
 
     #[test]
-    fn test_perform_cannot_play_card_error() {}
+    fn test_perform_cannot_play_card_error() {
+        let cards = vec![Card::EatSalad];
+        let advance = Advance::new(2, cards.clone());
+
+        let mut state = create_test_game_state();
+        let mut player = state.clone_current_player();
+        player.cards = vec![Card::FallBack];
+        state.update_player(player);
+
+        let result = advance.perform(&mut state);
+        assert!(result.is_err());
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|_| {
+            assert_eq!(
+                result.unwrap_err().to_string(),
+                "HUIError: Card not owned"
+            );
+        })
+    }
+
+    #[test]
+    fn test_perform_market_without_cards_error() {
+        let advance = Advance::new(1, vec![]);
+
+        let mut state = create_test_game_state();
+
+        let result = advance.perform(&mut state);
+        assert!(result.is_err());
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|_| {
+            assert_eq!(
+                result.unwrap_err().to_string(),
+                "HUIError: Cannot enter field without any cards"
+            );
+        })
+    }
+
+    #[test]
+    fn test_perform_hare_without_cards_error() {
+        let advance = Advance::new(2, vec![]);
+
+        let mut state = create_test_game_state();
+
+        let result = advance.perform(&mut state);
+        assert!(result.is_err());
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|_| {
+            assert_eq!(
+                result.unwrap_err().to_string(),
+                "HUIError: No card to play"
+            );
+        })
+    }
+
+    #[test]
+    fn test_perform_market_with_multiple_cards() {
+        let cards = vec![Card::HurryAhead, Card::FallBack];
+        let advance = Advance::new(1, cards.clone());
+
+        let mut state = create_test_game_state();
+
+        let result = advance.perform(&mut state);
+        assert!(result.is_err());
+
+        pyo3::prepare_freethreaded_python();
+        Python::with_gil(|_| {
+            assert_eq!(
+                result.unwrap_err().to_string(),
+                "HUIError: Only one card allowed to buy"
+            );
+        })
+    }
 }
