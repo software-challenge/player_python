@@ -143,10 +143,7 @@ mod tests {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|_| {
-            assert_eq!(
-                result.unwrap_err().to_string(),
-                "HUIError: Card not owned"
-            );
+            assert_eq!(result.unwrap_err().to_string(), "HUIError: Card not owned");
         })
     }
 
@@ -163,7 +160,7 @@ mod tests {
         Python::with_gil(|_| {
             assert_eq!(
                 result.unwrap_err().to_string(),
-                "HUIError: Cannot enter field without any cards"
+                "HUIError: Not enough carrots or no card to play"
             );
         })
     }
@@ -179,10 +176,7 @@ mod tests {
 
         pyo3::prepare_freethreaded_python();
         Python::with_gil(|_| {
-            assert_eq!(
-                result.unwrap_err().to_string(),
-                "HUIError: No card to play"
-            );
+            assert_eq!(result.unwrap_err().to_string(), "HUIError: No card to play");
         })
     }
 
