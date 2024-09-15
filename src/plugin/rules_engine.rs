@@ -110,7 +110,7 @@ impl RulesEngine {
         match field {
             Field::Hedgehog => Err(HUIError::new_err("Cannot advance on Hedgehog field")),
             Field::Salad if player.salads > 0 => Ok(()),
-            Field::Salad => Err(HUIError::new_err("Field is occupied by opponent")),
+            Field::Salad => Err(HUIError::new_err("No salad to eat")),
             Field::Hare if !cards.is_empty() => Ok(()),
             Field::Hare => Err(HUIError::new_err("No card to play")),
             Field::Market if player.carrots >= 10 && !cards.is_empty() => Ok(()),
