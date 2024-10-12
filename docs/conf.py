@@ -5,9 +5,9 @@ sys.path.insert(0, os.path.abspath('../'))
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'socha python client'
-copyright = '2023, maxblan'
-author = 'maxblan'
+project = 'python_player'
+copyright = '2024, Software-Challenge Germany'
+author = 'Software-Challenge Germany'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
