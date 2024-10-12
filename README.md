@@ -147,7 +147,7 @@ Um sicherzustellen, dass der Player im Wettbewerbssystem verwendbar ist, müssen
 
 > Das Paket erleichtert die Vorbereitung! Eine Datei `requirements.txt`, die alle Abhängigkeiten auflistet, wird benötigt. Zum Starten folgenden Befehl im Terminal ausführen:
 >
-> `$ python <Ihr_Hauptskript>.py --build -Verzeichnis <Ihr_Verzeichnisname> -Architektur <Zielarchitektur>`
+> `$ python <dein_haupt_skript>.py --build -directory <dein_ordner> -architecture <ziel_architektur>`
 >
 > Dadurch wird das Paket aktiviert und das Projekt erstellt.
 
