@@ -80,18 +80,13 @@ impl Card {
             }
             Card::EatSalad => current.eat_salad(state)?,
             Card::SwapCarrots => {
-                let last_lettuce_position = state
-                    .board
-                    .get_previous_field(Field::Salad, state.board.track.len() - 1)
-                    .ok_or_else(|| {
-                        HUIError::new_err("Unable to find the last lettuce field position")
-                    })?;
+                let last_lettuce_position = 57;
 
-                if current.position > last_lettuce_position
-                    || other.position > last_lettuce_position
+                if current.position >= last_lettuce_position
+                    || other.position >= last_lettuce_position
                 {
                     return Err(HUIError::new_err(
-                    "You can only play this card if both players haven't passed the last lettuce field",
+                    "You can only play this card if both players are before the last lettuce field",
                 ));
                 }
 

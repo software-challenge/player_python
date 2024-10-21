@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "socha"
-version = "3.5.1"
+version = "3.5.2"
 authors = [{ name = "maxblan", email = "stu222782@mail.uni-kiel.de" }]
 description = "Dieses Paket ist für die Software-Challenge Germany 2025, bei der in dieser Saison das Spiel 'Hase und Igel' im Mittelpunkt steht."
 readme = "README.md"
