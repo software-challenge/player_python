@@ -11,4 +11,6 @@ impl PluginConstants {
     pub const INITIAL_CARROTS: i32 = 68;
 
     pub const ROUND_LIMIT: usize = 30;
+
+    pub const LAST_LETTUCE_POSITION: usize = 57;
 }

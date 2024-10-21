@@ -3,7 +3,8 @@ use std::mem::swap;
 use pyo3::*;
 
 use crate::plugin::{
-    errors::HUIError, field::Field, game_state::GameState, hare::Hare, rules_engine::RulesEngine,
+    constants::PluginConstants, errors::HUIError, field::Field, game_state::GameState, hare::Hare,
+    rules_engine::RulesEngine,
 };
 
 use super::Action;
@@ -80,10 +81,8 @@ impl Card {
             }
             Card::EatSalad => current.eat_salad(state)?,
             Card::SwapCarrots => {
-                let last_lettuce_position = 57;
-
-                if current.position >= last_lettuce_position
-                    || other.position >= last_lettuce_position
+                if current.position >= PluginConstants::LAST_LETTUCE_POSITION
+                    || other.position >= PluginConstants::LAST_LETTUCE_POSITION
                 {
                     return Err(HUIError::new_err(
                     "You can only play this card if both players are before the last lettuce field",
