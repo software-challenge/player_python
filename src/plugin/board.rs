@@ -25,7 +25,7 @@ impl Board {
 
     /// Finds the index of the specified field within the given range.
     pub fn find_field(&self, field: Field, start: usize, end: usize) -> Option<usize> {
-        (start..end).find(|&i| self.track.get(i) == Some(&field))
+        (start..=end).find(|&i| self.track.get(i) == Some(&field))
     }
 
     /// Finds the previous occurrence of the specified field before the given index.

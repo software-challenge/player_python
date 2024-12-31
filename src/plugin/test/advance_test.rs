@@ -60,7 +60,7 @@ mod tests {
         assert!(result.is_ok());
 
         let current_player = state.clone_current_player();
-        assert_eq!(current_player.position, 6);
+        assert_eq!(current_player.position, 2);
     }
 
     #[test]

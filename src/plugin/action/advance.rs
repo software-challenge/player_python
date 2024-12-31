@@ -1,6 +1,6 @@
 use pyo3::{pyclass, pymethods, PyErr};
 
-use crate::plugin::{errors::HUIError, field::Field, game_state::GameState};
+use crate::plugin::{errors::HUIError, field::Field, game_state::GameState, hare::Hare};
 
 use super::card::Card;
 
@@ -28,21 +28,44 @@ impl Advance {
 
         let current_field = state.board.get_field(player.position).unwrap();
         if self.cards.is_empty() {
-            match current_field {
-                Field::Market | Field::Hare => {
-                    return Err(HUIError::new_err("Cannot enter field without any cards"));
-                }
-                _ => {
-                    state.update_player(player);
-                    return Ok(());
-                }
-            }
+            return self.handle_empty_cards(current_field, state, player);
         }
 
+        self.handle_cards(current_field, state, player)
+    }
+
+    fn handle_empty_cards(
+        &self,
+        current_field: Field,
+        state: &mut GameState,
+        player: Hare,
+    ) -> Result<(), PyErr> {
+        match current_field {
+            Field::Market | Field::Hare => {
+                Err(HUIError::new_err("Cannot enter field without any cards"))
+            }
+            _ => {
+                state.update_player(player);
+                Ok(())
+            }
+        }
+    }
+
+    fn handle_cards(
+        &self,
+        mut current_field: Field,
+        state: &mut GameState,
+        mut player: Hare,
+    ) -> Result<(), PyErr> {
         let mut last_card: Option<&Card> = None;
         let mut card_bought = false;
 
-        for card in &self.cards {
+        for (index, card) in self.cards.iter().enumerate() {
+            let remaining_cards = self
+                .cards
+                .get(index + 1..)
+                .map(|slice| slice.to_vec())
+                .unwrap_or(Vec::new());
             match current_field {
                 Field::Market if card_bought => {
                     return Err(HUIError::new_err("Only one card allowed to buy"));
@@ -60,17 +83,19 @@ impl Advance {
                     }
 
                     last_card = Some(card);
-                    let mut remaining_cards = self.cards.clone();
 
-                    if let Some(position) = remaining_cards.iter().position(|c| c == card) {
-                        remaining_cards.remove(position);
-                    } else {
-                        return Err(HUIError::new_err("Card not in list of cards"))?;
-                    }
-
-                    card.perform(state, remaining_cards)?;
+                    card.perform(state, remaining_cards.clone())?;
+                    player = state.clone_current_player();
                 }
                 _ => Err(HUIError::new_err("Card cannot be played on this field"))?,
+            }
+
+            current_field = state.board.get_field(player.position).unwrap();
+            if current_field == Field::Hare && remaining_cards.is_empty() && last_card.is_none() {
+                return Err(HUIError::new_err("Cannot enter field without any cards"));
+            }
+            if current_field == Field::Market && remaining_cards.is_empty() && !card_bought {
+                return Err(HUIError::new_err("Cannot enter field without any cards"));
             }
         }
 

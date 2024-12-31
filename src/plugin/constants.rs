@@ -1,5 +1,7 @@
 use pyo3::*;
 
+use super::action::card::Card;
+
 #[pyclass]
 pub struct PluginConstants;
 
@@ -13,4 +15,11 @@ impl PluginConstants {
     pub const ROUND_LIMIT: usize = 30;
 
     pub const LAST_LETTUCE_POSITION: usize = 57;
+
+    pub const MARKET_SELECTION: [Card; 4] = [
+        Card::FallBack,
+        Card::HurryAhead,
+        Card::EatSalad,
+        Card::SwapCarrots,
+    ];
 }

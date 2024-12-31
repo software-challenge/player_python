@@ -2,7 +2,6 @@ use itertools::Itertools;
 use pyo3::*;
 
 use super::action::advance::Advance;
-use super::action::card::Card;
 use super::action::eat_salad::EatSalad;
 use super::action::exchange_carrots::ExchangeCarrots;
 use super::action::fall_back::FallBack;
@@ -149,29 +148,28 @@ impl GameState {
         let mut moves = Vec::new();
 
         for distance in 1..=max_distance {
-            if let Some(Field::Hare) = self.board.get_field(current_player.position + distance) {
-                for k in 0..current_player.cards.len() {
-                    for combination in current_player.cards.iter().combinations(k) {
-                        moves.push(Move::new(Action::Advance(Advance::new(
-                            distance,
-                            combination.iter().map(|&c| *c).collect(),
-                        ))));
-                    }
-                }
+            for card in PluginConstants::MARKET_SELECTION {
+                moves.push(Move::new(Action::Advance(Advance::new(
+                    distance,
+                    vec![card],
+                ))));
             }
 
-            if self.board.get_field(current_player.position + distance) == Some(Field::Market) {
-                let cards = vec![
-                    Card::FallBack,
-                    Card::HurryAhead,
-                    Card::EatSalad,
-                    Card::SwapCarrots,
-                ];
-                for card in cards {
+            for k in 0..=current_player.cards.len() {
+                for permutation in current_player.cards.iter().permutations(k).unique() {
                     moves.push(Move::new(Action::Advance(Advance::new(
                         distance,
-                        vec![card],
+                        permutation.iter().map(|&c| *c).collect(),
                     ))));
+
+                    for card in PluginConstants::MARKET_SELECTION {
+                        let mut extended_permutaion = permutation.clone();
+                        extended_permutaion.push(&card);
+                        moves.push(Move::new(Action::Advance(Advance::new(
+                            distance,
+                            extended_permutaion.iter().map(|&c| *c).collect(),
+                        ))));
+                    }
                 }
             }
 
@@ -180,6 +178,7 @@ impl GameState {
 
         moves
             .into_iter()
+            .unique()
             .filter(|m| m.perform(&mut self.clone()).is_ok())
             .collect()
     }
