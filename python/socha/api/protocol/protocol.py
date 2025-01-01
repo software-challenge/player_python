@@ -93,13 +93,14 @@ class LastMove:
             'required': True,
         },
     )
+    class_binding: Optional[object] = field(default=None)
     distance: Optional[int] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    card: Optional[str] = field(
+    card: Optional[List[str]] = field(
         default=None,
         metadata={
             'type': 'Element',

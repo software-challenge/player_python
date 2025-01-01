@@ -37,7 +37,7 @@ mod tests {
             None,
             Some(3),
         );
-        GameState::new(board, 0, player_one, player_two)
+        GameState::new(board, 0, player_one, player_two, None)
     }
 
     #[test]

@@ -21,17 +21,20 @@ pub struct GameState {
     pub turn: usize,
     player_one: Hare,
     player_two: Hare,
+    #[pyo3(get, set)]
+    pub last_move: Option<Move>
 }
 
 #[pymethods]
 impl GameState {
     #[new]
-    pub fn new(board: Board, turn: usize, player_one: Hare, player_two: Hare) -> Self {
+    pub fn new(board: Board, turn: usize, player_one: Hare, player_two: Hare, last_move: Option<Move>) -> Self {
         Self {
             board,
             turn,
             player_one,
             player_two,
+            last_move,
         }
     }
 
@@ -192,8 +195,8 @@ impl std::fmt::Display for GameState {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "GameState(board={}, turn={}, player_one={}, player_two={})",
-            self.board, self.turn, self.player_one, self.player_two
+            "GameState(board={}, turn={}, player_one={}, player_two={}, last_move={:?})",
+            self.board, self.turn, self.player_one, self.player_two, self.last_move
         )
     }
 }

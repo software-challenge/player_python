@@ -385,9 +385,10 @@ class GameState:
 
     board: Board
     turn: int
+    last_move: Optional[Move]
 
     def __init__(
-        self, board: Board, turn: int, player_one: Hare, player_two: Hare
+        self, board: Board, turn: int, player_one: Hare, player_two: Hare, last_move: Optional[Move]
     ) -> None: ...
     def perform_move(self, move: Move) -> GameState:
         """
