@@ -49,6 +49,7 @@ mod tests {
             20,
             create_player(TeamEnum::One, 2, vec![Card::EatSalad], 37, 1),
             create_player(TeamEnum::Two, 6, vec![], 11, 1),
+            None,
         );
         let moves = state.possible_moves();
         assert!(moves.contains(&Move::new(Action::Advance(Advance::new(
@@ -70,6 +71,7 @@ mod tests {
                 0,
             ),
             create_player(TeamEnum::Two, 6, vec![], 11, 0),
+            None,
         );
         let moves = state.possible_moves();
 

@@ -92,29 +92,47 @@ def handle_move(move_response: _socha.Move) -> Data:
         raise ValueError(f'Unknown move response action: {move_response.action}')
 
 
-def message_to_state(message: Room) -> _socha.GameState:
+def message_to_state(message: Room, second_last_move: _socha.Move) -> _socha.GameState:
     """
     Constructs a GameState from the provided message, ensuring to reflect the
     current state based on the ships' positions, teams, and other attributes.
 
     Args:
         message: The input message containing the current game state.
+        second_last_move: the last_move object from the last game state before this game state
 
     Returns:
         GameState: The constructed game state from the message.
     """
+
+
     state: State = message.data.class_binding
 
+    # extract last move of current gameState
+    state_last_move = _socha.Move(action=state.last_move.class_binding) if state.last_move and state.last_move.class_binding else None
+
     def create_hare(hare: Hare) -> _socha.Hare:
+
+        players_last_move = None
+
+        if state.turn % 2 == 0: # now is ONE at turn, last turn was None or TWO
+            if hare.team == 'ONE':
+                players_last_move = second_last_move
+            else:
+                players_last_move = state_last_move
+        else:
+            if hare.team == 'TWO':
+                players_last_move = second_last_move
+            else:
+                players_last_move = state_last_move
+
         return _socha.Hare(
             cards=[map_string_to_card(card) for card in hare.cards.card]
             if hare.cards
             else [],
             carrots=hare.carrots,
             position=hare.position,
-            last_move=_socha.Move(action=hare.last_action.class_binding)
-            if hare.last_action and hare.last_action.class_binding
-            else None,
+            last_move=players_last_move,
             salads=hare.salads,
             team=_socha.TeamEnum.One if hare.team == 'ONE' else _socha.TeamEnum.Two,
         )
@@ -124,4 +142,5 @@ def message_to_state(message: Room) -> _socha.GameState:
         player_one=create_hare(state.hare[0]),
         player_two=create_hare(state.hare[1]),
         turn=state.turn,
+        last_move=state_last_move,
     )

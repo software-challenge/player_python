@@ -38,7 +38,7 @@ mod tests {
             None,
             Some(3),
         );
-        GameState::new(board, 0, player_one, player_two)
+        GameState::new(board, 0, player_one, player_two, None)
     }
 
     #[test]
@@ -93,7 +93,7 @@ mod tests {
             Some(0),
         );
 
-        let mut state = GameState::new(board, 0, player_one, player_two);
+        let mut state = GameState::new(board, 0, player_one, player_two, None);
 
         let advance = Advance::new(2, vec![]);
 

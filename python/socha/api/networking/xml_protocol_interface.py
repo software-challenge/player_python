@@ -24,17 +24,17 @@ from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
-from socha.api.protocol.protocol import Data, LastAction
+from socha.api.protocol.protocol import Data, LastAction, LastMove
 
 
-def map_object(data: Data | LastAction, params: dict):
+def map_object(data: Data | LastAction | LastMove, params: dict):
     try:
         params.pop('class_binding')
     except KeyError:
         ...
     if params.get('class_value') == 'welcomeMessage':
         welcome_message = WelcomeMessage(
-            _socha.TeamEnum.One if params.get('name') == 'ONE' else _socha.TeamEnum.Two
+            _socha.TeamEnum.One if params.get('color') == 'ONE' else _socha.TeamEnum.Two
         )
         return data(class_binding=welcome_message, **params)
     elif params.get('class_value') == 'memento':
@@ -71,6 +71,8 @@ def map_object(data: Data | LastAction, params: dict):
     elif params.get('class_value') == 'eatsalad':
         salad_object = _socha.EatSalad()
         return data(class_binding=salad_object, **params)
+    elif params.get('class_value') == 'card': # work around for LastAction, because buggy and now prevents warning
+        return data(**params)
     else:
         logging.warn('Unknown class value: %s', params.get('class_value'))
 
@@ -78,7 +80,7 @@ def map_object(data: Data | LastAction, params: dict):
 
 
 def custom_class_factory(clazz, params: dict):
-    if clazz.__name__ == 'Data' or clazz.__name__ == 'LastAction':
+    if clazz.__name__ == 'Data' or clazz.__name__ == 'LastAction' or clazz.__name__ == 'LastMove':
         return map_object(clazz, params)
 
     return clazz(**params)
