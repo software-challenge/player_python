@@ -1,0 +1,104 @@
+
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="9"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="6"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="4"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="4"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="3">
+      <card>FALL_BACK</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="3">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="3">
+      <card>FALL_BACK</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="9">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="10"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="5"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="eatsalad"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="6">
+      <card>FALL_BACK</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="1"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="fallback"/>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="5">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="14">
+      <card>EAT_SALAD</card>
+    </data>
+  </room>
+  <room roomId="7ea01df9-23e1-4724-a909-bc9b324e8772">
+    <data class="advance" distance="2"/>
+  </room>
+  <close/>
+</protocol>
