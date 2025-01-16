@@ -37,6 +37,7 @@ class Starter:
         directory: str = None,
         architecture: str = None,
         log_level: int = logging.INFO,
+        python_version: str = '3.10',
     ):
         """
         All these arguments can be overwritten, when parsed via start arguments,
@@ -71,8 +72,9 @@ class Starter:
         self.directory: str = args.directory or directory
         self.architecture: str = args.architecture or architecture
         self.build: str = args.build or build
+        self.python_version: str = args.python_version or python_version
         if self.build:
-            builder = SochaPackageBuilder(self.directory, self.architecture)
+            builder = SochaPackageBuilder(self.directory, self.architecture, self.python_version)
             builder.build_package()
             exit(0)
 
@@ -240,6 +242,11 @@ class Starter:
             "-a",
             "--architecture",
             help="Specifies the build architecture (e.g.: manylinux1_x86_64).",
+        )
+
+        parser.add_argument(
+            "--python-version",
+            help="Specifies the build python version (e.g.: 10 [for python 3.10 - this is standard]).",
         )
 
         return parser.parse_args()

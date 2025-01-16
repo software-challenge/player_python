@@ -14,9 +14,10 @@ import zipfile
 
 class SochaPackageBuilder:
 
-    def __init__(self, package_name, architecture):
+    def __init__(self, package_name, architecture, python_version):
         self.package_name = package_name
         self.architecture = architecture
+        self.python_version = python_version
         self.dependencies_dir = "dependencies"
         self.packages_dir = "packages"
         self.cache_dir = ".pip_cache"
@@ -50,7 +51,7 @@ class SochaPackageBuilder:
                     "download",
                     f"--platform={self.architecture}",
                     "--python-version",
-                    "3.10",
+                    f"{self.python_version}",
                     "--only-binary=:all:",
                     "-d",
                     f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}",
