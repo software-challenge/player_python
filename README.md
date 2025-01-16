@@ -16,13 +16,15 @@ Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany
 
 ## Inhaltsverzeichnis
 
-- [Installation](#installation)
-  - [Global](#global)
-  - [Virtuelle Umgebung](#virtuelle-umgebung)
-- [Erste Schritte](#erste-schritte)
-  - [Startargumente](#start-arguments)
-- [Vorbereitung des Spielers auf den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
-- [Lokale Entwicklung](#lokale-entwicklung)
+- [Python-Client für die Software-Challenge Germany 2025](#python-client-für-die-software-challenge-germany-2025)
+  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
+  - [Installation](#installation)
+    - [Global](#global)
+    - [Virtuelle Umgebung](#virtuelle-umgebung)
+  - [Erste Schritte](#erste-schritte)
+    - [Startargumente](#startargumente)
+  - [Vorbereitung des Spielers für den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
+  - [Lokale Entwicklung](#lokale-entwicklung)
 
 ## Installation
 
@@ -138,16 +140,24 @@ Falls die Logik von der Konsole aus ausgeführt werden soll, können Startargume
 | **-b, --build**        | Baut dieses Skript zu einem Paket mit all seinen Abhängigkeiten.                                 |
 | **-d, --directory**    | Das Verzeichnis, in dem das Paket erstellt werden soll.                                          |
 | **-a, --architecture** | Die Architektur des Pakets.                                                                      |
+| **--python-version**   | Die Python-Version für den Build. Der Standardwert ist '3.10'.                                   |
 
 ## Vorbereitung des Spielers für den Wettbewerb
 
-> Das Wettbewerbssystem läuft auf einem Linux-System mit einer `x86_64`-Architektur. Um den Client auf dem Wettbewerbssystem zu verwenden, muss das Socha-Paket für die Plattform `manylinux2014_x86_64` und die Python-Version `310` heruntergeladen werden.
+> Das Wettbewerbssystem läuft auf einem Linux-System mit einer `x86_64`-Architektur. Um den Client auf dem Wettbewerbssystem zu verwenden, muss das Socha-Paket für die Plattform `manylinux2014_x86_64` und die Python-Version `310` oder `312` heruntergeladen werden.
 
 Um sicherzustellen, dass der Player im Wettbewerbssystem verwendbar ist, müssen alle Abhängigkeiten heruntergeladen werden, da das System auf einem Docker-Container ohne Internetzugang und sudo-Berechtigung ausgeführt wird.
 
-> Das Paket erleichtert die Vorbereitung! Eine Datei `requirements.txt`, die alle Abhängigkeiten auflistet, wird benötigt. Zum Starten folgenden Befehl im Terminal ausführen:
+> Das Paket erleichtert die Vorbereitung!
+> 
+> Eine Datei `requirements.txt`, die alle Abhängigkeiten auflistet, wird dafür benötigt. 
+> Jeder Bot braucht natürlich das Paket `socha`. 
+> Außerdem sollte `setuptools` in der Version `58.1.0` für Python 3.10 bzw. `75.8.0` für Python 3.12 hinzugefügt werden. \
+> Alle Abhängigkeiten kommen mit der Syntax `<paket>==<version>` in jeweils eine Zeile.
+> 
+> Zum Starten folgenden Befehl im Terminal ausführen:
 >
-> `$ python <dein_haupt_skript>.py --build -directory <dein_ordner> -architecture <ziel_architektur>`
+> `$ python <dein_haupt_skript>.py --build --directory <dein_ordner> --architecture <ziel_architektur> --python-version <3.xx>`
 >
 > Dadurch wird das Paket aktiviert und das Projekt erstellt.
 
@@ -157,6 +167,7 @@ Falls eine manuelle Vorgehensweise bevorzugt wird, folgen diese Schritte zum Her
 2. `mkdir my_player` eingeben, um ein neues Verzeichnis namens `my_player` zu erstellen. Der Verzeichnisname kann beliebig gewählt werden.
 3. Mit `cd my_player` in das Verzeichnis wechseln.
 4. Den Befehl `pip download socha --only-binary=:all: --platform manylinux2014_x86_64 --python-version 310 -d dependencies` im Verzeichnis ausführen, um die benötigten Abhängigkeiten in den Ordner `dependencies` herunterzuladen.
+     - Ändere hier `310` zu `312` wenn du mit der Python-Version 3.12 arbeitest.
 5. Alle Abhängigkeiten hinzufügen, die der Client verwendet.
 6. Ein letztes Verzeichnis mit `mkdir .pip_cache` erstellen.
 
