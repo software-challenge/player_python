@@ -16,15 +16,13 @@ Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany
 
 ## Inhaltsverzeichnis
 
-- [Python-Client für die Software-Challenge Germany 2025](#python-client-für-die-software-challenge-germany-2025)
-  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
-  - [Installation](#installation)
-    - [Global](#global)
-    - [Virtuelle Umgebung](#virtuelle-umgebung)
-  - [Erste Schritte](#erste-schritte)
-    - [Startargumente](#startargumente)
-  - [Vorbereitung des Spielers für den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
-  - [Lokale Entwicklung](#lokale-entwicklung)
+- [Installation](#installation)
+  - [Global](#global)
+  - [Virtuelle Umgebung](#virtuelle-umgebung)
+- [Erste Schritte](#erste-schritte)
+  - [Startargumente](#startargumente)
+- [Vorbereitung des Spielers für den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
+- [Lokale Entwicklung](#lokale-entwicklung)
 
 ## Installation
 
