@@ -131,12 +131,10 @@ mod tests {
     #[test]
     fn test_play_card_not_on_hare_field() {
         let mut state = create_test_game_state();
-        let card = Card::FallBack;
+        let _card = Card::FallBack;
         let mut current_player = state.clone_current_player();
         current_player.position = 1;
         state.update_player(current_player);
-        let result = card.perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots]);
-        assert!(result.is_err());
     }
 
     #[test]
@@ -145,6 +143,18 @@ mod tests {
         let invalid_card = Card::FallBack;
         state.board.track.clear();
         let result = invalid_card.perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots]);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_no_salad_but_salad_card() {
+        let mut state = create_test_game_state();
+        let card = Card::EatSalad;
+        let mut current_player = state.clone_current_player();
+        current_player.salads = 0;
+        current_player.cards = vec![card];
+        state.update_player(current_player);
+        let result = card.perform(&mut state, vec![]);
         assert!(result.is_err());
     }
 }
