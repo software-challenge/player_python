@@ -79,7 +79,15 @@ impl Card {
                 // saturating add is here unnecessary because the board is finite and never larger than usize::MAX
                 self.move_to_field(current, state, other.position + 1, remaining_cards)?;
             }
-            Card::EatSalad => current.eat_salad(state)?,
+            Card::EatSalad => {
+                if current.salads == 0 {
+                    return Err(HUIError::new_err(
+                        "You can only play this card if you have lettuce left",
+                    ));
+                }
+
+                current.eat_salad(state)?
+            }
             Card::SwapCarrots => {
                 if current.position >= PluginConstants::LAST_LETTUCE_POSITION
                     || other.position >= PluginConstants::LAST_LETTUCE_POSITION
