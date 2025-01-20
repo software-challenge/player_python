@@ -72,6 +72,3 @@ docs/_build/
 
 # Pyenv
 .python-version
-
-# logic test
-logic_test.py
