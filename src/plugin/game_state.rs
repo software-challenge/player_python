@@ -48,23 +48,26 @@ impl GameState {
                 Some(Field::Position1) if player.position > opponent_position => {
                     player.carrots += 10
                 }
-                Some(Field::Position2) if player.position > opponent_position => {
+                Some(Field::Position2) if player.position < opponent_position => {
                     player.carrots += 30
                 }
                 _ => {}
             }
         }
 
-        update_carrots(
-            &mut new_state.player_one,
-            new_state.player_two.position,
-            &new_state.board,
-        );
-        update_carrots(
-            &mut new_state.player_two,
-            new_state.player_one.position,
-            &new_state.board,
-        );
+        if new_state.turn % 2 == 0 {
+            update_carrots(
+                &mut new_state.player_one,
+                new_state.player_two.position,
+                &new_state.board,
+            );
+        } else {
+            update_carrots(
+                &mut new_state.player_two,
+                new_state.player_one.position,
+                &new_state.board,
+            );
+        }
 
         Ok(new_state)
     }
