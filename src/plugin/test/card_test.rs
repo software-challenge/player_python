@@ -131,10 +131,12 @@ mod tests {
     #[test]
     fn test_play_card_not_on_hare_field() {
         let mut state = create_test_game_state();
-        let _card = Card::FallBack;
+        let card = Card::FallBack;
         let mut current_player = state.clone_current_player();
         current_player.position = 1;
         state.update_player(current_player);
+        let result = card.perform(&mut state, vec![Card::EatSalad, Card::SwapCarrots]);
+        assert!(result.is_err());
     }
 
     #[test]
