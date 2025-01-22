@@ -22,6 +22,7 @@ impl Move {
         if result.is_ok() {
             let mut player = state.clone_current_player();
             player.last_move = Some(self.clone());
+            state.last_move = Some(self.clone());
             state.update_player(player);
         }
         result
