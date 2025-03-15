@@ -84,7 +84,7 @@ impl Advance {
 
                     last_card = Some(card);
 
-                    card.perform(state, remaining_cards.clone())?;
+                    card.perform(state, remaining_cards.clone(), self.distance)?;
                     player = state.clone_current_player();
                 }
                 _ => Err(HUIError::new_err("Card cannot be played on this field"))?,
