@@ -59,7 +59,6 @@ impl Card {
     ) -> Result<(), PyErr> {
         match self {
             Card::FallBack => {
-                println!("trest");
                 if current.position < other.position {
                     return Err(HUIError::new_err(
                         "You can only play this card if you are ahead of the other player",
