@@ -93,8 +93,6 @@ jobs:
     needs: [linux, windows, macos]
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          pattern: '*.whl'
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -120,8 +118,6 @@ jobs:
     needs: [linux, windows, macos]
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          pattern: '*.whl'
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
