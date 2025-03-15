@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          path: dist
+          pattern: '*.whl'
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -112,7 +112,7 @@ jobs:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: 'dist/*.whl'
+          files: '*.whl'
   publish:
     name: Publish
     runs-on: ubuntu-latest
@@ -121,11 +121,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          path: dist
+          pattern: '*.whl'
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
         env:
           MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
         with:
           command: upload
-          args: --non-interactive --skip-existing dist/*.whl
+          args: --non-interactive --skip-existing *
