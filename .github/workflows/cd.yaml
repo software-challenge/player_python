@@ -94,7 +94,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: '*.whl'
+          pattern: '**/*.whl'
           merge-multiple: true          
       - name: Create Release
         id: create_release
@@ -122,7 +122,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          pattern: '*.whl'
+          pattern: '**/*.whl'
           merge-multiple: true      
       - name: Publish to PyPI
         uses: PyO3/maturin-action@v1
