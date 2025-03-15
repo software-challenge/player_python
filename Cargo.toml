@@ -1,6 +1,6 @@
 [package]
 name = "_socha"
-version = "3.6.2"
+version = "3.7.0"
 edition = "2021"
 
 [lib]
