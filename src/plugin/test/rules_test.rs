@@ -85,6 +85,21 @@ mod tests {
         assert!(RulesEngine::can_move_to(&board, 5, &player_one, &player_two, vec![]).is_err());
 
         player_one.cards = vec![];
+        player_one.carrots = 60;
         assert!(RulesEngine::can_move_to(&board, 6, &player_one, &player_two, vec![]).is_err());
+
+        // goal
+        //  too many salads and carrots
+        assert!(RulesEngine::can_move_to(&board, 8, &player_one, &player_two, vec![]).is_err());
+        //  salads ok, too many carrots
+        player_one.salads = 0;
+        assert!(RulesEngine::can_move_to(&board, 8, &player_one, &player_two, vec![]).is_err());
+        //  too many salads, carrots ok
+        player_one.carrots = 45;
+        player_one.salads = 3;
+        assert!(RulesEngine::can_move_to(&board, 8, &player_one, &player_two, vec![]).is_err());
+        //  all ok
+        player_one.salads = 0;
+        assert!(RulesEngine::can_move_to(&board, 8, &player_one, &player_two, vec![]).is_ok());
     }
 }

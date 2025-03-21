@@ -106,7 +106,7 @@ impl RulesEngine {
         if field != Field::Goal && new_position == other_player.position {
             return Err(HUIError::new_err("Field is occupied by opponent"));
         }
-
+        
         match field {
             Field::Hedgehog => Err(HUIError::new_err("Cannot advance on Hedgehog field")),
             Field::Salad if player.salads > 0 => Ok(()),
@@ -115,7 +115,7 @@ impl RulesEngine {
             Field::Hare => Err(HUIError::new_err("No card to play")),
             Field::Market if player.carrots >= 10 && !cards.is_empty() => Ok(()),
             Field::Market => Err(HUIError::new_err("Not enough carrots or no card to play")),
-            Field::Goal if player.carrots <= 10 && player.salads == 0 => Ok(()),
+            Field::Goal if player.carrots - RulesEngine::calculates_carrots(distance as usize) <= 10 && player.salads == 0 => Ok(()),
             Field::Goal => Err(HUIError::new_err("Too many carrots or salads")),
             _ => Ok(()),
         }
