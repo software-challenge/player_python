@@ -159,7 +159,6 @@ impl GameState {
     }
 
     fn possible_advance_moves_old(&self) -> Vec<Move> {
-        println!("begin old");
 
         let current_player = self.clone_current_player();
         let max_distance =
@@ -196,14 +195,6 @@ impl GameState {
             moves.push(Move::new(Action::Advance(Advance::new(distance, vec![]))));
         }
 
-        /*for m in &moves {
-            println!("{}", m);
-        }*/
-
-        println!("{}", moves.len());
-
-        println!("end old\n");
-
         moves
             .into_iter()
             .unique()
@@ -212,7 +203,6 @@ impl GameState {
     }
 
     fn possible_advance_moves(&self) -> Vec<Move> {
-        println!("begin performance");
 
         let current_player = self.clone_current_player();
         let max_distance =
@@ -227,11 +217,6 @@ impl GameState {
                 // change permutation cards to owned
                 let owned_permutation: Vec<Card> = permutation.iter().map(|&card| card.clone()).collect();
 
-                /*println!("{}", owned_permutation.len());
-                for per in &owned_permutation {
-                    println!("perm: {}", per);
-                }*/
-
                 // if minimum one card in permutation, save permutation and add all market cards to it
                 if !owned_permutation.is_empty() {
                     card_permutations.push(owned_permutation.clone());
@@ -244,16 +229,6 @@ impl GameState {
                 }
             }
         }
-
-
-        /*
-        TODO:
-        if hare in 1 to max_distance or if match_field = hare -> calc and save permutations
-
-        or
-
-        not using permutations anymore, do it like java 
-        */
 
         let mut moves: Vec<Move> = Vec::new();
 
@@ -268,8 +243,6 @@ impl GameState {
 
             // destination field of advance
             let target_field: Field = self.board.track[target_pos];
-
-            //println!("{}", target_field);
 
             // add card / no card advances for each field type
             match target_field {
@@ -294,15 +267,6 @@ impl GameState {
                 }
             }
         }
-
-        for m in &moves {
-            println!("{}", m);
-        }
-
-        println!("{}", moves.len());
-
-
-        println!("end performance\n");
 
         moves
             .into_iter()
