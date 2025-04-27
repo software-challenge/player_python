@@ -28,15 +28,15 @@ pub enum Field {
 impl std::fmt::Display for Field {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Field::Position1 => write!(f, "1"),
-            Field::Position2 => write!(f, "2"),
-            Field::Hedgehog => write!(f, "I"),
-            Field::Salad => write!(f, "S"),
-            Field::Carrots => write!(f, "C"),
-            Field::Hare => write!(f, "H"),
-            Field::Market => write!(f, "M"),
-            Field::Goal => write!(f, "G"),
-            Field::Start => write!(f, "S"),
+            Field::Position1 => write!(f, "Pos1"),
+            Field::Position2 => write!(f, "Pos2"),
+            Field::Hedgehog => write!(f, "Hedgehog"),
+            Field::Salad => write!(f, "Salad"),
+            Field::Carrots => write!(f, "Carrot"),
+            Field::Hare => write!(f, "Hare"),
+            Field::Market => write!(f, "Market"),
+            Field::Goal => write!(f, "Goal"),
+            Field::Start => write!(f, "Start"),
         }
     }
 }
