@@ -215,7 +215,7 @@ impl GameState {
             for permutation in current_player.cards.iter().permutations(k).unique() {
 
                 // change permutation cards to owned
-                let owned_permutation: Vec<Card> = permutation.iter().map(|&card| card.clone()).collect();
+                let owned_permutation: Vec<Card> = permutation.iter().map(|&card| *card).collect();
 
                 // if minimum one card in permutation, save permutation and add all market cards to it
                 if !owned_permutation.is_empty() {
@@ -250,7 +250,7 @@ impl GameState {
                     for permutation in &card_permutations {
                         moves.push(Move::new(Action::Advance(Advance::new(
                             distance,
-                            permutation.iter().map(|&c| c).collect(),
+                            permutation.iter().copied().collect(),
                         ))));
                     }
                 },
