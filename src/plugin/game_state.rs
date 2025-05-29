@@ -250,7 +250,7 @@ impl GameState {
                     for permutation in &card_permutations {
                         moves.push(Move::new(Action::Advance(Advance::new(
                             distance,
-                            permutation.iter().copied().collect(),
+                            permutation.to_vec(),
                         ))));
                     }
                 },
