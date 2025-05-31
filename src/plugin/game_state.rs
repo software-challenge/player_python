@@ -5,6 +5,7 @@ use super::action::advance::Advance;
 use super::action::eat_salad::EatSalad;
 use super::action::exchange_carrots::ExchangeCarrots;
 use super::action::fall_back::FallBack;
+use super::action::card::Card;
 use super::action::Action;
 use super::board::Board;
 use super::constants::PluginConstants;
@@ -105,6 +106,17 @@ impl GameState {
         player_one_in_goal || player_two_in_goal && both_had_last_chance || rounds_exceeded
     }
 
+    pub fn possible_moves_old(&self) -> Vec<Move> {
+        let mut moves = Vec::new();
+
+        moves.append(&mut self.possible_advance_moves_old());
+        moves.append(&mut self.possible_eat_salad_moves());
+        moves.append(&mut self.possible_exchange_carrots_moves());
+        moves.append(&mut self.possible_fall_back_moves());
+
+        moves
+    }
+
     pub fn possible_moves(&self) -> Vec<Move> {
         let mut moves = Vec::new();
 
@@ -146,7 +158,8 @@ impl GameState {
             .collect()
     }
 
-    fn possible_advance_moves(&self) -> Vec<Move> {
+    fn possible_advance_moves_old(&self) -> Vec<Move> {
+
         let current_player = self.clone_current_player();
         let max_distance =
             (((-1.0 + (1 + 8 * current_player.carrots) as f64).sqrt()) / 2.0) as usize;
@@ -180,6 +193,79 @@ impl GameState {
             }
 
             moves.push(Move::new(Action::Advance(Advance::new(distance, vec![]))));
+        }
+
+        moves
+            .into_iter()
+            .unique()
+            .filter(|m| m.perform(&mut self.clone()).is_ok())
+            .collect()
+    }
+
+    fn possible_advance_moves(&self) -> Vec<Move> {
+
+        let current_player = self.clone_current_player();
+        let max_distance =
+            (((-1.0 + (1 + 8 * current_player.carrots) as f64).sqrt()) / 2.0) as usize;
+        
+
+        let mut card_permutations = Vec::new();
+
+        for k in 0..=current_player.cards.len() {
+            for permutation in current_player.cards.iter().permutations(k).unique() {
+
+                // change permutation cards to owned
+                let owned_permutation: Vec<Card> = permutation.iter().map(|&card| *card).collect();
+
+                // if minimum one card in permutation, save permutation and add all market cards to it
+                if !owned_permutation.is_empty() {
+                    card_permutations.push(owned_permutation.clone());
+
+                    for card in PluginConstants::MARKET_SELECTION {
+                        let mut extended_permutation = owned_permutation.clone();
+                        extended_permutation.push(card);  // card is already owned
+                        card_permutations.push(extended_permutation);
+                    }
+                }
+            }
+        }
+
+        let mut moves: Vec<Move> = Vec::new();
+
+        for distance in 1..=max_distance {
+            // destination of advance
+            let target_pos: usize = current_player.position + distance;
+
+            // out of range, skip
+            if target_pos > self.board.track.len() - 1 {
+                continue;
+            }
+
+            // destination field of advance
+            let target_field: Field = self.board.track[target_pos];
+
+            // add card / no card advances for each field type
+            match target_field {
+                Field::Hare => {
+                    for permutation in &card_permutations {
+                        moves.push(Move::new(Action::Advance(Advance::new(
+                            distance,
+                            permutation.to_vec(),
+                        ))));
+                    }
+                },
+                Field::Market => {
+                    for card in PluginConstants::MARKET_SELECTION {
+                        moves.push(Move::new(Action::Advance(Advance::new(
+                            distance,
+                            vec![card],
+                        ))));
+                    }
+                },
+                _ => {
+                    moves.push(Move::new(Action::Advance(Advance::new(distance, vec![]))));
+                }
+            }
         }
 
         moves

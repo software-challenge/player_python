@@ -35,6 +35,11 @@ impl Card {
         cards: Vec<Card>,
     ) -> Result<(), PyErr> {
         let distance = target_position as isize - player.position as isize;
+
+        if target_position == PluginConstants::NUM_FIELDS - 1 && (player.carrots > 10 || player.salads > 0) {
+            return Err(HUIError::new_err("Too many carrots or salads to jump to goal"));
+        }
+
         RulesEngine::can_move_to(
             &state.board,
             distance,

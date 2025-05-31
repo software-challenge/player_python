@@ -62,6 +62,39 @@ mod tests {
         assert!(hurry_ahead_card.perform(&mut state, vec![], 0).is_ok());
         let current_player = state.clone_current_player();
         assert_eq!(current_player.position, 8);
+
+        // test hurry ahead in goal with too many carrots (salads are ok but that was never the problem)
+        let mut state = create_test_game_state();
+        state.turn = 1;
+
+        let mut current_player = state.clone_current_player();
+        current_player.salads = 0;
+        state.update_player(current_player);
+        let mut other_player = state.clone_other_player();
+        other_player.position = 10;
+        state.update_player(other_player);
+
+        let hurry_ahead_card: Card = Card::HurryAhead;
+        assert!(hurry_ahead_card.perform(&mut state, vec![], 0).is_err());
+        let current_player = state.clone_current_player();
+        assert_eq!(current_player.position, 3);
+
+        // test hurry ahead in goal with low enough many carrots
+        let mut state = create_test_game_state();
+        state.turn = 1;
+        
+        let mut current_player = state.clone_current_player();
+        current_player.carrots = 3;
+        current_player.salads = 0;
+        state.update_player(current_player);
+        let mut other_player = state.clone_other_player();
+        other_player.position = 10;
+        state.update_player(other_player);
+
+        let hurry_ahead_card: Card = Card::HurryAhead;
+        assert!(hurry_ahead_card.perform(&mut state, vec![], 0).is_ok());
+        let current_player = state.clone_current_player();
+        assert_eq!(current_player.position, 11);
     }
 
     #[test]

@@ -374,6 +374,8 @@ class Move:
         ...
     def __repr__(self) -> str: ...
 
+    def __eq__(self) -> bool: ...
+
 class GameState:
     """
     Repräsentiert den aktuellen Zustand des Spiels.
@@ -441,6 +443,15 @@ class GameState:
         """
         ...
 
+    def possible_moves_old(self) -> List[Move]:
+        """
+        Gibt eine Liste aller möglichen Züge zurück.
+
+        Returns:
+            List[Move]: Eine Liste aller möglichen Züge.
+        """
+        ...
+        
     def possible_moves(self) -> List[Move]:
         """
         Gibt eine Liste aller möglichen Züge zurück.

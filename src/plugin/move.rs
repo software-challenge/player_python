@@ -31,6 +31,10 @@ impl Move {
     fn __repr__(&self) -> PyResult<String> {
         Ok(format!("Move(action={:?})", self.action))
     }
+
+    fn __eq__(&self, other: &Move) -> PyResult<bool> {
+        Ok(self == other)
+    }
 }
 
 impl std::fmt::Display for Move {
