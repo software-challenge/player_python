@@ -1,3 +1,5 @@
+DAS IST EIN TEST!
+
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
 # Python-Client für die Software-Challenge Germany 2025
