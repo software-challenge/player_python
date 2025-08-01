@@ -246,7 +246,7 @@ class Starter:
 
         parser.add_argument(
             "--python-version",
-            help="Specifies the build python version (e.g.: 3.10 - this is standard]).",
+            help="Specifies the build python version (e.g.: 3.10 - this is standard).",
         )
 
         return parser.parse_args()

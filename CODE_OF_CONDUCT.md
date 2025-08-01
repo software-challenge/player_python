@@ -28,4 +28,4 @@ Verstöße gegen diesen Verhaltenskodex können durch die Projektbetreuer überp
 
 ## 6. Kontakt
 
-Bei Fragen oder zur Meldung von Verstößen bitte eine Nachricht an [@maxblan](https://github.com/maxblan) senden.
+Bei Fragen oder zur Meldung von Verstößen bitte eine Nachricht an [@yoente](https://github.com/yoente) oder [@maxblan](https://github.com/maxblan) senden.

@@ -2,7 +2,7 @@
 
    <!-- trunk-ignore-all(markdownlint/MD041) -->
 
-Python Client for the Software-Challenge Germany 2024
+Python Client for the Software-Challenge Germany 2026
 =====================================================
 
 |Read the Docs| |PyPI| |PyPI - Python Version| |Discord| |Documentation|
@@ -15,7 +15,7 @@ competition for students. The students have to develop an artificial
 intelligence that plays and competes against other opponents in an
 annually changing game.
 
-   This year it is the game `Hase und Igel <>`__.
+   This year it is the game `Piranhas <>`__.
 
 Table of Contents
 -----------------
@@ -200,6 +200,9 @@ start arguments.
 |                        | built.                                     |
 +------------------------+--------------------------------------------+
 | **-a, --architecture** | The architecture of the package.           |
++------------------------+--------------------------------------------+
+| **--python-version**   | Specifies the build python version         |
+|                        | (e.g.: '3.10' - this is standard).         |
 +------------------------+--------------------------------------------+
 
 Preparing Your Player for the Competition

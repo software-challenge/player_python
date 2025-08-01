@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.abspath('../'))
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'python_player'
-copyright = '2024, Software-Challenge Germany'
+copyright = '2025, Software-Challenge Germany'
 author = 'Software-Challenge Germany'
 
 # -- General configuration ---------------------------------------------------
