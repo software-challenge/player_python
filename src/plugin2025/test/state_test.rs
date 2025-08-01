@@ -2,7 +2,7 @@
 mod tests {
     use std::vec;
 
-    use crate::plugin::{
+    use crate::plugin2025::{
         action::{advance::Advance, card::Card, Action},
         board::Board,
         field::Field,

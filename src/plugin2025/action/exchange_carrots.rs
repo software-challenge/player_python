@@ -1,6 +1,6 @@
 use pyo3::*;
 
-use crate::plugin::game_state::GameState;
+use crate::plugin2025::game_state::GameState;
 
 #[pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]

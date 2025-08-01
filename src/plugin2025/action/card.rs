@@ -2,7 +2,7 @@ use std::mem::swap;
 
 use pyo3::*;
 
-use crate::plugin::{
+use crate::plugin2025::{
     constants::PluginConstants, errors::HUIError, field::Field, game_state::GameState, hare::Hare,
     rules_engine::RulesEngine,
 };

@@ -1,6 +1,6 @@
 use pyo3::{pyclass, pymethods, PyErr};
 
-use crate::plugin::{errors::HUIError, field::Field, game_state::GameState, hare::Hare};
+use crate::plugin2025::{errors::HUIError, field::Field, game_state::GameState, hare::Hare};
 
 use super::card::Card;
 
