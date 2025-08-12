@@ -94,12 +94,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          merge-multiple: true          
-
+          merge-multiple: true
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           files: '*.whl'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
