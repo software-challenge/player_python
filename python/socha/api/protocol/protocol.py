@@ -17,9 +17,9 @@ from socha.api.protocol.room_message import (
 
 
 @dataclass
-class Board:
+class Row:
     class Meta:
-        name = 'board'
+        name = 'row'
 
     field_value: List[str] = field(
         default_factory=list,
@@ -32,13 +32,14 @@ class Board:
 
 
 @dataclass
-class Cards:
+class Board:
     class Meta:
-        name = 'cards'
+        name = 'board'
 
-    card: List[str] = field(
+    rows: List[Row] = field(
         default_factory=list,
         metadata={
+            'name': 'row',
             'type': 'Element',
             'min_occurs': 1,
         },
@@ -46,67 +47,18 @@ class Cards:
 
 
 @dataclass
-class LastAction:
+class Coordinate:
+    
     class Meta:
-        name = 'lastAction'
+        name = 'from'
 
-    class_value: Optional[str] = field(
-        default=None,
-        metadata={
-            'name': 'class',
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    class_binding: Optional[object] = field(default=None)
-    distance: Optional[int] = field(
+    x: Optional[int] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    card: Optional[List[str]] = field(
-        default=None,
-        metadata={
-            'type': 'Element',
-        },
-    )
-    amount: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-        },
-    )
-    value: str = field(default='')
-
-
-@dataclass
-class LastMove:
-    class Meta:
-        name = 'lastMove'
-
-    class_value: Optional[str] = field(
-        default=None,
-        metadata={
-            'name': 'class',
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    class_binding: Optional[object] = field(default=None)
-    distance: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-        },
-    )
-    card: Optional[List[str]] = field(
-        default=None,
-        metadata={
-            'type': 'Element',
-        },
-    )
-    amount: Optional[int] = field(
+    y: Optional[int] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -115,50 +67,22 @@ class LastMove:
 
 
 @dataclass
-class Hare:
+class LastMove:
     class Meta:
-        name = 'hare'
-
-    team: Optional[str] = field(
+        name = 'lastMove'
+        
+    class_binding: Optional[object] = field(default=None)
+    from_: Optional[Coordinate] = field(
         default=None,
         metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    position: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    salads: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    carrots: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
-    last_action: Optional[LastAction] = field(
-        default=None,
-        metadata={
-            'name': 'lastAction',
+            'name': 'from',
             'type': 'Element',
         },
     )
-    cards: Optional[Cards] = field(
+    direction: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Element',
-            'required': True,
         },
     )
 
@@ -168,6 +92,13 @@ class Player:
     class Meta:
         name = 'player'
 
+    name: Optional[str] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
+            'required': True,
+        },
+    )
     team: Optional[str] = field(
         default=None,
         metadata={
@@ -210,13 +141,6 @@ class State(ObservableRoomMessage):
         metadata={
             'type': 'Element',
             'required': True,
-        },
-    )
-    hare: List[Hare] = field(
-        default_factory=list,
-        metadata={
-            'type': 'Element',
-            'min_occurs': 1,
         },
     )
     last_move: Optional[LastMove] = field(
@@ -734,15 +658,15 @@ class OriginalMessage:
             'required': True,
         },
     )
-    distance: Optional[int] = field(
+    from_: Optional[Coordinate] = field(
         default=None,
         metadata={
+            'name': 'from',
             'type': 'Element',
-            'required': True,
         },
     )
-    card: List[str] = field(
-        default_factory=list,
+    direction: Optional[str] = field(
+        default=None,
         metadata={
             'type': 'Element',
         },
@@ -798,34 +722,29 @@ class Data:
             'type': 'Element',
         },
     )
-    distance: Optional[int] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-        },
-    )
-    card: Optional[List[str]] = field(
-        default=None,
-        metadata={
-            'type': 'Element',
-        },
-    )
     state: Optional[State] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    amount: Optional[int] = field(
+    color: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    color: Optional[str] = field(
+    from_: Optional[Coordinate] = field(
         default=None,
         metadata={
-            'type': 'Attribute',
+            'name': 'from',
+            'type': 'Element',
+        },
+    )
+    direction: Optional[str] = field(
+        default=None,
+        metadata={
+            'type': 'Element',
         },
     )
 

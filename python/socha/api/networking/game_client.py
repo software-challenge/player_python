@@ -279,11 +279,7 @@ class GameClient(XMLProtocolInterface):
             logging.error(f'{move_response} is not a valid move.')
 
     def _on_state(self, message):
-        second_last_move = None # last move from last gamestate
-        if len(self._game_handler.history[-1]) > 0 and isinstance(self._game_handler.history[-1][-1], GameState):
-            second_last_move = self._game_handler.history[-1][-1].last_move
-
-        _state = message_to_state(message, second_last_move)
+        _state = message_to_state(message)
         self._game_handler.history[-1].append(_state)
         self._game_handler.on_update(_state)
 
