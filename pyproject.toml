@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "socha"
-version = "4.0.2"
+version = "4.0.3"
 authors = [
   { name = "yoente", email = "stu250140@mail.uni-kiel.de" },
   { name = "maxblan", email = "stu222782@mail.uni-kiel.de" },
