@@ -89,30 +89,20 @@ jobs:
     permissions: write-all
     name: Release
     runs-on: ubuntu-latest
-    if: 'startsWith(github.ref, ''refs/tags/'')'
+    if: startsWith(github.ref, 'refs/tags/')
     needs: [linux, windows, macos]
     steps:
       - uses: actions/download-artifact@v4
         with:
           merge-multiple: true          
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-        with:
-          tag_name: '${{ github.ref }}'
-          release_name: 'Release ${{ github.ref }}'
-          draft: false
-          prerelease: false
+
       - name: Upload Release Asset
-        id: upload-release-asset
         uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-        if: startsWith(github.ref, 'refs/tags/')
         with:
+          tag_name: ${{ github.ref_name }}
           files: '*.whl'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish:
     name: Publish
     runs-on: ubuntu-latest
