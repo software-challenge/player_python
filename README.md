@@ -12,7 +12,7 @@
 
 Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany](https://www.software-challenge.de), einem Programmierwettbewerb für Schülerinnen und Schüler. Dabei muss eine künstliche Intelligenz entwickelt werden, die in einem jährlich wechselnden Spiel gegen andere Gegner antritt.
 
-> In diesem Jahr ist es das Spiel **[Hase und Igel](https://docs.software-challenge.de/spiele/25_hase-und-igel)**.
+> In diesem Jahr ist es das Spiel **[Piranhas](https://docs.software-challenge.de/spiele/26_piranhas/)**.
 
 ## Inhaltsverzeichnis
 
