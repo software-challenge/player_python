@@ -1,12 +1,12 @@
 """
-Here are all incoming byte streams and all outgoing protocol objects handheld.
+Here are all incoming byte streams and all outgoing protocol objects handled.
 """
 
 import contextlib
 import logging
 from typing import Any, Callable, Iterator
 
-from socha.api.networking.utils import map_string_to_card
+from socha.api.networking.utils import map_string_to_direction
 from socha import _socha
 from socha.api.networking.network_socket import NetworkSocket
 from socha.api.protocol.protocol import (
@@ -24,10 +24,11 @@ from xsdata.formats.dataclass.parsers.handlers import XmlEventHandler
 from xsdata.formats.dataclass.serializers import XmlSerializer
 from xsdata.formats.dataclass.serializers.config import SerializerConfig
 
-from socha.api.protocol.protocol import Data, LastAction, LastMove
+from socha.api.protocol.protocol import Data, LastMove
 
 
-def map_object(data: Data | LastAction | LastMove, params: dict):
+def map_object(data: Data , params: dict):
+
     try:
         params.pop('class_binding')
     except KeyError:
@@ -56,32 +57,32 @@ def map_object(data: Data | LastAction | LastMove, params: dict):
             originalMessage=params.get('original_message'),
         )
         return data(class_binding=error_object, **params)
-    elif params.get('class_value') == 'advance':
-        advance_object = _socha.Advance(
-            distance=params.get('distance'),
-            cards=[map_string_to_card(card) for card in params.get('card', [])],
-        )
-        return data(class_binding=advance_object, **params)
-    elif params.get('class_value') == 'exchangecarrots':
-        exchange_object = _socha.ExchangeCarrots(amount=params.get('amount'))
-        return data(class_binding=exchange_object, **params)
-    elif params.get('class_value') == 'fallback':
-        back_object = _socha.FallBack()
-        return data(class_binding=back_object, **params)
-    elif params.get('class_value') == 'eatsalad':
-        salad_object = _socha.EatSalad()
-        return data(class_binding=salad_object, **params)
-    elif params.get('class_value') == 'card': # work around for LastAction, because buggy and now prevents warning
-        return data(**params)
     else:
         logging.warn('Unknown class value: %s', params.get('class_value'))
 
     return data(**params)
 
+def map_last_move(last_move: LastMove, params: dict):
+    try:
+        params.pop('class_binding')
+    except KeyError:
+        ...
+
+    move_object = _socha.Move(
+        start=_socha.Coordinate(x=params.get('from_').x, y=params.get('from_').y),
+        direction=map_string_to_direction(params.get('direction')),
+    )
+    return last_move(class_binding=move_object, **params)
+
 
 def custom_class_factory(clazz, params: dict):
-    if clazz.__name__ == 'Data' or clazz.__name__ == 'LastAction' or clazz.__name__ == 'LastMove':
+    # print("TEST01: ", clazz, params)
+
+    if clazz.__name__ == 'Data':
         return map_object(clazz, params)
+    if clazz.__name__ == 'LastMove':
+        test = map_last_move(clazz, params)
+        return test
 
     return clazz(**params)
 
@@ -102,11 +103,19 @@ class XMLProtocolInterface:
 
         context = XmlContext()
         deserialize_config = ParserConfig(class_factory=custom_class_factory)
+
         self.deserializer = XmlParser(
-            handler=XmlEventHandler, context=context, config=deserialize_config
+            handler=XmlEventHandler,
+            context=context,
+            config=deserialize_config,
         )
 
-        serialize_config = SerializerConfig(pretty_print=True, xml_declaration=False)
+        serialize_config = SerializerConfig(
+            pretty_print=True,
+            xml_declaration=False,
+            encoding='utf-8',
+        )
+
         self.serializer = XmlSerializer(config=serialize_config)
 
     def connect(self):
@@ -134,6 +143,12 @@ class XMLProtocolInterface:
             # Return None if the server returns an empty response
             if not receiving:
                 return None
+            
+            # weird replacing of unicode chars, that are not working in xml rn
+            unicodes = [b"\xe5", b"\xf6", b"\xfc", b"\xdf"]
+            replaces = [b"ae", b"oe", b"ue", b"ss"]
+            for i, t in enumerate(unicodes):
+                receiving = receiving.replace(t, replaces[i])
 
             cls = self._deserialize_object(receiving)
             return cls

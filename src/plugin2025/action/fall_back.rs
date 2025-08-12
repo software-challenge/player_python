@@ -1,13 +1,13 @@
 use pyo3::*;
 
-use crate::plugin::{game_state::GameState, rules_engine::RulesEngine};
+use crate::plugin2025::game_state::GameState;
 
 #[pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash, Default)]
-pub struct EatSalad {}
+pub struct FallBack {}
 
 #[pymethods]
-impl EatSalad {
+impl FallBack {
     #[new]
     #[must_use]
     pub fn new() -> Self {
@@ -16,8 +16,7 @@ impl EatSalad {
 
     pub fn perform(&self, state: &mut GameState) -> Result<(), PyErr> {
         let mut current = state.clone_current_player();
-        RulesEngine::can_eat_salad(&state.board, &current)?;
-        current.eat_salad(state)?;
+        current.fall_back(state)?;
         Ok(())
     }
 
@@ -26,8 +25,8 @@ impl EatSalad {
     }
 }
 
-impl std::fmt::Display for EatSalad {
+impl std::fmt::Display for FallBack {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "EatSalad")
+        write!(f, "FallBack")
     }
 }

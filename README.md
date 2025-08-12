@@ -2,7 +2,7 @@
 
 # Python-Client für die Software-Challenge Germany 2025
 
-[![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/en/)
+[![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/de/latest/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/socha?label=Python)](https://pypi.org/project/socha/)
 [![Discord](https://img.shields.io/discord/233577109363097601?color=blue&label=Discord)](https://discord.gg/ARZamDptG5)
@@ -16,13 +16,15 @@ Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany
 
 ## Inhaltsverzeichnis
 
-- [Installation](#installation)
-  - [Global](#global)
-  - [Virtuelle Umgebung](#virtuelle-umgebung)
-- [Erste Schritte](#erste-schritte)
-  - [Startargumente](#startargumente)
-- [Vorbereitung des Spielers für den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
-- [Lokale Entwicklung](#lokale-entwicklung)
+- [Python-Client für die Software-Challenge Germany 2025](#python-client-für-die-software-challenge-germany-2025)
+  - [Inhaltsverzeichnis](#inhaltsverzeichnis)
+  - [Installation](#installation)
+    - [Global](#global)
+    - [Virtuelle Umgebung](#virtuelle-umgebung)
+  - [Erste Schritte](#erste-schritte)
+    - [Startargumente](#startargumente)
+  - [Vorbereitung des Spielers für den Wettbewerb](#vorbereitung-des-spielers-für-den-wettbewerb)
+  - [Lokale Entwicklung](#lokale-entwicklung)
 
 ## Installation
 

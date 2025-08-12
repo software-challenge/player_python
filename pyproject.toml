@@ -1,12 +1,15 @@
 [build-system]
-requires = ["maturin==1.6.0"]
+requires = ["maturin==1.8.1"]
 build-backend = "maturin"
 
 [project]
 name = "socha"
-version = "3.7.2"
-authors = [{ name = "maxblan", email = "stu222782@mail.uni-kiel.de" }]
-description = "Dieses Paket ist für die Software-Challenge Germany 2025, bei der in dieser Saison das Spiel 'Hase und Igel' im Mittelpunkt steht."
+version = "4.0.0"
+authors = [
+  { name = "yoente", email = "stu250140@mail.uni-kiel.de" },
+  { name = "maxblan", email = "stu222782@mail.uni-kiel.de" },
+]
+description = "Dieses Paket ist für die Software-Challenge Germany 2026, bei der in dieser Saison das Spiel 'Piranhas' im Mittelpunkt steht."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["xsdata==22.9"]
@@ -28,9 +31,9 @@ classifiers = [
 
 [project.urls]
 homepage = "https://software-challenge.de/"
-repository = "https://github.com/FalconsSky/socha-python-client"
-documentation = "https://software-challenge-python-client.readthedocs.io/en/latest/"
-bug-tracker = "https://github.com/FalconsSky/Software-Challenge-Python-Client/issues"
+repository = "https://github.com/software-challenge/player_python"
+documentation = "https://socha-python-client.readthedocs.io/de/latest/"
+bug-tracker = "https://github.com/software-challenge/player_python/issues"
 
 [tool.maturin]
 python-source = "python"

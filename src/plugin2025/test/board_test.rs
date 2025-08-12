@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::plugin::{board::Board, field::Field};
+    use crate::plugin2025::{board::Board, field::Field};
 
     #[test]
     fn test_new_board() {
