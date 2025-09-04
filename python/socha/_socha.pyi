@@ -438,6 +438,33 @@ class GameState:
         """
         ...
 
+    def perform_move(self, move: Move) -> GameState:
+        """
+        Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**nicht mutierend**).
+
+        Args:
+            move_ (Move): Der zuverwendene Zug.
+
+        Returns:
+            Gamestate: Der neue Spielstand.
+
+        Raises:
+            PiranhasError: Wenn der Zug nicht valide ist.
+        """
+        ...
+
+    def perform_move_mut(self, move: Move) -> None:
+        """
+        Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**mutierend**).
+
+        Args:
+            move_ (Move): Der zuverwendene Zug.
+
+        Raises:
+            PiranhasError: Wenn der Zug nicht valide ist.
+        """
+        ...
+
 class RulesEngine:
     """
     Stellt Methoden, die zur Überprüfung der Spielregeln dienen.
@@ -498,6 +525,9 @@ class RulesEngine:
         Args:
             board (Board): Das Spielfeld.
             move_ (Move): Der Zug, der geprüft werden soll.
+
+        Raises:
+            PiranhasError: Wenn der Zug nicht valide ist.
         """
         ...
 
