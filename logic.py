@@ -25,6 +25,7 @@ class Logic(IClientHandler):
 
     # Diese Methode wird immer aufgerufen, wenn der Spielserver einen Zug vom Client anfordert.
     # Sie muss implementiert sein, weil der Computerspieler sonst disqualifiziert wird.
+    # Damit ein Zug an den Spielserver übermittelt wird, muss dieser mit *return* von der Methode zurückgegeben werden.
     def calculate_move(self) -> Move:
         return random.choice(self.game_state.possible_moves())
 

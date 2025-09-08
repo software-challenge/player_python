@@ -441,6 +441,7 @@ class GameState:
     def perform_move(self, move: Move) -> GameState:
         """
         Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**nicht mutierend**).
+        Dabei wird *kein* Zug an den Spielserver übermittelt.
 
         Args:
             move_ (Move): Der zuverwendene Zug.
@@ -456,6 +457,7 @@ class GameState:
     def perform_move_mut(self, move: Move) -> None:
         """
         Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**mutierend**).
+        Dabei wird *kein* Zug an den Spielserver übermittelt.
 
         Args:
             move_ (Move): Der zuverwendene Zug.
