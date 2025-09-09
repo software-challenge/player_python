@@ -1,7 +1,5 @@
 use crate::plugin2026::{
-    board::Board,
-    field_type::FieldType,
-    utils::constants::PluginConstants
+    board::Board, field_type::FieldType, game_state::GameState, utils::constants::PluginConstants
 };
 
 pub fn create_test_board() -> Board {
@@ -36,5 +34,9 @@ pub fn create_test_board() -> Board {
         }
     }
 
-    Board::new(new_map)
+    Board {map: new_map}
+}
+
+pub fn create_test_game_state() -> GameState {
+    GameState { board: create_test_board(), turn: 0, last_move: None }
 }
