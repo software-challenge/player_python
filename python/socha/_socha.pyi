@@ -429,6 +429,18 @@ class GameState:
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
 
+    def possible_moves_for(self, start: Coordinate) -> List[Move]:
+        """
+        Berechnet alle Züge, die aus der aktuellen Spielposition für den Fisch an der Koordinate möglich sind.
+        
+        Args:
+            start (Coordinate): Die Position des gewählten Fisch.
+
+        Returns:
+            List[Move]: Die Liste der Züge.
+        """
+        ...
+
     def possible_moves(self) -> List[Move]:
         """
         Berechnet alle Züge, die aus der aktuellen Spielposition für den aktuellen Spieler möglich sind.

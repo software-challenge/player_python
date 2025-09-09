@@ -32,6 +32,19 @@ impl GameState {
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
 
+    pub fn possible_moves_for(&self, start: &Coordinate) -> Vec<Move> {
+        let mut moves: Vec<Move> = Vec::new();
+
+        for d in Direction::all_directions() {
+            moves.push(Move { start: start.to_owned(), direction: d });
+        }
+
+        moves
+            .into_iter()
+            .filter(|m| RulesEngine::can_execute_move(&self.board, m).is_ok())
+            .collect()
+    }
+
     pub fn possible_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
         let mut fish: Vec<Coordinate> = Vec::new();
@@ -41,40 +54,20 @@ impl GameState {
         }
         
         for f in fish {
-            for d in Direction::all_directions() {
-                moves.push(Move { start: f.clone(), direction: d });
-            }
+            moves.extend(self.possible_moves_for(&f));
         }
 
         moves
-            .into_iter()
-            .filter(|m| RulesEngine::can_execute_move(&self.board, m).is_ok())
-            .collect()
     }
 
     pub fn perform_move(&self, move_: &Move) -> Result<GameState, PyErr> {
 
-        RulesEngine::can_execute_move(&self.board, move_)
-            .map_err(|e| {
-                let full_error = e.to_string();
-                let clean_error = full_error.strip_prefix("PiranhasError:").unwrap_or(&full_error).trim();
-                PiranhasError::new_err(format!("Cannot execute move: {}", clean_error))
-            })?;
-    
-        let target = RulesEngine::target_position(&self.board, move_);
-        let mut new_board = self.board.clone();
-        new_board.map[target.y as usize][target.x as usize] = self.board.get_field(&move_.start).unwrap();
-        new_board.map[move_.start.y as usize][move_.start.x as usize] = FieldType::Empty;
+        let mut new_game_state = self.clone();
+        new_game_state.perform_move_mut(move_)?;
 
-        let new_state = GameState {
-            board: new_board,
-            turn: self.turn + 1,
-            last_move: Some(move_.clone())
-        };
-
-        Ok(new_state)
+        Ok(new_game_state)
     }
-
+    
     pub fn perform_move_mut(&mut self, move_: &Move) -> Result<(), PyErr> {
 
         RulesEngine::can_execute_move(&self.board, move_)
