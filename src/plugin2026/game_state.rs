@@ -32,6 +32,19 @@ impl GameState {
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
 
+    pub fn possible_moves_for(&self, start: &Coordinate) -> Vec<Move> {
+        let mut moves: Vec<Move> = Vec::new();
+
+        for d in Direction::all_directions() {
+            moves.push(Move { start: start.to_owned(), direction: d });
+        }
+
+        moves
+            .into_iter()
+            .filter(|m| RulesEngine::can_execute_move(&self.board, m).is_ok())
+            .collect()
+    }
+
     pub fn possible_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
         let mut fish: Vec<Coordinate> = Vec::new();
@@ -41,15 +54,10 @@ impl GameState {
         }
         
         for f in fish {
-            for d in Direction::all_directions() {
-                moves.push(Move { start: f.clone(), direction: d });
-            }
+            moves.extend(self.possible_moves_for(&f));
         }
 
         moves
-            .into_iter()
-            .filter(|m| RulesEngine::can_execute_move(&self.board, m).is_ok())
-            .collect()
     }
 
     pub fn perform_move(&self, move_: &Move) -> Result<GameState, PyErr> {
