@@ -61,21 +61,6 @@ impl RulesEngine {
         let distance = Self::move_distance(board, move_);
         let direction_fields = board.get_fields_in_direction(&move_.start, &move_.direction);
         let path_fields: Vec<_> = direction_fields.iter().take(distance - 1).cloned().collect(); // not including start or target
-/*
-        println!("{}", move_);
-        println!("{}", move_.start);
-        println!("{}", move_.direction);
-        println!("{}", distance);
-        println!("{}", target_pos);
-        println!("{}", target_field);
-        for d in direction_fields {
-            print!("{} ", d);
-        }
-        println!();
-        for d in &path_fields {
-            print!("{} ", *d);
-        }
-        println!();*/
 
         for d in path_fields {
             let mut blocked_fields = this_team.get_fish_types();
