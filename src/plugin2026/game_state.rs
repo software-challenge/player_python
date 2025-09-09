@@ -62,27 +62,12 @@ impl GameState {
 
     pub fn perform_move(&self, move_: &Move) -> Result<GameState, PyErr> {
 
-        RulesEngine::can_execute_move(&self.board, move_)
-            .map_err(|e| {
-                let full_error = e.to_string();
-                let clean_error = full_error.strip_prefix("PiranhasError:").unwrap_or(&full_error).trim();
-                PiranhasError::new_err(format!("Cannot execute move: {}", clean_error))
-            })?;
-    
-        let target = RulesEngine::target_position(&self.board, move_);
-        let mut new_board = self.board.clone();
-        new_board.map[target.y as usize][target.x as usize] = self.board.get_field(&move_.start).unwrap();
-        new_board.map[move_.start.y as usize][move_.start.x as usize] = FieldType::Empty;
+        let mut new_game_state = self.clone();
+        new_game_state.perform_move_mut(move_)?;
 
-        let new_state = GameState {
-            board: new_board,
-            turn: self.turn + 1,
-            last_move: Some(move_.clone())
-        };
-
-        Ok(new_state)
+        Ok(new_game_state)
     }
-
+    
     pub fn perform_move_mut(&mut self, move_: &Move) -> Result<(), PyErr> {
 
         RulesEngine::can_execute_move(&self.board, move_)
