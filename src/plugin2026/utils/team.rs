@@ -3,7 +3,7 @@ use pyo3::*;
 use crate::plugin2026::field_type::FieldType;
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TeamEnum {
     One,
     Two,
@@ -13,6 +13,8 @@ pub enum TeamEnum {
 impl TeamEnum {
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &TeamEnum) -> bool {self == other}
+    pub fn __ne_(&self, other: &TeamEnum) -> bool {self != other}
 
     pub fn get_fish_types(&self) -> Vec<FieldType> {
         match self {

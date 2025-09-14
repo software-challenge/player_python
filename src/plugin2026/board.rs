@@ -10,7 +10,7 @@ use crate::plugin2026::{
 };
 
 #[pyclass]
-#[derive(PartialEq, Eq, PartialOrd, Clone, Debug, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Board {
     #[pyo3(get, set)]
     pub map: Vec<Vec<FieldType>>,
@@ -25,6 +25,10 @@ impl Board {
 
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &Board) -> bool {self == other}
+    pub fn __ne_(&self, other: &Board) -> bool {self != other}
+
+    pub fn deepcopy(&self) -> Board {self.clone()}
 
     pub fn get_field(&self, position: &Coordinate) -> Option<FieldType> {
 

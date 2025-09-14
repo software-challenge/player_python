@@ -13,9 +13,9 @@ mod tests {
         let poss01 = state.possible_moves_for(&position01);
 
         assert_eq!(poss01, vec![
-            Move {start: position01.clone(), direction: Direction::UpRight},
-            Move {start: position01.clone(), direction: Direction::Right},
-            Move {start: position01.clone(), direction: Direction::DownRight},
+            Move {start: position01, direction: Direction::UpRight},
+            Move {start: position01, direction: Direction::Right},
+            Move {start: position01, direction: Direction::DownRight},
         ]);
         
         // no possible move because out of bounds start

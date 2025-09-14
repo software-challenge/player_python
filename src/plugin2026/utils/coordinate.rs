@@ -3,7 +3,7 @@ use pyo3::*;
 use crate::plugin2026::{utils::vector::Vector};
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Coordinate {
     #[pyo3(get, set)]
     pub x: isize,
@@ -22,6 +22,10 @@ impl Coordinate {
 
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &Coordinate) -> bool {self == other}
+    pub fn __ne_(&self, other: &Coordinate) -> bool {self != other}
+    
+    pub fn deepcopy(&self) -> Coordinate {*self}
 
     pub fn add_vector(&self, vector: &Vector) -> Coordinate {
         Coordinate {

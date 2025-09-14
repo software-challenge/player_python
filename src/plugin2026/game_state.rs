@@ -8,7 +8,7 @@ use crate::plugin2026::{
 };
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct GameState {
     #[pyo3(get, set)]
     pub board: Board,
@@ -31,6 +31,23 @@ impl GameState {
 
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &GameState) -> bool {self == other}
+    pub fn __ne__(&self, other: &GameState) -> bool {self != other}
+    
+    pub fn deepcopy(&self) -> GameState {self.clone()}
+
+    pub fn set_board_field(&mut self, position: &Coordinate, field: FieldType) -> Result<(), PyErr> {
+        let x = position.x as usize;
+        let y = position.y as usize;
+
+        if y >= self.board.map.len() || x >= self.board.map[0].len() {
+            return Err(PiranhasError::new_err("Position not in bounds of map"));
+        }
+
+        self.board.map[y][x] = field;
+
+        Ok(())
+    }
 
     pub fn possible_moves_for(&self, start: &Coordinate) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();

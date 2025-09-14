@@ -1,7 +1,7 @@
 use pyo3::*;
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector {
     #[pyo3(get, set)]
     pub delta_x: isize,
@@ -20,6 +20,10 @@ impl Vector {
 
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &Vector) -> bool {self == other}
+    pub fn __ne_(&self, other: &Vector) -> bool {self != other}
+
+    pub fn deepcopy(&self) -> Vector {*self}
 
     pub fn add_vector(&self, other: &Vector) -> Vector {
         Vector {
