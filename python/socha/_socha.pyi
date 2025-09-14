@@ -16,6 +16,36 @@ class Coordinate:
     def __init__(self, x: int, y: int) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: Coordinate) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Coordinate): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: Coordinate) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Coordinate): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+
+    def deepcopy(self) -> Coordinate: 
+        """
+        Kopiert das Objekt rekursiv.
+        """
+        ...
 
     def add_vector(self, vector: Vector) -> Coordinate:
         """
@@ -65,6 +95,36 @@ class Vector:
     def __init__(self, delta_x: int, delta_y: int) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: Vector) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Vector): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: Vector) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Vector): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+        
+    def deepcopy(self) -> GameState: 
+        """
+        Kopiert das Objekt rekursiv.
+        """
+        ...
 
     def add_vector(self, other: Vector) -> Vector:
         """
@@ -158,6 +218,30 @@ class Direction(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: Direction) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Direction): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: Direction) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Direction): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
 
     @staticmethod
     def from_vector(vector: Vector) -> Optional[Direction]:
@@ -242,6 +326,30 @@ class FieldType(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: FieldType) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (FieldType): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: FieldType) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (FieldType): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
 
     def get_value(self) -> int:
         """
@@ -288,6 +396,30 @@ class TeamEnum(Enum):
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: TeamEnum) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (TeamEnum): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: TeamEnum) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (TeamEnum): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
 
     def get_fish_types(self) -> List[FieldType]:
         """
@@ -323,6 +455,37 @@ class Board:
     def __init__(self, map: List[List[FieldType]]) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    
+    def __eq__(self, other: TeamEnum) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (TeamEnum): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: TeamEnum) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (TeamEnum): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+        
+    def deepcopy(self) -> GameState: 
+        """
+        Kopiert das Objekt rekursiv.
+        """
+        ...
 
     def get_field(self, position: Coordinate) -> Optional[FieldType]:
         """
@@ -410,6 +573,37 @@ class Move:
     def __init__(self, start: Coordinate, direction: Direction) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    
+    def __eq__(self, other: Move) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Move): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: Move) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (Move): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+        
+    def deepcopy(self) -> GameState: 
+        """
+        Kopiert das Objekt rekursiv.
+        """
+        ...
 
 class GameState:
     """
@@ -428,6 +622,46 @@ class GameState:
     def __init__(self, board: Board, turn: int, last_move: Optional[Move]) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
+    def __eq__(self, other: GameState) -> bool:
+        """
+        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (GameState): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+    def __ne__(self, other: GameState) -> bool:
+        """
+        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
+        weiteren Objektes zuvergleichen.
+
+        Args:
+            other: (GameState): Die andere Koordinate.
+
+        Returns:
+            bool: Das Ergebnis des Vergleichs.
+        """
+        ...
+
+    def deepcopy(self) -> GameState: 
+        """
+        Kopiert das Objekt rekursiv.
+        """
+        ...
+
+    def set_board_field(self, position: Coordinate, field: FieldType) -> None:
+        """
+        Ändert ein Feld auf dem Spielfeld an einer Koordinate.
+
+        Args:
+            position (Coordinate): Die Position des Feldes, das geändert werden soll.
+            field (FieldType): Das Feld, was dort platziert werden soll.
+        """
+        ...
 
     def possible_moves_for(self, start: Coordinate) -> List[Move]:
         """
@@ -497,7 +731,6 @@ class RulesEngine:
             int: Die Länge.
         """
         ...
-
 
     @staticmethod
     def target_position(board: Board, move_: Move) -> Coordinate:

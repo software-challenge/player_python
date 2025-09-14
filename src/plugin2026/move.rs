@@ -10,7 +10,7 @@ use crate::plugin2026::{
 };
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Move {
     #[pyo3(get, set)]
     pub start: Coordinate,
@@ -29,6 +29,10 @@ impl Move {
 
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &Move) -> bool {self == other}
+    pub fn __ne_(&self, other: &Move) -> bool {self != other}
+    
+    pub fn deepcopy(&self) -> Move {self.clone()}
 }
 
 impl std::fmt::Display for Move {

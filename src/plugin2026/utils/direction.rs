@@ -5,7 +5,7 @@ use crate::plugin2026::{
 };
 
 #[pyclass]
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Direction {
     Up,
     UpRight,
@@ -21,6 +21,10 @@ pub enum Direction {
 impl Direction {
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &Direction) -> bool {self == other}
+    pub fn __ne_(&self, other: &Direction) -> bool {self != other}
+
+    pub fn deepcopy(&self) -> Direction {*self}
 
     #[staticmethod]
     pub fn from_vector(vector: &Vector) -> Option<Direction> {

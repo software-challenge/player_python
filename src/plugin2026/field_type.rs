@@ -3,7 +3,7 @@ use pyo3::*;
 use crate::plugin2026::utils::team::TeamEnum;
 
 #[pyclass]
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FieldType {
     OneS,
     OneM,
@@ -19,6 +19,8 @@ pub enum FieldType {
 impl FieldType {
     pub fn __str__(&self) -> String {self.to_string()}
     pub fn __repr__(&self) -> String {format!("{:?}", self)}
+    pub fn __eq__(&self, other: &FieldType) -> bool {self == other}
+    pub fn __ne_(&self, other: &FieldType) -> bool {self != other}
     
     pub fn get_value(&self) -> usize {
         match self {
