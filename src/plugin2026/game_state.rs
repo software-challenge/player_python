@@ -62,19 +62,6 @@ impl GameState {
             .collect()
     }
 
-    pub fn possible_moves_for(&self, start: &Coordinate) -> Vec<Move> {
-        let mut moves: Vec<Move> = Vec::new();
-
-        for d in Direction::all_directions() {
-            moves.push(Move { start: start.to_owned(), direction: d });
-        }
-
-        moves
-            .into_iter()
-            .filter(|m| RulesEngine::can_execute_move(&self.board, m).is_ok())
-            .collect()
-    }
-
     pub fn possible_moves(&self) -> Vec<Move> {
         let mut moves: Vec<Move> = Vec::new();
         let mut fish: Vec<Coordinate> = Vec::new();
