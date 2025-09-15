@@ -27,12 +27,11 @@ impl Move {
         }
     }
 
-    pub fn __str__(&self) -> String {self.to_string()}
-    pub fn __repr__(&self) -> String {format!("{:?}", self)}
-    pub fn __eq__(&self, other: &Move) -> bool {self == other}
-    pub fn __ne_(&self, other: &Move) -> bool {self != other}
-    
-    pub fn deepcopy(&self) -> Move {self.clone()}
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &Move) -> bool {self == other}
+    fn __ne__(&self, other: &Move) -> bool {self != other}
+    fn deepcopy(&self) -> Move {self.clone()}
 }
 
 impl std::fmt::Display for Move {

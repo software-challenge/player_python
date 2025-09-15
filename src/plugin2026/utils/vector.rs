@@ -18,12 +18,11 @@ impl Vector {
         }
     }
 
-    pub fn __str__(&self) -> String {self.to_string()}
-    pub fn __repr__(&self) -> String {format!("{:?}", self)}
-    pub fn __eq__(&self, other: &Vector) -> bool {self == other}
-    pub fn __ne_(&self, other: &Vector) -> bool {self != other}
-
-    pub fn deepcopy(&self) -> Vector {*self}
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &Vector) -> bool {self == other}
+    fn __ne__(&self, other: &Vector) -> bool {self != other}
+    fn deepcopy(&self) -> Vector {*self}
 
     pub fn add_vector(&self, other: &Vector) -> Vector {
         Vector {

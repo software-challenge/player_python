@@ -29,12 +29,11 @@ impl GameState {
         }
     }
 
-    pub fn __str__(&self) -> String {self.to_string()}
-    pub fn __repr__(&self) -> String {format!("{:?}", self)}
-    pub fn __eq__(&self, other: &GameState) -> bool {self == other}
-    pub fn __ne__(&self, other: &GameState) -> bool {self != other}
-    
-    pub fn deepcopy(&self) -> GameState {self.clone()}
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &GameState) -> bool {self == other}
+    fn __ne__(&self, other: &GameState) -> bool {self != other}
+    fn deepcopy(&self) -> GameState {self.clone()}
 
     pub fn set_board_field(&mut self, position: &Coordinate, field: FieldType) -> Result<(), PyErr> {
         let x = position.x as usize;
