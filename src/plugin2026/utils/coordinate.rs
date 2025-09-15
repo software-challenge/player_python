@@ -20,12 +20,11 @@ impl Coordinate {
         }
     }
 
-    pub fn __str__(&self) -> String {self.to_string()}
-    pub fn __repr__(&self) -> String {format!("{:?}", self)}
-    pub fn __eq__(&self, other: &Coordinate) -> bool {self == other}
-    pub fn __ne_(&self, other: &Coordinate) -> bool {self != other}
-    
-    pub fn deepcopy(&self) -> Coordinate {*self}
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &Coordinate) -> bool {self == other}
+    fn __ne__(&self, other: &Coordinate) -> bool {self != other}
+    fn deepcopy(&self) -> Coordinate {*self}
 
     pub fn add_vector(&self, vector: &Vector) -> Coordinate {
         Coordinate {
@@ -35,6 +34,7 @@ impl Coordinate {
     }
 
     pub fn add_vector_mut(&mut self, vector: &Vector) {
+
         self.x += vector.delta_x;
         self.y += vector.delta_y;
     }

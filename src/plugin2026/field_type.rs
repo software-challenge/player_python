@@ -17,10 +17,10 @@ pub enum FieldType {
 
 #[pymethods]
 impl FieldType {
-    pub fn __str__(&self) -> String {self.to_string()}
-    pub fn __repr__(&self) -> String {format!("{:?}", self)}
-    pub fn __eq__(&self, other: &FieldType) -> bool {self == other}
-    pub fn __ne_(&self, other: &FieldType) -> bool {self != other}
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &FieldType) -> bool {self == other}
+    fn __ne__(&self, other: &FieldType) -> bool {self != other}
     
     pub fn get_value(&self) -> usize {
         match self {
