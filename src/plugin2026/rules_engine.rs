@@ -1,9 +1,14 @@
+use std::vec;
+
 use pyo3::*;
 
 use crate::plugin2026::{
-    board::Board, errors::PiranhasError, field_type::FieldType, r#move::Move, utils::{
+    board::Board, errors::PiranhasError, field_type::FieldType, r#move::Move,
+    utils::{
         constants::PluginConstants,
-        coordinate::Coordinate, team::TeamEnum
+        coordinate::Coordinate,
+        direction::Direction,
+        team::TeamEnum
     }
 };
 
@@ -81,5 +86,82 @@ impl RulesEngine {
         } else {
             TeamEnum::Two
         }
+    }
+
+    #[staticmethod]
+    pub fn swarm_from(board: &Board, position: &Coordinate) -> Vec<Coordinate> {
+
+        if !RulesEngine::is_in_bounds(position) {
+            return vec![];
+        }
+        
+        let Some(this_team) = board.get_field(position).unwrap().get_team() else {
+            return vec![];
+        };
+
+        let mut todo: Vec<Coordinate> = vec![position.to_owned()];
+        let mut visited: Vec<Coordinate> = Vec::new();
+
+        while !todo.is_empty() {
+
+            let neighbors = RulesEngine::valid_neighbors(&todo[0]);
+            for n in neighbors {
+                if visited.contains(&n) || todo.contains(&n) {
+                    continue;
+                }
+
+                if let Some(team) = board.get_field(&n).unwrap().get_team() {
+                    if team == this_team {
+                        todo.push(n)
+                    }
+                }
+            }
+
+            visited.push(todo[0]);
+            todo.remove(0);
+        }
+
+        visited
+    }
+
+    #[staticmethod]
+    pub fn swarms_of_team(board: &Board, team: &TeamEnum) -> Vec<Vec<Coordinate>> {
+
+        let mut team_fish: Vec<Coordinate> = Vec::new();
+        for f in team.get_fish_types() {
+            team_fish.extend(board.get_fields_by_type(f));
+        }
+
+        let mut swarms: Vec<Vec<Coordinate>> = Vec::new();
+        while !team_fish.is_empty() {
+            let visited = RulesEngine::swarm_from(board, &team_fish[0]);
+
+            for v in &visited {
+                if let Some(index) = team_fish.iter().position(|x| x == v) {
+                    team_fish.remove(index);
+                }
+            }
+
+            swarms.push(visited)
+        }
+
+        swarms
+    }
+}
+
+// rust exclusive methods
+impl RulesEngine {
+    pub fn valid_neighbors(position: &Coordinate) -> Vec<Coordinate> {
+
+        let mut coordinates: Vec<Coordinate> = Vec::new();
+
+        for d in Direction::all_directions() {
+            let neighbor = position.add_vector(&d.to_vector());
+            if RulesEngine::is_in_bounds(&neighbor) {
+                coordinates.push(neighbor);
+            }
+        }
+        
+        coordinates
     }
 }

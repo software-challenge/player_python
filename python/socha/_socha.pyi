@@ -785,10 +785,45 @@ class RulesEngine:
         Es wird nicht beachtet, ob die Zahl kleiner 0 oder größer 59 ist.
 
         Args:
-            turn (int): Die Zugzahl
+            turn (int): Die Zugzahl.
 
         Returns:
             TeamEnum: Das Team, was dran ist.
+        """
+        ...
+
+    @staticmethod
+    def swarm_from(board: Board, position: Coordinate) -> List[Coordinate]:
+        """
+        Berechnet auf einem Spielbrett von einer Startposition aus, welche Fische
+        von dort aus in einem Schwarm zusammenhängen.
+        Dabei werden nur Fische beachtet, die im selben Team sind, wie der auf dem Startfeld.
+        Gibt eine Liste an Koordinaten zurück, die leer ist, wenn die Startposition
+        außerhalb des Spielbrettes ist, oder kein Fisch als Start angegeben ist.
+
+        Args:
+            board (Board): Das Spielbrett.
+            position (Coordinate): Die Startkoordinate
+
+        Returns:
+            List[Coordinate]: Die Liste an zusammenhängenden Fischen.
+
+        """
+        ...
+
+    @staticmethod
+    def swarms_of_team(board: Board, team: TeamEnum) -> List[List[Coordinate]]:
+        """
+        Berechnet auf einem Spielbrett alle Schwärme, die ein Team gerade gebildet hat.
+        Gibt eine 2-Dimensionale Liste zurück, wobei jede Sub-Liste ein einzelner Schwarm ist.
+
+        Args:
+            board (Board): Das Spielbrett.
+            team (TeamEnum): Das gewählte Team.
+
+        Returns:
+            List[List[Coordinate]]: Die Liste an Schwärmen.
+
         """
         ...
 
