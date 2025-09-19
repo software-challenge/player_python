@@ -14,11 +14,16 @@ jobs:
           sudo dpkg -i pandoc-2.19.2-1-amd64.deb
           pandoc README.md --from markdown -f gfm --to rst -s -o docs/index.rst
           cat docs/appending >> docs/index.rst
+      - name: checkout master
+        run: |
+          git fetch origin master
+          git checkout master
+          git pull origin master
       - name: commit index.rst
         run: |
           git config --global user.name 'YoEnte'
           git config --global user.email 'anthonyroeder@live.de'
           git add docs/index.rst
           git commit -m "docs: auto update index.rst"
-          git push origin HEAD:master --force-with-lease
+          git push origin master --force-with-lease
         continue-on-error: true
