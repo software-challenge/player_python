@@ -20,5 +20,5 @@ jobs:
           git config --global user.email 'anthonyroeder@live.de'
           git add docs/index.rst
           git commit -m "docs: auto update index.rst"
-          git push origin HEAD:master
+          git push origin HEAD:master --force-with-lease
         continue-on-error: true
