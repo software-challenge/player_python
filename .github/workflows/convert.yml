@@ -16,9 +16,9 @@ jobs:
           cat docs/appending >> docs/index.rst
       - name: commit index.rst
         run: |
-          git config --global user.name 'Falcon'
-          git config --global user.email 'stu222782@mail.uni-kiel.de'
+          git config --global user.name 'YoEnte'
+          git config --global user.email 'anthonyroeder@live.de'
           git add docs/index.rst
           git commit -m "docs: auto update index.rst"
-          git push
+          git push origin HEAD:master
         continue-on-error: true
