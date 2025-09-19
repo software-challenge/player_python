@@ -81,7 +81,7 @@ impl RulesEngine {
 
     #[staticmethod]
     pub fn get_team_on_turn(turn: usize) -> TeamEnum {
-        if turn % 2 == 0 {
+        if turn.is_multiple_of(2) {
             TeamEnum::One
         } else {
             TeamEnum::Two
