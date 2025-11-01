@@ -11,7 +11,7 @@ __pycache__/
 # Distribution / packaging
 socha_builds/
 .Python
-.venv/
+venv*/
 env/
 bin/
 build/

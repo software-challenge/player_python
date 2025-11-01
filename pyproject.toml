@@ -12,7 +12,7 @@ authors = [
 description = "Dieses Paket ist für die Software-Challenge Germany 2026, bei der in dieser Saison das Spiel 'Piranhas' im Mittelpunkt steht."
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["xsdata==22.9"]
+dependencies = ["xsdata==25.7", "setuptools==80.9.0"]
 classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: MacOS",
@@ -23,6 +23,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
   "Programming Language :: Python :: Implementation :: CPython",
   "Programming Language :: Python",
   "Programming Language :: Rust",

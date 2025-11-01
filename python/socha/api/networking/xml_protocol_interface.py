@@ -150,6 +150,8 @@ class XMLProtocolInterface:
             for i, t in enumerate(unicodes):
                 receiving = receiving.replace(t, replaces[i])
 
+            print(receiving)
+
             cls = self._deserialize_object(receiving)
             return cls
         except OSError:
