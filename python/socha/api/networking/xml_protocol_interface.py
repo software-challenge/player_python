@@ -76,8 +76,6 @@ def map_last_move(last_move: LastMove, params: dict):
 
 
 def custom_class_factory(clazz, params: dict):
-    # print("TEST01: ", clazz, params)
-
     if clazz.__name__ == 'Data':
         return map_object(clazz, params)
     if clazz.__name__ == 'LastMove':
@@ -149,8 +147,6 @@ class XMLProtocolInterface:
             replaces = [b"ae", b"oe", b"ue", b"ss"]
             for i, t in enumerate(unicodes):
                 receiving = receiving.replace(t, replaces[i])
-
-            print(receiving)
 
             cls = self._deserialize_object(receiving)
             return cls
