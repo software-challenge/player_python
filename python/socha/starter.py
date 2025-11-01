@@ -56,6 +56,7 @@ class Starter:
             log: If True the client write a log file to the current directory.
             verbose: Verbose option for logging.
             build: If set, the client will build a zip package with the given name.
+            python_version: When building, takes string for specified python version. Standard: "3.10".
         """
         VERBOSE = 15
         logging.addLevelName(VERBOSE, "VERBOSE")
@@ -241,10 +242,11 @@ class Starter:
         parser.add_argument(
             "-a",
             "--architecture",
-            help="Specifies the build architecture (e.g.: manylinux1_x86_64).",
+            help="Specifies the build architecture (e.g.: manylinux2014_x86_64).",
         )
 
         parser.add_argument(
+            "-pyv",
             "--python-version",
             help="Specifies the build python version (e.g.: 3.10 - this is standard).",
         )
