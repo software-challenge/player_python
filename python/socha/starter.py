@@ -8,7 +8,7 @@ import json
 import logging
 import urllib.request
 
-import pkg_resources
+from importlib.metadata import version, PackageNotFoundError
 from socha.api.networking.game_client import GameClient, IClientHandler
 from socha.utils.package_builder import SochaPackageBuilder
 
@@ -142,7 +142,7 @@ class Starter:
     def check_socha_version():
         package_name = "socha"
         try:
-            installed_version = pkg_resources.get_distribution(package_name).version
+            installed_version = version(package_name)
             # trunk-ignore(bandit/B310)
             response = urllib.request.urlopen(
                 f"https://pypi.org/pypi/{package_name}/json"
@@ -158,7 +158,7 @@ class Starter:
                 logging.info(
                     f"You're running the latest version of {package_name} ({latest_version})"
                 )
-        except pkg_resources.DistributionNotFound:
+        except PackageNotFoundError:
             logging.error(f"{package_name} is not installed.")
         except urllib.error.URLError as e:
             logging.warning(

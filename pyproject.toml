@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "socha"
 version = "4.3.4"
 authors = [
-  { name = "yoente", email = "stu250140@mail.uni-kiel.de" },
+  { name = "yoente", email = "anthony@software-challenge.de" },
   { name = "maxblan", email = "stu222782@mail.uni-kiel.de" },
 ]
 description = "Dieses Paket ist für die Software-Challenge Germany 2026, bei der in dieser Saison das Spiel 'Piranhas' im Mittelpunkt steht."
