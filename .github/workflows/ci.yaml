@@ -19,49 +19,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Set up Python first
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
       # Install Rust toolchain
-      - name: Install Rust toolchain
-        run: |
-          rustup toolchain install stable
-          rustup default stable
-          rustup component add clippy
+      - name: Install Rust
+        run: rustup toolchain install stable
 
-      # Clippy - Rust linter
+      # Run Clippy (Rust linter)
       - name: Run Clippy
-        run: cargo clippy -- -D warnings
+        run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Build Rust code first
-      - name: Build
-        run: cargo build --verbose
-
-      # Set up Python virtual environment FIRST
-      - name: Setup Python environment
+      # Setup Python virtual environment and run Python lint/tests
+      - name: Setup Python and run tests
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install maturin ruff
-
-      # Run maturin develop to build the extension and set up environment
-      - name: Build Python extension
-        run: |
-          source venv/bin/activate
-          maturin develop
-
-      # Run Python tests
-      - name: Run Python tests
-        run: |
-          source venv/bin/activate
+          pip install --upgrade pip
+          pip install ruff maturin
           ruff check .
+          maturin develop
           python -m unittest discover -s tests -p '*.py'
 
-      # Run Rust tests - they should work now with the extension built
+      # Build Rust with PyO3
+      - name: Build Rust
+        run: |
+          source venv/bin/activate
+          export PYTHON_SYS_EXECUTABLE=$(which python)
+          cargo build --verbose
+
+      # Run Rust tests with all features (including PyO3)
       - name: Run Rust tests
         run: |
           source venv/bin/activate
-          cargo test --verbose
+          export PYTHON_SYS_EXECUTABLE=$(which python)
+          cargo test --all-features --verbose
