@@ -2,13 +2,11 @@ name: Continuous Integration
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   pull_request:
     types: [opened, synchronize, reopened]
 
 permissions: read-all
-
 env:
   CARGO_TERM_COLOR: always
 
@@ -19,19 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Clippy - Rust linter
+      # Install Rust
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-      - name: Run Clippy
-        run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Setup Python virtual environment for PyO3
-      - name: Setup Python environment
+      # Clippy (all features including PyO3)
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      # Setup Python environment
+      - name: Setup Python
         run: |
           python -m venv venv
           source venv/bin/activate
           pip install --upgrade pip setuptools maturin ruff
-          python -m pip list
 
       # Lint Python
       - name: Lint Python
@@ -39,28 +38,18 @@ jobs:
           source venv/bin/activate
           ruff check .
 
-      # Build PyO3 extension in-place
+      # Build PyO3 extension
       - name: Build PyO3 extension
         run: |
           source venv/bin/activate
           maturin develop --release
 
-      # Run Python unit tests
-      - name: Run Python tests
+      # Run Python tests
+      - name: Python tests
         run: |
           source venv/bin/activate
           python -m unittest discover -s tests -p '*.py'
 
-      # Build Rust without features (for pure Rust tests)
-      - name: Rust build (no features)
-        run: cargo build --no-default-features --verbose
-
-      # Run Rust tests without PyO3
-      - name: Rust tests (no PyO3)
-        run: cargo test --no-default-features --verbose
-
-      # Run Rust tests with PyO3 linked
-      - name: Rust tests (with PyO3)
-        run: |
-          source venv/bin/activate
-          cargo test --features extension-module --verbose
+      # Run Rust tests with all features
+      - name: Rust tests
+        run: cargo test --all-features --verbose
