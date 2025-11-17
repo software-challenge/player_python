@@ -22,25 +22,45 @@ jobs:
       # Clippy - Rust linter
       - name: Install Rust toolchain
         run: rustup toolchain install stable
-
       - name: Run Clippy
         run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Python linting + PyO3 develop mode
-      - name: Setup and run tests in virtual environment
+      # Setup Python virtual environment for PyO3
+      - name: Setup Python environment
         run: |
           python -m venv venv
           source venv/bin/activate
-          pip install ruff
+          pip install --upgrade pip setuptools maturin ruff
+          python -m pip list
+
+      # Lint Python
+      - name: Lint Python
+        run: |
+          source venv/bin/activate
           ruff check .
-          pip install maturin
-          maturin develop
+
+      # Build PyO3 extension in-place
+      - name: Build PyO3 extension
+        run: |
+          source venv/bin/activate
+          maturin develop --release
+
+      # Run Python unit tests
+      - name: Run Python tests
+        run: |
+          source venv/bin/activate
           python -m unittest discover -s tests -p '*.py'
 
-      # Build Rust
-      - name: Build
-        run: cargo build --verbose
+      # Build Rust without features (for pure Rust tests)
+      - name: Rust build (no features)
+        run: cargo build --no-default-features --verbose
 
-      # Run Rust tests without PyO3 linking
-      - name: Run tests
+      # Run Rust tests without PyO3
+      - name: Rust tests (no PyO3)
         run: cargo test --no-default-features --verbose
+
+      # Run Rust tests with PyO3 linked
+      - name: Rust tests (with PyO3)
+        run: |
+          source venv/bin/activate
+          cargo test --features extension-module --verbose
