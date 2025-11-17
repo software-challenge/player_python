@@ -17,45 +17,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout code
       - uses: actions/checkout@v3
+
+      # Set up Python first
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
 
       # Install Rust toolchain
       - name: Install Rust toolchain
-        run: rustup toolchain install stable
+        run: |
+          rustup toolchain install stable
+          rustup default stable
+          rustup component add clippy
 
       # Clippy - Rust linter
       - name: Run Clippy
-        run: |
-          rustup component add clippy
-          cargo clippy -- -D warnings
+        run: cargo clippy -- -D warnings
 
-      # Install Python dev headers (needed for PyO3)
-      - name: Install Python dev dependencies
-        run: sudo apt-get update && sudo apt-get install -y python3-dev python3-venv
-
-      # Setup Python virtual environment
-      - name: Setup Python environment
-        run: |
-          python3 -m venv venv
-          source venv/bin/activate
-          pip install --upgrade pip
-
-      # Python linting
-      - name: Python linting
-        run: |
-          source venv/bin/activate
-          pip install ruff
-          ruff check .
-
-      # Build and test PyO3 extension + Python tests using maturin
-      - name: Build and test Rust + PyO3
-        run: |
-          source venv/bin/activate
-          pip install maturin
-          maturin develop --release
-          maturin test --release
-
-      # Optional: build Rust without Python (for pure Rust CI)
-      - name: Build Rust only
+      # Build Rust code first
+      - name: Build
         run: cargo build --verbose
+
+      # Set up Python virtual environment and run Python tests
+      - name: Setup and run Python tests
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install ruff maturin
+          ruff check .
+          maturin develop
+          python -m unittest discover -s tests -p '*.py'
+
+      # Run Rust tests with Python environment available
+      - name: Run tests
+        run: |
+          source venv/bin/activate
+          cargo test --verbose
