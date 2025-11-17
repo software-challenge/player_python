@@ -19,11 +19,17 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Set up Python first
+      # Set up Python with development headers first
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
+
+      # Install Python development packages
+      - name: Install Python dev dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev
 
       # Install Rust toolchain
       - name: Install Rust toolchain
@@ -31,6 +37,16 @@ jobs:
           rustup toolchain install stable
           rustup default stable
           rustup component add clippy
+
+      # Set environment variables for PyO3
+      - name: Configure PyO3
+        run: |
+          # Find Python library path and set environment variables
+          python -c "import sysconfig; print(sysconfig.get_config_var('LIBDIR'))"
+          python -c "import sysconfig; print(sysconfig.get_config_var('INCLUDEPY'))"
+          
+          # Set PyO3 environment variables
+          echo "PYO3_PYTHON=$(which python)" >> $GITHUB_ENV
 
       # Clippy - Rust linter
       - name: Run Clippy
@@ -50,8 +66,11 @@ jobs:
           maturin develop
           python -m unittest discover -s tests -p '*.py'
 
-      # Run Rust tests with Python environment available
-      - name: Run tests
+      # Run Rust tests with proper Python linkage
+      - name: Run Rust tests
         run: |
           source venv/bin/activate
+          # Ensure Python is in the path and libraries are available
+          export PYTHON_SYS_EXECUTABLE=$(which python)
+          # Run tests with explicit Python configuration
           cargo test --verbose
