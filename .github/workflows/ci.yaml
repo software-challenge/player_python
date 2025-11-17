@@ -22,10 +22,11 @@ jobs:
       # Clippy - Rust linter
       - name: Install Rust toolchain
         run: rustup toolchain install stable
+
       - name: Run Clippy
         run: rustup component add clippy && cargo clippy -- -D warnings
 
-      # Install dependencies and run unittests within the virtual environment
+      # Python linting + PyO3 develop mode
       - name: Setup and run tests in virtual environment
         run: |
           python -m venv venv
@@ -36,9 +37,10 @@ jobs:
           maturin develop
           python -m unittest discover -s tests -p '*.py'
 
-
-      # Build and test steps for Rust
+      # Build Rust
       - name: Build
         run: cargo build --verbose
+
+      # Run Rust tests without PyO3 linking
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --no-default-features --verbose
