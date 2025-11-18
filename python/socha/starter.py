@@ -8,7 +8,7 @@ import json
 import logging
 import urllib.request
 
-import pkg_resources
+from importlib.metadata import version, PackageNotFoundError
 from socha.api.networking.game_client import GameClient, IClientHandler
 from socha.utils.package_builder import SochaPackageBuilder
 
@@ -56,6 +56,7 @@ class Starter:
             log: If True the client write a log file to the current directory.
             verbose: Verbose option for logging.
             build: If set, the client will build a zip package with the given name.
+            python_version: When building, takes string for specified python version. Standard: "3.10".
         """
         VERBOSE = 15
         logging.addLevelName(VERBOSE, "VERBOSE")
@@ -141,7 +142,7 @@ class Starter:
     def check_socha_version():
         package_name = "socha"
         try:
-            installed_version = pkg_resources.get_distribution(package_name).version
+            installed_version = version(package_name)
             # trunk-ignore(bandit/B310)
             response = urllib.request.urlopen(
                 f"https://pypi.org/pypi/{package_name}/json"
@@ -157,7 +158,7 @@ class Starter:
                 logging.info(
                     f"You're running the latest version of {package_name} ({latest_version})"
                 )
-        except pkg_resources.DistributionNotFound:
+        except PackageNotFoundError:
             logging.error(f"{package_name} is not installed.")
         except urllib.error.URLError as e:
             logging.warning(
@@ -241,10 +242,11 @@ class Starter:
         parser.add_argument(
             "-a",
             "--architecture",
-            help="Specifies the build architecture (e.g.: manylinux1_x86_64).",
+            help="Specifies the build architecture (e.g.: manylinux2014_x86_64).",
         )
 
         parser.add_argument(
+            "-pyv",
             "--python-version",
             help="Specifies the build python version (e.g.: 3.10 - this is standard).",
         )
