@@ -13,10 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout master
+      - name: Checkout full history
         uses: actions/checkout@v4
         with:
           ref: master
+          fetch-depth: 0            # <-- allows commits, no detached HEAD
           persist-credentials: false
 
       - name: Install pandoc
@@ -29,11 +30,10 @@ jobs:
           pandoc README.md --from markdown -f gfm --to rst -s -o docs/index.rst
           cat docs/appending >> docs/index.rst
 
-      - name: Commit and push updated index.rst
+      - name: Commit and force-push updated index.rst
         run: |
           git config --global user.name "YoEnte"
           git config --global user.email "anthonyroeder@live.de"
-          git pull --rebase
           git add docs/index.rst
           git commit -m "docs: auto update index.rst" || exit 0
-          git push https://x-access-token:${{ secrets.PAT_PUSH_MASTER }}@github.com/software-challenge/player_python.git master
+          git push --force https://x-access-token:${{ secrets.PAT_PUSH_MASTER }}@github.com/software-challenge/player_python.git master
