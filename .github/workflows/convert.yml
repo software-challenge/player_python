@@ -1,29 +1,34 @@
 name: convert readme
-'on':
+
+on:
   push:
     tags:
-      - '*'
+      - "*"
+
+permissions:
+  contents: write
+
 jobs:
   convert:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: convert to rst
+      - uses: actions/checkout@v4
+
+      - name: Install pandoc
         run: |
           wget https://github.com/jgm/pandoc/releases/download/2.19.2/pandoc-2.19.2-1-amd64.deb
           sudo dpkg -i pandoc-2.19.2-1-amd64.deb
+
+      - name: Convert README.md to docs/index.rst
+        run: |
           pandoc README.md --from markdown -f gfm --to rst -s -o docs/index.rst
           cat docs/appending >> docs/index.rst
-      - name: checkout master
+
+      - name: Commit and push updated index.rst
         run: |
-          git fetch origin master
-          git checkout master
-          git pull origin master
-      - name: commit index.rst
-        run: |
-          git config --global user.name 'YoEnte'
-          git config --global user.email 'anthonyroeder@live.de'
+          git config --global user.name "YoEnte"
+          git config --global user.email "anthonyroeder@live.de"
           git add docs/index.rst
-          git commit -m "docs: auto update index.rst"
-          git push origin master --force-with-lease
-        continue-on-error: true
+          git commit -m "docs: auto update index.rst" || exit 0
+          git push https://x-access-token:${{ secrets.PAT_PUSH_MASTER }}@github.com/software-challenge/player_python.git HEAD:master
