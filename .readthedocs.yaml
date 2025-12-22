@@ -4,7 +4,7 @@ build:
   os: ubuntu-20.04
   tools:
     python: "3.10"
-    rust: "1.90.0"
+    rust: "1.91"
 
 python:
   install:
