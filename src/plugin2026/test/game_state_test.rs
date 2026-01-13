@@ -1,5 +1,7 @@
 #[cfg(test)]
 mod tests {
+    use pyo3::Python;
+
     use crate::plugin2026::{
         field_type::FieldType, r#move::Move, test::common::create_test_game_state, utils::{coordinate::Coordinate, direction::Direction}
     };
@@ -39,7 +41,7 @@ mod tests {
 
     #[test]
     pub fn perform_move_test() {
-        pyo3::prepare_freethreaded_python();
+        Python::initialize();
 
         let mut state = create_test_game_state();
 

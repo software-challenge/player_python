@@ -8,8 +8,8 @@ name = "socha"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.21.2" }
-pyo3-log = "0.10.0"
+pyo3 = { version = "0.27.1", features = ["extension-module"] }
+pyo3-log = "0.13.2"
 log = "0.4.20"
 itertools = "0.13.0"
 

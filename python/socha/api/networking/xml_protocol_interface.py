@@ -76,8 +76,6 @@ def map_last_move(last_move: LastMove, params: dict):
 
 
 def custom_class_factory(clazz, params: dict):
-    # print("TEST01: ", clazz, params)
-
     if clazz.__name__ == 'Data':
         return map_object(clazz, params)
     if clazz.__name__ == 'LastMove':
