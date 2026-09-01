@@ -1,6 +1,6 @@
 [package]
 name = "_socha"
-version = "4.3.9"
+version = "5.0.0"
 edition = "2021"
 
 [lib]
@@ -12,6 +12,7 @@ pyo3 = { version = "0.21.2" }
 pyo3-log = "0.10.0"
 log = "0.4.20"
 itertools = "0.13.0"
+rand = "0.10.2"
 
 [features]
 extension-module = ["pyo3/extension-module"]

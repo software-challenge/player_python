@@ -1,84 +1,5 @@
 from enum import Enum
-from typing import List, Optional
-
-class Coordinate:
-    """
-    Eine 2 dimensionale Koordinate auf einem Spielfeld.
-
-    Attributes:
-        x (int): Der x-Wert.
-        y (int): Der y-Wert.
-    """
-
-    x: int
-    y: int
-
-    def __init__(self, x: int, y: int) -> None: ...
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
-    def __eq__(self, other: Coordinate) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (Coordinate): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: Coordinate) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (Coordinate): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-
-    def deepcopy(self) -> Coordinate: 
-        """
-        Kopiert das Objekt rekursiv.
-        """
-        ...
-
-    def add_vector(self, vector: Vector) -> Coordinate:
-        """
-        Addiert einen Vector auf die Werte dieser Koordinate (**nicht mutierend**).
-
-        Args:
-            vector (Vector): Der Vektor.
-
-        Returns:
-            Coordinate: Ein neues Koordinatenobjekt mit den berechneten Werten.
-        """
-        ...
-
-    def add_vector_mut(self, vector: Vector) -> None:
-        """
-        Addiert einen Vector auf die Werte dieser Koordinate (**mutierend**).
-
-        Args:
-            vector (Vector): Der Vektor.
-        """
-        ...
-
-    def get_difference(self, other: Coordinate) -> Vector:
-        """
-        Berechnet die Differenz zwischen zwei Koordinaten Punkten als Vektor.
-
-        Args:
-            other (Coordinate): Die andere Koordinate
-
-        Returns:
-            Vector: Der Vektor zwischen den Punkten
-        """
-        ...
+from typing import Dict, List, Optional, Set, Tuple
 
 class Vector:
     """
@@ -95,744 +16,738 @@ class Vector:
     def __init__(self, delta_x: int, delta_y: int) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: Vector) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
-        Args:
-            other: (Vector): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: Vector) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (Vector): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-        
-    def deepcopy(self) -> GameState: 
-        """
-        Kopiert das Objekt rekursiv.
-        """
+    def deepcopy(self) -> Vector:
+        """Kopiert das Objekt."""
         ...
 
     def add_vector(self, other: Vector) -> Vector:
-        """
-        Addiert einen anderen Vector auf die Werte dieses Vektors (**nicht mutierend**).
-
-        Args:
-            other (Vector): Der andere Vektor.
-
-        Returns:
-            Vector: Ein neues Vektorobjekt mit den berechneten Werten.
-        """
+        """Addiert einen anderen Vector (nicht mutierend)."""
         ...
 
     def add_vector_mut(self, other: Vector) -> None:
-        """
-        Addiert einen anderen Vector auf die Werte dieses Vektors (**mutierend**).
-
-        Args:
-            other (Vector): Der andere Vektor.
-        """
+        """Addiert einen anderen Vector (mutierend)."""
         ...
 
     def scale(self, scalar: int) -> Vector:
-        """
-        Skaliert diesen Vektor um ein gegebenes Skalar (**nicht mutierend**).
-
-        Args:
-            scalar (int): Das Skalar.
-
-        Returns:
-            Vector: Ein neues Vektorobjekt mit den berechneten Werten.
-        """
+        """Skaliert diesen Vektor (nicht mutierend)."""
         ...
 
     def scale_mut(self, scalar: int) -> None:
-        """
-        Skaliert diesen Vektor um ein gegebenes Skalar (**mutierend**).
-
-        Args:
-            scalar (int): Das Skalar.
-        """
+        """Skaliert diesen Vektor (mutierend)."""
         ...
 
-    def get_length(self) -> float:
-        """
-        Berechnet die Länge dieses Vektors.
-
-        Returns:
-            float: Die Länge des Vektors (in 32 bit Präzision).
-        """
+    def get_length(self) -> Optional[float]:
+        """Berechnet die Länge dieses Vektors."""
         ...
+
+
+class Coordinate:
+    """
+    Eine 2 dimensionale Koordinate auf einem Spielfeld.
+
+    Attributes:
+        x (int): Der x-Wert.
+        y (int): Der y-Wert.
+    """
+
+    x: int
+    y: int
+
+    def __init__(self, x: int, y: int) -> None: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+
+    def deepcopy(self) -> Coordinate:
+        """Kopiert das Objekt."""
+        ...
+
+    def add_vector(self, vector: Vector) -> Coordinate:
+        """Addiert einen Vector auf diese Koordinate (nicht mutierend)."""
+        ...
+
+    def add_vector_mut(self, vector: Vector) -> None:
+        """Addiert einen Vector auf diese Koordinate (mutierend)."""
+        ...
+
+    def get_difference(self, other: Coordinate) -> Vector:
+        """Berechnet die Differenz zwischen zwei Koordinaten als Vektor."""
+        ...
+
+    def neighbors(self) -> List[Coordinate]:
+        """Gibt die vier benachbarten Feldkoordinaten zurück."""
+        ...
+
+    def diagonal_neighbors(self) -> List[Coordinate]:
+        """Gibt die vier angrenzenden Ecken der Feldkoordinaten zurück."""
+        ...
+
+    def as_vector(self) -> Vector:
+        """Coordinate als Vektor Objekt"""
+        ...
+
 
 class Direction(Enum):
-    """
-    Eine Darstellung für eine normierte Richtung.<br>
-    Kann in einen Vektor konvertiert werden.
-    """
-    
-    Up: int = 0
-    """
-    Richtung nach oben, entspricht Vektor(0, 1).
-    """
-    UpRight: int = 1
-    """
-    Richtung nach oben-rechts, entspricht Vektor(1, 1).
-    """
-    Right: int = 2
-    """
-    Richtung nach rechts, entspricht Vektor(1, 0).
-    """
-    DownRight: int = 3
-    """
-    Richtung nach unten-rechts, entspricht Vektor(1, -1).
-    """
-    Down: int = 4
-    """
-    Richtung nach unten, entspricht Vektor(0, -1).
-    """
-    DownLeft: int = 5
-    """
-    Richtung nach unten-links, entspricht Vektor(-1, -1).
-    """
-    Left: int = 6
-    """
-    Richtung nach links, entspricht Vektor(-1, 0).
-    """
-    UpLeft: int = 7
-    """
-    Richtung nach oben-links, entspricht Vektor(-1, 1).
-    """
+    """Eine Darstellung für eine normierte Richtung."""
+
+    Up = 0
+    UpRight = 1
+    Right = 2
+    DownRight = 3
+    Down = 4
+    DownLeft = 5
+    Left = 6
+    UpLeft = 7
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: Direction) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (Direction): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: Direction) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (Direction): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+    def deepcopy(self) -> Direction: ...
 
     @staticmethod
     def from_vector(vector: Vector) -> Optional[Direction]:
-        """
-        Wandelt einen Vektor in eine der 8 Richtungen um, insofern der Vektor exakt der Richtung entspricht.
-
-        Args:
-            vector (Vector): Der Vektor, der konvertiert werden soll.
-
-        Returns:
-            Optional[Direction]: Die Richtung oder None, wenn der Vektor nicht direkt übersetzt werden kann.
-        """
+        """Wandelt einen Vektor in eine der 8 Richtungen um."""
         ...
-    
+
     @staticmethod
     def all_directions() -> List[Direction]:
-        """
-        Gibt eine Liste aller 8 Richtungen aus.<br>
-        Der erste Wert ist oben und alle weiteren folgen im Uhrzeigersinn.
-        
-        Returns:
-            List[Direction]: Die Liste der Richtungen.
-        """
+        """Gibt eine Liste aller 8 Richtungen zurück."""
+        ...
+
+    @staticmethod
+    def cardinals() -> List[Direction]:
+        """Gibt die vier nicht-diagonalen Richtungen zurück (Up, Right, Down, Left)."""
+        ...
+
+    @staticmethod
+    def diagonals() -> List[Direction]:
+        """Gibt die vier diagonalen Richtungen zurück."""
         ...
 
     def to_vector(self) -> Vector:
-        """
-        Wandelt die Richtung in den entsprechenden Vektor um.
-
-        Returns:
-            Vector: Der Richtungsvektor.
-        """
+        """Wandelt die Richtung in den entsprechenden Vektor um."""
         ...
 
     def to_mirrored(self) -> Direction:
-        """
-        Spiegelt die gegebene Richtung.<br>
-        Beispiel: Up -> Down.
-
-        Returns:
-            Direction: Die neue Richtung.
-        """
+        """Spiegelt die gegebene Richtung."""
         ...
 
-class FieldType(Enum):
-    """
-    Stellt alle verfügbaren Feldtypen dar.
-    """
-
-    OneS: int = 0
-    """
-    Der kleine Fisch von Spieler 1.
-    """
-    OneM: int = 1
-    """
-    Der mittlere Fisch von Spieler 1.
-    """
-    OneL: int = 2
-    """
-    Der große Fisch von Spieler 1.
-    """
-    TwoS: int = 3
-    """
-    Der kleine Fisch von Spieler 2.
-    """
-    TwoM: int = 4
-    """
-    Der mittlere Fisch von Spieler 2.
-    """
-    TwoL: int = 5
-    """
-    Der große Fisch von Spieler 2.
-    """
-    Squid: int = 6
-    """
-    Der Kraken.
-    """
-    Empty: int = 7
-    """
-    Alle anderen unbesetzten Felder.
-    """
-
-    def __str__(self) -> str: ...
-    def __repr__(self) -> str: ...
-    def __eq__(self, other: FieldType) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (FieldType): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: FieldType) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (FieldType): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-
-    def get_value(self) -> int:
-        """
-        Gibt die entsprechende Wertigkeit eines Feldes zurück.<br>
-        Für Fische je nachdem 1-3, für die anderen Felder 0.
-        
-        Returns:
-            int: Der Wert des Feldes.
-        """
-        ...
-
-    def get_team(self) -> Optional[TeamEnum]:
-        """
-        Gibt für ein Fischfeld aus, zu welchem Team dieser Fisch gehört.
-
-        Returns:
-            Optional[TeamEnum]: Das Team, zudem der Fisch gehört, oder None, wenn das Feld kein Fisch ist.
-        """
-        ...
-
-    @staticmethod
-    def all_field_types() -> List[FieldType]:
-        """
-        Gibt eine Liste aller Feldtypen aus.<br>
-        
-        Returns:
-            List[Direction]: Die Liste der Richtungen.
-        """
-        ...
 
 class TeamEnum(Enum):
-    """
-    Eine Darstellung für die beiden Teams
-    """
+    """Eine Darstellung für die beiden Teams."""
 
     One = 0
-    """
-    Team 1
-    """
     Two = 1
-    """
-    Team 2
-    """
 
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: TeamEnum) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (TeamEnum): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: TeamEnum) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (TeamEnum): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-
-    def get_fish_types(self) -> List[FieldType]:
-        """
-        Gibt eine Liste aller Fischtypen des Teams aus.
-
-        Returns:
-            List[FieldType]: Die Liste der Feldtypen.
-        """
-        ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
     def opponent(self) -> TeamEnum:
-        """
-        Gibt den Gegner dieses Teams an.
-
-        Return:
-            TeamEnum: Das Gegnerteam.
-        """
+        """Gibt den Gegner dieses Teams zurück."""
         ...
+
+
+class Color(Enum):
+    """Die Farbe eines Spielsteins / Teams."""
+
+    BLUE = 0
+    YELLOW = 1
+    RED = 2
+    GREEN = 3
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+    def __hash__(self) -> int: ...
+
+    def next(self) -> Color:
+        """Gibt die nächste Farbe in der Zugreihenfolge zurück."""
+        ...
+
+    def team(self) -> TeamEnum:
+        """Gibt das Team zurück, zu dem diese Farbe gehört."""
+        ...
+
+    def to_field_content(self) -> FieldContent:
+        """Wandelt die Farbe in den entsprechenden Feldinhalt um."""
+        ...
+
+    def name(self) -> str:
+
+        ...
+
+class FieldContent(Enum):
+    """Der Inhalt eines Feldes: eine Farbe oder leer."""
+
+    BLUE = 0
+    YELLOW = 1
+    RED = 2
+    GREEN = 3
+    EMPTY = 4
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+
+    def to_team_color(self) -> Optional[Color]:
+        """Wandelt den Feldinhalt in die entsprechende Farbe um, oder None, wenn leer."""
+        ...
+
+    def is_empty(self) -> bool:
+        """Gibt zurück, ob das Feld leer ist."""
+        ...
+
+
+class Field:
+    """Ein einzelnes Feld auf dem Spielbrett."""
+
+    coordinate: Coordinate
+    content: FieldContent
+
+    def __init__(self, coordinate: Coordinate, color: Color) -> None: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+
+    def deepcopy(self) -> Field:
+        """Kopiert das Objekt."""
+        ...
+
+    def is_empty(self) -> bool:
+        """Gibt zurück, ob das Feld leer ist."""
+        ...
+
 
 class Board:
     """
-    Ein Spielbrett, das die Felder des Spiels enthält.
-
-    Das Feld unten-links hat Koordinate (0, 0) und das Feld oben-rechts ist an Position (9, 9).<br>
-    Gleichzeitig bedeutet das, dass map[0] auch die unterste Zeile des Spielfeldes ist.
+    Das Spielbrett.
 
     Attributes:
-        map (List[List[Field]]): Die 2 dimensionale Liste der Felder, die das Spielbrett darstellen.<br>
+        map (List[List[Field]]): Die 2-dimensionale Liste der Felder.
     """
 
-    map: List[List[FieldType]]
+    map: List[List[Field]]
 
-    def __init__(self, map: List[List[FieldType]]) -> None: ...
+    def __init__(self, map: Optional[List[List[Field]]]) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    
-    def __eq__(self, other: TeamEnum) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
+    def __eq__(self, other: object) -> bool: ...
 
-        Args:
-            other: (TeamEnum): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: TeamEnum) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (TeamEnum): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-        
-    def deepcopy(self) -> GameState: 
-        """
-        Kopiert das Objekt rekursiv.
-        """
-        ...
-
-    def get_field(self, position: Coordinate) -> Optional[FieldType]:
+    def get(self, position: Coordinate) -> Field:
         """
         Gibt das Feld an der gegebenen Koordinate zurück.
 
-        Args:
-            position (Coordinate): Die Position des Feldes, das abgerufen werden soll.
-
-        Returns:
-            Field: Das Feld an der gegebenen Koordinate, oder None, wenn außerhalb des gültigen Bereichs.
+        Raises:
+            IndexError: Wenn die Koordinate außerhalb des Spielfelds liegt.
         """
         ...
 
-    def get_fields_by_type(self, field: FieldType) -> List[Coordinate]:
-        """
-        Gibt eine Liste aller Koordinaten zurück, auf dem der angegebene Feld-Typ zu finden ist.
-
-        Args:
-            field (FieldType): Der Feld-Typ, nachdem gesucht werden soll.
-
-        Returns:
-            List[Coordinate]: Die Liste der Koordinaten.
-        """
+    def set_content(self, position: Coordinate, content: FieldContent) -> None:
+        """Setzt den Inhalt eines Feldes."""
         ...
 
-    def get_fields_in_direction(self, position: Coordinate, direction: Direction) -> List[FieldType]:
-        """
-        Gibt eine Liste aller Feld-Typen zurück, die in einer Richtung liegen.<br>
-        Dabei wird als Ausgangspunkt eine Koordinate genommen und dazu die Richtung, in die aufgelistet werden soll.
-
-        **Achtung**: Das Feld der Ausgangskoordinate wird *nicht* beachtet und ausgegeben.<br>
-        Wenn die Startkoordinate nicht im Spielfeld liegt, wird eine leere Liste zurückgegeben.
-
-        Args:
-            position (Coordinate): Die Ausgangskoordinate.
-            direction (Direction): Die Richtung.
-
-        Returns:
-            List[FieldType]: Die Liste der Felder.
-        """
-
-    def get_fields_on_line(self, position: Coordinate, direction: Direction) -> List[FieldType]:
-        """
-        Gibt eine Liste aller Feld-Typen zurück, die auf einer Gerade liegen.<br>
-        Die Gerade wird aufgespannt durch eine Koordinate und einen Richtungsvektor.
-
-        Das Ergebnis wird in Richtung des "Vektorpfeils" abgelesen.<br>
-        Wenn die Startkoordinate nicht im Spielfeld liegt, wird eine leere Liste zurückgegeben.
-
-        Args:
-            position (Coordinate): Die Startkoordinate für die Gerade.
-            direction (Direction): Der aufspannende Richtungsvektor.
-
-        Returns:
-            List[FieldType]: Die Liste der Felder.
-        """
+    def get_content(self, position: Coordinate) -> Optional[FieldContent]:
+        """Gibt den Inhalt eines Feldes zurück, oder None, wenn außerhalb des Feldes."""
         ...
 
-    def get_fish_on_line(self, position: Coordinate, direction: Direction) -> List[FieldType]:
-        """
-        Funktioniert ähnlich wie *Board.get_fields_on_line()*,
-        gibt aber nur die Feldtypen, die Fische sind, auf einer Geraden als Liste aus.
-
-        Args:
-            position (Coordinate): Die Startkoordinate für die Gerade.
-            direction (Direction): Der aufspannende Richtungsvektor.
-
-        Returns:
-            List[FieldType]: Die Liste der Fisch-Felder.
-        """
+    def is_empty(self) -> bool:
+        """Prüft, ob alle Felder leer sind."""
         ...
 
-class Move:
-    """
-    Repräsentiert einen Zug im Spiel.
+    def is_obstructed(self, position: Coordinate) -> bool:
+        """Prüft, ob auf dieser Position bereits eine Spielerfarbe liegt."""
+        ...
 
-    Attribute:
-        start (Coordinate): Die Koordinate, von wo aus ein Fisch bewegt werden soll.
-        direction (Direction): Die Richtung, in die der Fisch schwimmt.
-    """
+    def get_team(self, position: Coordinate) -> Optional[Color]:
+        """Gibt das Team zurück, das auf dem Feld liegt, oder None."""
+        ...
 
-    start: Coordinate
-    direction: Direction
+    def pretty_string(self) -> str:
+        """Gibt eine lesbare String-Darstellung des Spielfelds zurück."""
+        ...
 
-    def __init__(self, start: Coordinate, direction: Direction) -> None: ...
+    def compare(self, other: Board) -> List[Field]:
+        """Vergleicht dieses Board mit einem anderen und gibt die unterschiedlichen Felder zurück."""
+        ...
+
+    @staticmethod
+    def random_fields() -> List[List[Field]]:
+        """Erstellt ein leeres Spielfeld."""
+        ...
+
+    @staticmethod
+    def contains(position: Coordinate) -> bool:
+        """Prüft, ob die Koordinate innerhalb der Grenzen des Spielfelds liegt."""
+        ...
+
+
+class Rotation(Enum):
+    """Beschreibt, wie weit eine PieceShape gedreht werden soll."""
+
+    NONE = 0
+    RIGHT = 1
+    MIRROR = 2
+    LEFT = 3
+
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    
-    def __eq__(self, other: Move) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
 
-        Args:
-            other: (Move): Die andere Koordinate.
+    def value(self) -> int:
+        """Gibt den numerischen Wert (Anzahl Vierteldrehungen) zurück."""
+        ...
+
+    def rotate(self, other: Rotation) -> Rotation:
+        """Summiert beide Rotationen auf."""
+        ...
+
+    @staticmethod
+    def all() -> List[Rotation]:
+        """Gibt alle vier Rotationen zurück."""
+        ...
+
+    def name(self) -> str:
+        ...
+
+
+class PieceShape(Enum):
+    """Eine Enumeration aller 21 verschiedenen Formen."""
+
+    Mono = 0
+    Domino = 1
+    TrioL = 2
+    TrioI = 3
+    TetroO = 4
+    TetroT = 5
+    TetroI = 6
+    TetroL = 7
+    TetroZ = 8
+    PentoL = 9
+    PentoT = 10
+    PentoV = 11
+    PentoS = 12
+    PentoZ = 13
+    PentoI = 14
+    PentoP = 15
+    PentoW = 16
+    PentoU = 17
+    PentoR = 18
+    PentoX = 19
+    PentoY = 20
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+
+    @staticmethod
+    def all() -> List[PieceShape]:
+        """Gibt alle 21 Formen in Reihenfolge zurück."""
+        ...
+
+    @staticmethod
+    def from_index(index: int) -> Optional[PieceShape]:
+        """Gibt die Form anhand ihres Index zurück, oder None."""
+        ...
+
+    def coordinates(self) -> Set[Coordinate]:
+        """Die normalisierten Koordinaten der Grundform."""
+        ...
+
+    def dimension(self) -> Vector:
+        """Das kleinstmögliche Rechteck, das die Form umfasst."""
+        ...
+
+    def as_vectors(self) -> Set[Vector]:
+        """Die Form als Menge von Vektoren relativ zu (0,0)."""
+        ...
+
+    def size(self) -> int:
+        """Die Anzahl der Felder, die diese Form belegt."""
+        ...
+
+    def variants(self) -> List[Tuple[Set[Coordinate], Rotation, bool]]:
+        """
+        Alle eindeutigen Varianten der Form (Rotation + Spiegelung), ohne Duplikate.
 
         Returns:
-            bool: Das Ergebnis des Vergleichs.
+            Eine Liste von (Koordinatenmenge, Rotation, ist_gespiegelt)-Tupeln.
         """
         ...
-    def __ne__(self, other: Move) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
 
-        Args:
-            other: (Move): Die andere Koordinate.
+    def transform(self, rotation: Rotation, should_flip: bool) -> Set[Coordinate]:
+        """Transformiert die Form entsprechend Rotation und Spiegelung."""
+        ...
 
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
+    def name(self) -> str:
         ...
-        
-    def deepcopy(self) -> GameState: 
-        """
-        Kopiert das Objekt rekursiv.
-        """
+
+class Piece:
+    """Ein Spielstein mit Farbe, Position und Transformation."""
+
+    color: Color
+    kind: PieceShape
+    rotation: Rotation
+    is_flipped: bool
+    position: Coordinate
+
+    def __init__(
+        self,
+        color: Color,
+        kind: PieceShape,
+        rotation: Rotation,
+        is_flipped: bool,
+        position: Coordinate,
+    ) -> None: ...
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+    def __hash__(self) -> int: ...
+
+    def shape(self) -> Set[Coordinate]:
+        """Die normalisierte Form des Steins (gedreht/gespiegelt, nicht verschoben)."""
         ...
+
+    def coordinates(self) -> Set[Coordinate]:
+        """Die tatsächlichen Koordinaten, die der Stein auf dem Feld einnimmt."""
+        ...
+
+    def transform(self, rotation: Rotation, is_flipped: bool) -> Piece:
+        """Dreht/spiegelt den Stein, Position bleibt gleich."""
+        ...
+
+
+class Move:
+    """Repräsentiert einen Zug im Spiel: entweder ein SetMove oder ein SkipMove."""
+
+    def __str__(self) -> str: ...
+    def __repr__(self) -> str: ...
+    def __eq__(self, other: object) -> bool: ...
+    def __ne__(self, other: object) -> bool: ...
+
+    @staticmethod
+    def set_move(piece: Piece) -> Move:
+        """Erstellt einen Zug, der den gegebenen Stein platziert."""
+        ...
+
+    @staticmethod
+    def skip_move(color: Color) -> Move:
+        """Erstellt einen Zug, der die aktuelle Runde für die gegebene Farbe aussetzt."""
+        ...
+
+    def get_color(self) -> Color:
+        """Die Farbe, die diesen Zug getätigt hat."""
+        ...
+
+    def as_piece(self) -> Optional[Piece]:
+        """Gibt das verwendete Piece aus, wenn vorhanden"""
+        ...
+
 
 class GameState:
     """
-    Repräsentiert einen Spielstand.
+    Repräsentiert den aktuellen Spielstand.
 
     Attribute:
-        board (Board): Das Spielbrett.
-        turn (int): Die aktuelle Runde.
-        last_move (Optional[Move]): Der zuletzt ausgeführte Zug.
+        turn (int): Die Anzahl der bereits getätigten Züge.
+        last_move (Optional[Move]): Der zuletzt gespielte Zug.
+        board (Board): Das aktuelle Spielfeld.
+        start_piece (PieceShape): Der Spielstein, der im ersten Zug gesetzt werden muss.
+        last_move_mono (Dict[Color, bool]): Ob das Monomino zuletzt für jede Farbe gelegt wurde.
     """
 
-    board: Board
     turn: int
     last_move: Optional[Move]
+    board: Board
+    start_piece: PieceShape
+    last_move_mono: Dict[Color, bool]
 
-    def __init__(self, board: Board, turn: int, last_move: Optional[Move]) -> None: ...
+    def __init__(
+        self,
+        turn: int = 0,
+        last_move: Optional[Move] = None,
+        board: Optional[Board] = None,
+        start_piece: PieceShape = PieceShape.Mono,
+        last_move_mono: Optional[Dict[Color, bool]] = None,
+    ) -> None: ...
     def __str__(self) -> str: ...
     def __repr__(self) -> str: ...
-    def __eq__(self, other: GameState) -> bool:
-        """
-        Unterstützt den Vergleichsoperator ==, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
+    def __eq__(self, other: object) -> bool: ...
 
-        Args:
-            other: (GameState): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
-        ...
-    def __ne__(self, other: GameState) -> bool:
-        """
-        Unterstützt den Vergleichsoperator !=, um die Werte mit denen eines
-        weiteren Objektes zuvergleichen.
-
-        Args:
-            other: (GameState): Die andere Koordinate.
-
-        Returns:
-            bool: Das Ergebnis des Vergleichs.
-        """
+    def round(self) -> int:
+        """Die aktuelle Rundenzahl."""
         ...
 
-    def deepcopy(self) -> GameState: 
-        """
-        Kopiert das Objekt rekursiv.
-        """
+    def undeployed_piece_shapes(self, color: Color) -> List[PieceShape]:
+        """Gibt die noch nicht gesetzten Formen der gegebenen Farbe zurück."""
         ...
 
-    def set_board_field(self, position: Coordinate, field: FieldType) -> None:
-        """
-        Ändert ein Feld auf dem Spielfeld an einer Koordinate.
-
-        Args:
-            position (Coordinate): Die Position des Feldes, das geändert werden soll.
-            field (FieldType): Das Feld, was dort platziert werden soll.
-        """
+    def remove_undeployed_piece(self, color: Color, shape: PieceShape) -> bool:
+        """Entfernt eine Form aus der Liste der noch nicht gesetzten Steine."""
         ...
 
-    def possible_moves_for(self, start: Coordinate) -> List[Move]:
-        """
-        Berechnet alle Züge, die aus der aktuellen Spielposition für den Fisch an der Koordinate möglich sind.
-        
-        Args:
-            start (Coordinate): Die Position des gewählten Fisch.
+    def current_color(self) -> Color:
+        """Die Farbe, die aktuell am Zug ist."""
+        ...
 
-        Returns:
-            List[Move]: Die Liste der Züge.
-        """
+    def has_valid_colors(self) -> bool:
+        """Gibt zurück, ob noch Farben im Spiel sind."""
+        ...
+
+    def is_valid_color(self, color: Color) -> bool:
+        """Prüft, ob die gegebene Farbe noch im Spiel ist."""
+        ...
+
+    def remove_active_color(self) -> bool:
+        """Entfernt die aktuell aktive Farbe aus dem Spiel und rückt vor."""
+        ...
+
+    def advance(self, turns: int = 1) -> bool:
+        """Geht zum Zug der nächsten gültigen Farbe über."""
+        ...
+
+    def is_over(self) -> bool:
+        """Gibt zurück, ob das Spiel vorbei ist."""
         ...
 
     def possible_moves(self) -> List[Move]:
         """
-        Berechnet alle Züge, die aus der aktuellen Spielposition für den aktuellen Spieler möglich sind.
-
-        Returns:
-            List[Move]: Die Liste der Züge.
+        Berechnet alle sinnvollen Züge der aktuellen Farbe.
+        Enthält einen SkipMove nur, wenn kein anderer Zug möglich ist.
         """
         ...
 
-    def perform_move(self, move: Move) -> GameState:
+    def get_points_for_color(self, color: Color) -> int:
+        """Berechnet die Punkteanzahl für die gegebene Farbe."""
+        ...
+
+    def get_points_for_team(self, team: TeamEnum) -> int:
+        """Berechnet die Punkteanzahl für das gegebene Team (Summe der Farben des Teams)."""
+        ...
+
+    def win_condition(self) -> Optional[TeamEnum]:
         """
-        Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**nicht mutierend**).
-        Dabei wird *kein* Zug an den Spielserver übermittelt.
+        Gibt das Gewinnerteam zurück, oder None bei einem Unentschieden.
+        """
+        ...
 
-        Args:
-            move_ (Move): Der zuverwendene Zug.
 
-        Returns:
-            Gamestate: Der neue Spielstand.
+class GameRuleLogic:
+    """Eine Sammlung an statischen Methoden, die die Spielregeln logisch umsetzen."""
+
+    @staticmethod
+    def get_points_from_undeployed(undeployed: List[PieceShape], mono_last: bool = False) -> int:
+        """Berechnet den Punktestand anhand der gegebenen, nicht gelegten Formen."""
+        ...
+
+    @staticmethod
+    def perform_move(game_state: GameState, move: Move) -> None:
+        """
+        Führt den Zug im GameState aus (mutierend).
 
         Raises:
-            PiranhasError: Wenn der Zug nicht valide ist.
+            Eine der Blokus-Move-Mistake-Exceptions, wenn der Zug nicht valide ist.
         """
         ...
 
-    def perform_move_mut(self, move: Move) -> None:
+    @staticmethod
+    def validate_move_color(game_state: GameState, move: Move) -> None:
         """
-        Führt den gegebenen Zug auf dem Spielstand aus, insofern dieser ausführbar ist (**mutierend**).
-        Dabei wird *kein* Zug an den Spielserver übermittelt.
-
-        Args:
-            move_ (Move): Der zuverwendene Zug.
+        Prüft, ob die Farbe des Zuges der aktiven Farbe entspricht.
 
         Raises:
-            PiranhasError: Wenn der Zug nicht valide ist.
-        """
-        ...
-
-class RulesEngine:
-    """
-    Stellt Methoden, die zur Überprüfung der Spielregeln dienen.
-    """
-
-    @staticmethod
-    def move_distance(board: Board, move_: Move) -> int:
-        """
-        Gibt die Länge / Anzahl der Felder von einem Zug auf dem Spielfeld zurück.
-
-        Args:
-            board (Board): Das Spielfeld, auf dem die Länge berechnet werden soll.
-            move_ (Move): Der zuverwendene Zug.
-
-        Returns:
-            int: Die Länge.
+            WrongColor: Wenn die Farbe nicht am Zug ist.
         """
         ...
 
     @staticmethod
-    def target_position(board: Board, move_: Move) -> Coordinate:
+    def validate_set_move(game_state: GameState, piece: Piece) -> None:
         """
-        Gibt die Koordinate zurück, auf der ein Fisch landen würde, wenn man den Zug ausführt.
-
-        Es wird nicht berücksichtigt, ob diese Koordinate im Spielfeld ist.
-
-        Args:
-            board (Board): Das Spielfeld, auf dem der Zug berechnet werden soll.
-            move_ (Move): Der zuverwendene Zug.
-
-        Returns:
-            Coordinate: Die Koordinate.
-        """
-        ...
-
-    @staticmethod
-    def is_in_bounds(coordinate: Coordinate) -> bool:
-        """
-        Gibt einen Wahrheitswert zurück, ob eine Position in dem (Standard-) Spielfeld (10x10) liegt.
-
-        Args:
-            coordinate (Coordinate): Die Position
-
-        Returns:
-            bool: Ob die Koordinate im Feld ist.
-        """
-        ...
-
-    @staticmethod
-    def can_execute_move(board: Board, move_: Move) -> None:
-        """
-        Prüft, ob ein Zug auf dem Board nach den Regeln durchgeführt werden könnte.<br>
-        Dabei ist nicht relevant, welcher Spieler gerade tatsächlich dran wäre.
-
-        Gibt keinen Wert zurück, sondern wirft eine Fehlermeldung, falls der Zug nicht valide ist.
-
-        Args:
-            board (Board): Das Spielfeld.
-            move_ (Move): Der Zug, der geprüft werden soll.
+        Prüft, ob der gegebene Stein gesetzt werden könnte.
 
         Raises:
-            PiranhasError: Wenn der Zug nicht valide ist.
-        """
-        ...
-
-    @staticmethod 
-    def get_team_on_turn(turn: int) -> TeamEnum:
-        """
-        Berechnet anhand der Zugzahl, welcher Spieler dran sein müsste.<br>
-        Es wird nicht beachtet, ob die Zahl kleiner 0 oder größer 59 ist.
-
-        Args:
-            turn (int): Die Zugzahl.
-
-        Returns:
-            TeamEnum: Das Team, was dran ist.
+            Eine der Blokus-Move-Mistake-Exceptions, wenn der Zug nicht valide ist.
         """
         ...
 
     @staticmethod
-    def swarm_from(board: Board, position: Coordinate) -> List[Coordinate]:
+    def perform_set_move(game_state: GameState, piece: Piece) -> None:
+        """Platziert den gegebenen Stein auf dem Spielfeld (mutierend, intern genutzt)."""
+        ...
+
+    @staticmethod
+    def validate_shape(game_state: GameState, shape: PieceShape, color: Color) -> None:
         """
-        Berechnet auf einem Spielbrett von einer Startposition aus, welche Fische
-        von dort aus in einem Schwarm zusammenhängen.
-        Dabei werden nur Fische beachtet, die im selben Team sind, wie der auf dem Startfeld.
-        Gibt eine Liste an Koordinaten zurück, die leer ist, wenn die Startposition
-        außerhalb des Spielbrettes ist, oder kein Fisch als Start angegeben ist.
+        Prüft, ob die Form im ersten Zug/den nachfolgenden Zügen erlaubt ist.
 
-        Args:
-            board (Board): Das Spielbrett.
-            position (Coordinate): Die Startkoordinate
-
-        Returns:
-            List[Coordinate]: Die Liste an zusammenhängenden Fischen.
-
+        Raises:
+            WrongShape: Im ersten Zug, falls die falsche Form gewählt wurde.
+            DuplicateShape: In folgenden Zügen, falls die Form bereits gesetzt wurde.
         """
         ...
 
     @staticmethod
-    def swarms_of_team(board: Board, team: TeamEnum) -> List[List[Coordinate]]:
+    def is_valid_set_move(game_state: GameState, piece: Piece) -> bool:
+        """Gibt zurück, ob der SetMove zulässig ist, ohne eine Exception zu werfen."""
+        ...
+
+    @staticmethod
+    def validate_set_move_on_board(board: Board, piece: Piece) -> None:
         """
-        Berechnet auf einem Spielbrett alle Schwärme, die ein Team gerade gebildet hat.
-        Gibt eine 2-Dimensionale Liste zurück, wobei jede Sub-Liste ein einzelner Schwarm ist.
+        Prüft, ob der Stein auf dem Board platziert werden kann (Grenzen, Überlappung, Farbregeln).
 
-        Args:
-            board (Board): Das Spielbrett.
-            team (TeamEnum): Das gewählte Team.
-
-        Returns:
-            List[List[Coordinate]]: Die Liste an Schwärmen.
-
+        Raises:
+            OutOfBounds: Wenn der Stein nicht vollständig auf das Spielfeld passt.
+            Obstructed: Wenn der Stein eine andere Farbe überlagern würde.
+            TouchesSameColor: Wenn der Stein ein Feld gleicher Farbe berührt.
         """
         ...
 
-class PluginConstants:
-    """
-    Hält globale Konstanten.
-    """
+    @staticmethod
+    def validate_skip_move(game_state: GameState) -> None:
+        """
+        Prüft, ob die aktuelle Farbe den Zug überspringen kann.
 
-    BOARD_WIDTH: int
-    BOARD_HEIGHT: int
+        Raises:
+            SkipFirstTurn: Wenn im ersten Zug übersprungen werden soll.
+        """
+        ...
 
+    @staticmethod
+    def perform_skip_move(game_state: GameState) -> None:
+        """Führt einen Skip-Zug aus (validiert, mutiert aber sonst nichts)."""
+        ...
+
+    @staticmethod
+    def borders_on_color(board: Board, field: Field) -> bool:
+        """Prüft, ob das Feld an ein Feld gleicher Farbe angrenzt (Kante)."""
+        ...
+
+    @staticmethod
+    def corners_on_color(board: Board, field: Field) -> bool:
+        """Prüft, ob das Feld an die Ecke eines Feldes gleicher Farbe angrenzt."""
+        ...
+
+    @staticmethod
+    def is_on_border(position: Coordinate) -> bool:
+        """Prüft, ob die Position am Rand des Spielfelds liegt."""
+        ...
+
+    @staticmethod
+    def is_first_move(game_state: GameState) -> bool:
+        """Gibt zurück, ob sich der GameState noch in der ersten Runde befindet."""
+        ...
+
+    @staticmethod
+    def get_random_start_pentomino() -> PieceShape:
+        """Gibt ein zufälliges Pentomino zurück (Startstein)."""
+        ...
+
+    @staticmethod
+    def remove_invalid_colors(game_state: GameState) -> None:
+        """Entfernt rekursiv alle Farben, die keine Steine mehr platzieren können (mutierend)."""
+        ...
+
+    @staticmethod
+    def get_all_possible_moves(game_state: GameState) -> List[Piece]:
+        """Gibt eine Liste aller möglichen SetMoves zurück (inkl. möglicher Startzüge)."""
+        ...
+
+    @staticmethod
+    def get_filtered_possible_moves(game_state: GameState) -> List[Piece]:
+        """
+        Gibt eine gefilterte Liste möglicher SetMoves zurück:
+        Startzüge, dann 5 Runden nur Pentominos, danach alle.
+        """
+        ...
+
+    @staticmethod
+    def get_possible_start_moves(game_state: GameState, filter: bool = False) -> List[Piece]:
+        """Gibt alle möglichen SetMoves für den ersten Zug zurück."""
+        ...
+
+    @staticmethod
+    def get_possible_moves(game_state: GameState) -> List[Piece]:
+        """Gibt alle möglichen SetMoves (ohne Startzug) zurück."""
+        ...
+
+    @staticmethod
+    def get_pentomino_moves(game_state: GameState) -> List[Piece]:
+        """Gibt nur die möglichen SetMoves mit Pentominos zurück."""
+        ...
+
+    @staticmethod
+    def get_possible_moves_for_shape(
+        game_state: GameState, shape: PieceShape, valid_fields: Set[Coordinate]
+    ) -> List[Piece]:
+        """Gibt alle möglichen SetMoves für eine bestimmte Form zurück."""
+        ...
+
+    @staticmethod
+    def get_valid_fields(board: Board, color: Color) -> Set[Coordinate]:
+        """Gibt alle Koordinaten zurück, auf die die gegebene Farbe einen Stein platzieren könnte."""
+        ...
+
+    @staticmethod
+    def get_colored_fields(board: Board, color: Color) -> Set[Coordinate]:
+        """Gibt alle Koordinaten mit der gegebenen Farbe auf dem Board zurück."""
+        ...
+
+
+class Constants:
+    """Hält globale Konstanten."""
+
+    BOARD_LENGTH: int
     ROUND_LIMIT: int
+    TOTAL_PIECE_SHAPES: int
+    COLORS: int
+    VALIDATE_MOVE: bool
+
+
+class WrongColor(Exception):
+    """Die Farbe des Zuges ist nicht an der Reihe."""
+    ...
+
+class NotOnBorder(Exception):
+    """Der erste Zug muss an den Rand gesetzt werden."""
+    ...
+
+class NoSharedCorner(Exception):
+    """Alle Teile müssen ein vorheriges Teil gleicher Farbe über mindestens eine Ecke berühren."""
+    ...
+
+class WrongShape(Exception):
+    """Der erste Zug muss den festgelegten Spielstein setzen."""
+    ...
+
+class SkipFirstTurn(Exception):
+    """Der erste Zug muss einen Stein setzen."""
+    ...
+
+class DuplicateShape(Exception):
+    """Der gewählte Stein wurde bereits gesetzt."""
+    ...
+
+class OutOfBounds(Exception):
+    """Der Spielstein passt nicht vollständig auf das Spielfeld."""
+    ...
+
+class Obstructed(Exception):
+    """Der Spielstein würde eine andere Farbe überlagern."""
+    ...
+
+class TouchesSameColor(Exception):
+    """Der Spielstein berührt ein Feld gleicher Farbe."""
+    ...

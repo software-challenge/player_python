@@ -17,52 +17,55 @@ from socha.api.protocol.room_message import (
 
 
 @dataclass
-class Row:
+class Position:
+    """
+    Eine Position auf dem Spielbrett, verschachtelt innerhalb eines Piece-Elements.
+    """
+
     class Meta:
-        name = 'row'
-
-    field_value: List[str] = field(
-        default_factory=list,
-        metadata={
-            'name': 'field',
-            'type': 'Element',
-            'min_occurs': 1,
-        },
-    )
-
-
-@dataclass
-class Board:
-    class Meta:
-        name = 'board'
-
-    rows: List[Row] = field(
-        default_factory=list,
-        metadata={
-            'name': 'row',
-            'type': 'Element',
-            'min_occurs': 1,
-        },
-    )
-
-
-@dataclass
-class Coordinate:
-    
-    class Meta:
-        name = 'from'
+        name = 'position'
 
     x: Optional[int] = field(
         default=None,
-        metadata={
-            'type': 'Attribute',
-        },
+        metadata={'type': 'Attribute'},
     )
     y: Optional[int] = field(
         default=None,
+        metadata={'type': 'Attribute'},
+    )
+
+
+@dataclass
+class Piece:
+    """
+    Ein Spielstein mit Farbe, Form, Rotation, Spiegelung und Position.
+    """
+
+    class Meta:
+        name = 'piece'
+
+    color: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+    kind: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+    rotation: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+    is_flipped: Optional[bool] = field(
+        default=None,
         metadata={
+            'name': 'isFlipped',
             'type': 'Attribute',
         },
+    )
+    position: Optional[Position] = field(
+        default=None,
+        metadata={'type': 'Element'},
     )
 
 
@@ -70,41 +73,116 @@ class Coordinate:
 class LastMove:
     class Meta:
         name = 'lastMove'
-        
+
     class_binding: Optional[object] = field(default=None)
-    from_: Optional[Coordinate] = field(
+    class_value: Optional[str] = field(
         default=None,
         metadata={
-            'name': 'from',
-            'type': 'Element',
+            'name': 'class',
+            'type': 'Attribute',
+            'required': True,
         },
     )
-    direction: Optional[str] = field(
+    piece: Optional[Piece] = field(
         default=None,
+        metadata={'type': 'Element'},
+    )
+    # Für SkipMove: SkipMove.color hat kein @XStreamAsAttribute in Kotlin,
+    # wird daher als Kindelement serialisiert (nicht als Attribut).
+    color: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Element'},
+    )
+
+
+@dataclass
+class Field:
+    class Meta:
+        name = 'field'
+
+    x: Optional[int] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+    y: Optional[int] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+    content: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Attribute'},
+    )
+
+
+@dataclass
+class Board:
+    """
+    Das Spielbrett. Enthält nur belegte Felder;
+    leere Felder werden vom Server nicht mitgeschickt.
+    """
+
+    class Meta:
+        name = 'board'
+
+    field_value: List[Field] = field(
+        default_factory=list,
         metadata={
+            'name': 'field',
             'type': 'Element',
         },
     )
 
 
 @dataclass
-class Player:
-    class Meta:
-        name = 'player'
+class ShapeList:
+    """
+    Wiederverwendet für blueShapes / yellowShapes / redShapes / greenShapes.
+    Enthält die noch nicht gesetzten Formen einer Farbe.
+    """
 
-    name: Optional[str] = field(
+    shape: List[str] = field(
+        default_factory=list,
+        metadata={'type': 'Element'},
+    )
+
+
+@dataclass
+class ColorList:
+    class Meta:
+        name = 'validColors'
+
+    color: List[str] = field(
+        default_factory=list,
+        metadata={'type': 'Element'},
+    )
+
+
+@dataclass
+class LastMoveMonoEntry:
+    class Meta:
+        name = 'entry'
+
+    color: Optional[str] = field(
+        default=None,
+        metadata={'type': 'Element'},
+    )
+    value: Optional[bool] = field(
         default=None,
         metadata={
-            'type': 'Attribute',
-            'required': True,
+            'name': 'boolean',
+            'type': 'Element',
         },
     )
-    team: Optional[str] = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
+
+
+@dataclass
+class LastMoveMono:
+    class Meta:
+        name = 'lastMoveMono'
+
+    entry: List[LastMoveMonoEntry] = field(
+        default_factory=list,
+        metadata={'type': 'Element'},
     )
 
 
@@ -136,10 +214,18 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    board: Optional[Board] = field(
+    start_piece: Optional[str] = field(
         default=None,
         metadata={
-            'type': 'Element',
+            'name': 'startPiece',
+            'type': 'Attribute',
+            'required': True,
+        },
+    )
+    round: Optional[int] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
             'required': True,
         },
     )
@@ -148,6 +234,76 @@ class State(ObservableRoomMessage):
         metadata={
             'name': 'lastMove',
             'type': 'Element',
+        },
+    )
+    board: Optional[Board] = field(
+        default=None,
+        metadata={
+            'type': 'Element',
+            'required': True,
+        },
+    )
+    last_move_mono: Optional[LastMoveMono] = field(
+        default=None,
+        metadata={
+            'name': 'lastMoveMono',
+            'type': 'Element',
+        },
+    )
+    blue_shapes: Optional[ShapeList] = field(
+        default=None,
+        metadata={
+            'name': 'blueShapes',
+            'type': 'Element',
+        },
+    )
+    yellow_shapes: Optional[ShapeList] = field(
+        default=None,
+        metadata={
+            'name': 'yellowShapes',
+            'type': 'Element',
+        },
+    )
+    red_shapes: Optional[ShapeList] = field(
+        default=None,
+        metadata={
+            'name': 'redShapes',
+            'type': 'Element',
+        },
+    )
+    green_shapes: Optional[ShapeList] = field(
+        default=None,
+        metadata={
+            'name': 'greenShapes',
+            'type': 'Element',
+        },
+    )
+    valid_colors: Optional[ColorList] = field(
+        default=None,
+        metadata={
+            'name': 'validColors',
+            'type': 'Element',
+        },
+    )
+
+
+@dataclass
+class Player:
+    class Meta:
+        name = 'player'
+
+    name: Optional[str] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
+            'required': True,
+        },
+    )
+    team: Optional[str] = field(
+        default=None,
+        metadata={
+            'type': 'Attribute',
+            'required': True,
         },
     )
 
@@ -645,6 +801,12 @@ class OriginalMessage:
     """
     The original message that was sent by the client.
     Is sent by the server if an error occurs.
+
+    UNBESTÄTIGT für Blokus: Struktur übernommen aus dem alten Piranhas-Format
+    mit from_/direction. Da wir keine echte error-Nachricht aufgezeichnet haben,
+    ist unklar, ob der Server hier stattdessen ein <piece>- oder <color>-Element
+    verwendet, analog zu Data. Passe ggf. an, sobald eine echte error-Nachricht
+    für einen Blokus-Move vorliegt.
     """
 
     class Meta:
@@ -658,18 +820,13 @@ class OriginalMessage:
             'required': True,
         },
     )
-    from_: Optional[Coordinate] = field(
+    piece: Optional[Piece] = field(
         default=None,
-        metadata={
-            'name': 'from',
-            'type': 'Element',
-        },
+        metadata={'type': 'Element'},
     )
-    direction: Optional[str] = field(
+    color: Optional[str] = field(
         default=None,
-        metadata={
-            'type': 'Element',
-        },
+        metadata={'type': 'Element'},
     )
 
 
@@ -728,22 +885,25 @@ class Data:
             'type': 'Element',
         },
     )
+    # Nur für welcomeMessage: color="ONE"/"TWO" (TeamEnum), als Attribut.
     color: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    from_: Optional[Coordinate] = field(
+    # Für ausgehenden SetMove.
+    piece: Optional[Piece] = field(
         default=None,
-        metadata={
-            'name': 'from',
-            'type': 'Element',
-        },
+        metadata={'type': 'Element'},
     )
-    direction: Optional[str] = field(
+    # Für ausgehenden SkipMove: eigenes Feld, da 'color' oben schon als
+    # Attribut für welcomeMessage belegt ist. SkipMove.color ist ein
+    # Kindelement (kein @XStreamAsAttribute in Kotlin).
+    skip_color: Optional[str] = field(
         default=None,
         metadata={
+            'name': 'color',
             'type': 'Element',
         },
     )
