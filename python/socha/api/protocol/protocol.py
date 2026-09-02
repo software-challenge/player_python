@@ -241,13 +241,6 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    round: int | None = field(
-        default=None,
-        metadata={
-            'type': 'Attribute',
-            'required': True,
-        },
-    )
     last_move: LastMove | None = field(
         default=None,
         metadata={
