@@ -203,7 +203,7 @@ class State(ObservableRoomMessage):
     class Meta:
         name = 'state'
 
-    class_value: str | None = field(
+    class_value: Optional[str] = field(
         default=None,
         metadata={
             'name': 'class',
@@ -211,7 +211,7 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    start_team: str | None = field(
+    start_team: Optional[str] = field(
         default=None,
         metadata={
             'name': 'startTeam',
@@ -219,7 +219,7 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    turn: int | None = field(
+    turn: Optional[int] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -241,7 +241,7 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    last_move: LastMove | None = field(
+    last_move: Optional[LastMove] = field(
         default=None,
         metadata={
             'name': 'lastMove',
@@ -325,14 +325,14 @@ class OriginalRequest(ProtocolPacket):
     class Meta:
         name = 'originalRequest'
 
-    class_value: str | None = field(
+    class_value: Optional[str] = field(
         default=None,
         metadata={
             'name': 'class',
             'type': 'Attribute',
         },
     )
-    reservation_code: str | None = field(
+    reservation_code: Optional[str] = field(
         default=None,
         metadata={
             'name': 'reservationCode',
@@ -346,13 +346,13 @@ class Errorpacket(ProtocolPacket):
     class Meta:
         name = 'errorpacket'
 
-    message: str | None = field(
+    message: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    original_request: OriginalRequest | None = field(
+    original_request: Optional[OriginalRequest] = field(
         default=None,
         metadata={
             'name': 'originalRequest',
@@ -370,7 +370,7 @@ class Left(ProtocolPacket):
     class Meta:
         name = 'left'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -409,7 +409,7 @@ class Authenticate(AdminLobbyRequest):
     class Meta:
         name = 'authenticate'
 
-    password: str | None = field(
+    password: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -426,7 +426,7 @@ class Cancel(AdminLobbyRequest):
     class Meta:
         name = 'cancel'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -444,14 +444,14 @@ class JoinedGameRoom(ObservableRoomMessage):
     class Meta:
         name = 'joinedGameRoom'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
             'type': 'Attribute',
         },
     )
-    player_count: int | None = field(
+    player_count: Optional[int] = field(
         default=None,
         metadata={
             'name': 'playerCount',
@@ -469,7 +469,7 @@ class Observe(AdminLobbyRequest):
     class Meta:
         name = 'observe'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -487,14 +487,14 @@ class Pause(AdminLobbyRequest):
     class Meta:
         name = 'pause'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
             'type': 'Attribute',
         },
     )
-    pause: bool | None = field(
+    pause: Optional[bool] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -511,21 +511,21 @@ class Slot(RoomOrchestrationMessage):
     class Meta:
         name = 'slot'
 
-    display_name: str | None = field(
+    display_name: Optional[str] = field(
         default=None,
         metadata={
             'name': 'displayName',
             'type': 'Attribute',
         },
     )
-    can_timeout: bool | None = field(
+    can_timeout: Optional[bool] = field(
         default=None,
         metadata={
             'name': 'canTimeout',
             'type': 'Attribute',
         },
     )
-    reserved: bool | None = field(
+    reserved: Optional[bool] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -544,7 +544,7 @@ class Step(RoomOrchestrationMessage):
     class Meta:
         name = 'step'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -563,14 +563,14 @@ class Prepare(RoomOrchestrationMessage):
     class Meta:
         name = 'prepare'
 
-    game_type: str | None = field(
+    game_type: Optional[str] = field(
         default=None,
         metadata={
             'name': 'gameType',
             'type': 'Attribute',
         },
     )
-    pause: bool | None = field(
+    pause: Optional[bool] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -605,7 +605,7 @@ class JoinPrepared(LobbyRequest):
     class Meta:
         name = 'joinPrepared'
 
-    reservation_code: str | None = field(
+    reservation_code: Optional[str] = field(
         default=None,
         metadata={
             'name': 'reservationCode',
@@ -623,7 +623,7 @@ class JoinRoom(LobbyRequest):
     class Meta:
         name = 'joinRoom'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -641,19 +641,19 @@ class Fragment:
     class Meta:
         name = 'fragment'
 
-    name: str | None = field(
+    name: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
-    aggregation: str | None = field(
+    aggregation: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    relevant_for_ranking: bool | None = field(
+    relevant_for_ranking: Optional[bool] = field(
         default=None,
         metadata={
             'name': 'relevantForRanking',
@@ -671,7 +671,7 @@ class Joined(ResponsePacket):
     class Meta:
         name = 'joined'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -703,21 +703,21 @@ class Winner:
     class Meta:
         name = 'winner'
 
-    team: str | None = field(
+    team: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
             'required': True,
         },
     )
-    regular: bool | None = field(
+    regular: Optional[bool] = field(
         default=None,
         metadata={
             'type': 'Attribute',
             'required': True,
         },
     )
-    reason: str | None = field(
+    reason: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -755,13 +755,13 @@ class Entry:
     class Meta:
         name = 'entry'
 
-    player: Player | None = field(
+    player: Optional[Player] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    score: Score | None = field(
+    score: Optional[Score] = field(
         default=None,
         metadata={
             'type': 'Element',
@@ -824,7 +824,7 @@ class OriginalMessage:
     class Meta:
         name = 'originalMessage'
 
-    class_value: str | None = field(
+    class_value: Optional[str] = field(
         default=None,
         metadata={
             'name': 'class',
@@ -857,7 +857,7 @@ class Data:
     class Meta:
         name = 'data'
 
-    class_value: str | None = field(
+    class_value: Optional[str] = field(
         default=None,
         metadata={
             'name': 'class',
@@ -865,33 +865,33 @@ class Data:
             'required': True,
         },
     )
-    class_binding: object | None = field(default=None)
-    definition: Definition | None = field(
+    class_binding: Optional[object] = field(default=None)
+    definition: Optional[Definition] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    original_message: OriginalMessage | None = field(
+    original_message: Optional[OriginalMessage] = field(
         default=None,
         metadata={
             'name': 'originalMessage',
             'type': 'Element',
         },
     )
-    scores: Scores | None = field(
+    scores: Optional[Scores] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    winner: Winner | None = field(
+    winner: Optional[Winner] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    state: State | None = field(
+    state: Optional[State] = field(
         default=None,
         metadata={
             'type': 'Element',
@@ -926,7 +926,7 @@ class Room(ProtocolPacket):
     class Meta:
         name = 'room'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -934,7 +934,7 @@ class Room(ProtocolPacket):
             'required': True,
         },
     )
-    data: Data | None = field(
+    data: Optional[Data] = field(
         default=None,
         metadata={
             'type': 'Element',
@@ -948,7 +948,7 @@ class Observed(RoomOrchestrationMessage):
     class Meta:
         name = 'observed'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -962,7 +962,7 @@ class Prepared(RoomOrchestrationMessage):
     class Meta:
         name = 'prepared'
 
-    room_id: str | None = field(
+    room_id: Optional[str] = field(
         default=None,
         metadata={
             'name': 'roomId',
@@ -988,56 +988,56 @@ class Protocol:
     class Meta:
         name = 'protocol'
 
-    authenticate: Authenticate | None = field(
+    authenticate: Optional[Authenticate] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    joined_game_room: JoinedGameRoom | None = field(
+    joined_game_room: Optional[JoinedGameRoom] = field(
         default=None,
         metadata={
             'name': 'joinedGameRoom',
             'type': 'Element',
         },
     )
-    prepare: Prepare | None = field(
+    prepare: Optional[Prepare] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    observe: Observe | None = field(
+    observe: Optional[Observe] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    pause: Pause | None = field(
+    pause: Optional[Pause] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    step: Step | None = field(
+    step: Optional[Step] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    cancel: Cancel | None = field(
+    cancel: Optional[Cancel] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    join: Join | None = field(
+    join: Optional[Join] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    joined: Joined | None = field(
+    joined: Optional[Joined] = field(
         default=None,
         metadata={
             'type': 'Element',
@@ -1049,13 +1049,13 @@ class Protocol:
             'type': 'Element',
         },
     )
-    prepared: Prepared | None = field(
+    prepared: Optional[Prepared] = field(
         default=None,
         metadata={
             'type': 'Element',
         },
     )
-    observed: Observed | None = field(
+    observed: Optional[Observed] = field(
         default=None,
         metadata={
             'type': 'Element',
