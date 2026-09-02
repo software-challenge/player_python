@@ -11,6 +11,8 @@ import time
 import types
 import zipfile
 
+logger = logging.getLogger(__name__)
+
 
 class SochaPackageBuilder:
 
@@ -29,16 +31,16 @@ class SochaPackageBuilder:
 
         req_file = os.path.join(current_dir, "requirements.txt")
         try:
-            with open(req_file, "r") as f:
+            with open(req_file) as f:
                 requirements = f.read().splitlines()
-        except Exception as e:
-            logging.error(f"Error reading requirements file: {str(e)}")
-            logging.info(
+        except OSError as e:
+            logger.error(f"Error reading requirements file: {e!s}")
+            logger.info(
                 "Please create a 'requirements.txt' in the same folder as your logic."
             )
             sys.exit(1)
 
-        logging.info(f"Downloading the following packages: {requirements}")
+        logger.info(f"Downloading the following packages: {requirements}")
 
         # Download all dependencies to the dependencies directory
         try:
@@ -59,7 +61,7 @@ class SochaPackageBuilder:
                 + requirements
             )
         except subprocess.CalledProcessError as e:
-            logging.error(f"Error downloading dependencies: {str(e)}")
+            logger.error(f"Error downloading dependencies: {e!s}")
             sys.exit(1)
 
     @staticmethod
@@ -72,10 +74,10 @@ class SochaPackageBuilder:
     def _create_directory_structure(self):
         try:
             if not os.path.exists(f"{self.build_dir}/{self.package_name}"):
-                logging.info(f"Creating directory {self.package_name}")
+                logger.info(f"Creating directory {self.package_name}")
                 os.mkdir(f"{self.build_dir}/{self.package_name}")
 
-            logging.info(f"Creating directory {self.dependencies_dir}")
+            logger.info(f"Creating directory {self.dependencies_dir}")
             if not os.path.exists(
                 f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}"
             ):
@@ -83,20 +85,20 @@ class SochaPackageBuilder:
                     f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}"
                 )
 
-            logging.info(f"Creating directory {self.packages_dir}")
+            logger.info(f"Creating directory {self.packages_dir}")
             if not os.path.exists(
                 f"{self.build_dir}/{self.package_name}/{self.packages_dir}"
             ):
                 os.mkdir(f"{self.build_dir}/{self.package_name}/{self.packages_dir}")
 
-            logging.info(f"Creating directory {self.cache_dir}")
+            logger.info(f"Creating directory {self.cache_dir}")
             if not os.path.exists(
                 f"{self.build_dir}/{self.package_name}/{self.cache_dir}"
             ):
                 os.mkdir(f"{self.build_dir}/{self.package_name}/{self.cache_dir}")
 
-        except OSError as e:
-            logging.error(f"Error creating directory: {e}")
+        except OSError:
+            logger.exception("Error creating directory.")
             sys.exit(1)
 
     @staticmethod
@@ -112,12 +114,12 @@ class SochaPackageBuilder:
         # and are in the same directory or a subdirectory
         main_modules = set(sys.modules) - set(globals())
         if main_module:
-            main_modules |= set(
+            main_modules |= {
                 obj.__name__
                 for obj in gc.get_objects()
                 if isinstance(obj, types.ModuleType)
                 and obj.__name__.startswith(main_module.__name__)
-            )
+            }
         main_modules = {
             name
             for name in main_modules
@@ -145,7 +147,7 @@ class SochaPackageBuilder:
         Recursively searches for the given python file in the current working directory and its subdirectories,
         and copies all python files with their directory structure to the target_folder.
         """
-        logging.info(f"Copying python files to {self.package_name}")
+        logger.info(f"Copying python files to {self.package_name}")
         source_folder = os.getcwd()
         main_modules = self._get_modules()
         for root, dirs, files in os.walk(source_folder):
@@ -162,18 +164,18 @@ class SochaPackageBuilder:
                     if file in sys.argv[0]:
                         os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                         shutil.copy2(source_file_path, target_file_path)
-                        logging.info(
+                        logger.info(
                             f"Copying {source_file_path} to {target_file_path}"
                         )
                     if source_file_path in main_modules:
                         os.makedirs(os.path.dirname(target_file_path), exist_ok=True)
                         shutil.copy2(source_file_path, target_file_path)
-                        logging.info(
+                        logger.info(
                             f"Copying {source_file_path} to {target_file_path}"
                         )
 
     def _create_shell_script(self):
-        logging.info(f"Creating shell script {self.package_name}/start.sh")
+        logger.info(f"Creating shell script {self.package_name}/start.sh")
         with open(
             f"{self.build_dir}/{self.package_name}/start.sh", "w", newline="\n"
         ) as f:
@@ -200,10 +202,9 @@ class SochaPackageBuilder:
             )
 
             # Add all downloaded packages to the pip install command
-            for package in os.listdir(
+            f.writelines(f"./{self.package_name}/{self.dependencies_dir}/{package} " for package in os.listdir(
                 f"{self.build_dir}/{self.package_name}/{self.dependencies_dir}"
-            ):
-                f.write(f"./{self.package_name}/{self.dependencies_dir}/{package} ")
+            ))
 
             f.write("\n\n")
             f.write(
@@ -214,7 +215,7 @@ class SochaPackageBuilder:
             )
 
     def _zipdir(self):
-        logging.info(f"Zipping directory {self.package_name}")
+        logger.info(f"Zipping directory {self.package_name}")
         try:
             zipf = zipfile.ZipFile(
                 f"{self.build_dir}/{self.package_name}.zip", "w", zipfile.ZIP_DEFLATED
@@ -229,13 +230,13 @@ class SochaPackageBuilder:
                     arc_name = os.path.relpath(dir_path, self.build_dir)
                     zipf.write(dir_path, arcname=arc_name)
             zipf.close()
-            logging.info(f"{self.package_name}.zip successfully created!")
-        except Exception as e:
-            logging.error(f"Error creating {self.package_name}.zip: {str(e)}")
+            logger.info(f"{self.package_name}.zip successfully created!")
+        except (OSError, zipfile.BadZipFile) as e:
+            logger.error(f"Error creating {self.package_name}.zip: {e!s}")
             sys.exit(1)
 
     def build_package(self):
-        logging.info("Building package...")
+        logger.info("Building package...")
 
         # Create the directory structure
         self._create_directory_structure()
@@ -253,4 +254,4 @@ class SochaPackageBuilder:
         self._zipdir()
 
         # Log a success message
-        logging.info(f"{self.package_name} package successfully built!")
+        logger.info(f"{self.package_name} package successfully built!")

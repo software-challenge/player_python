@@ -1,7 +1,8 @@
 import logging
 import re
 import socket
-from typing import Union
+
+logger = logging.getLogger(__name__)
 
 
 class NetworkSocket:
@@ -52,7 +53,7 @@ class NetworkSocket:
         """
         self.socket.sendall(data)
 
-    def receive(self) -> Union[bytes, None]:
+    def receive(self) -> bytes | None:
         """
         Attempts to receive data from the server. The received data is processed using a regular expression to extract
         complete messages. If a complete message is found, it is returned as bytes and removed from the buffer.
@@ -66,13 +67,13 @@ class NetworkSocket:
         while True:
             try:
                 chunk = self.socket.recv(16129)
-            except socket.timeout:
+            except TimeoutError:
                 chunk = b""
             except ConnectionResetError:
                 self.close()
                 return None
             if chunk:
-                logging.debug(f"Received message: {chunk}")
+                logger.debug(f"Received message: {chunk}")
                 self.buffer += chunk
             if regex.search(self.buffer):
                 receive = regex.search(self.buffer).group()

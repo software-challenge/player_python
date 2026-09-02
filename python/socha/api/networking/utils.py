@@ -1,5 +1,3 @@
-from typing import Optional
-
 from socha import _socha
 from socha.api.protocol.protocol import (
     Board,
@@ -11,7 +9,6 @@ from socha.api.protocol.protocol import (
     Room,
     State,
 )
-
 
 # SCREAMING_SNAKE_CASE (Server) <-> CamelCase-Variantenname (Rust/_socha)
 _SHAPE_NAME_MAP = {
@@ -96,7 +93,7 @@ def map_piece_to_protocol(piece: _socha.Piece) -> Piece:
     )
 
 
-def map_last_move(protocol_last_move: Optional[LastMove]) -> Optional[_socha.Move]:
+def map_last_move(protocol_last_move: LastMove | None) -> _socha.Move | None:
     """
     Konvertiert das lastMove-Element eines State in ein _socha.Move-Objekt.
     Kann entweder ein SetMove (piece gesetzt) oder ein SkipMove (color gesetzt) sein.
@@ -110,7 +107,7 @@ def map_last_move(protocol_last_move: Optional[LastMove]) -> Optional[_socha.Mov
     return None
 
 
-def map_last_move_mono(last_move_mono: Optional[LastMoveMono]) -> dict:
+def map_last_move_mono(last_move_mono: LastMoveMono | None) -> dict:
     """
     Konvertiert das lastMoveMono-Element (XStream-Standard-Map-Serialisierung)
     in ein Python-Dict[Color, bool].

@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 
 from socha._socha import TeamEnum
-
 from socha.api.protocol.protocol_packet import (
     AdminLobbyRequest,
     LobbyRequest,
@@ -133,7 +132,7 @@ class Board:
 
 
 @dataclass
-class Shapelist:
+class ShapeList:
     """
     Wiederverwendet für blueShapes / yellowShapes / redShapes / greenShapes.
     Enthält die noch nicht gesetzten Formen einer Farbe.
@@ -146,7 +145,7 @@ class Shapelist:
 
 
 @dataclass
-class Colorlist:
+class ColorList:
     class Meta:
         name = 'validColors'
 
@@ -158,12 +157,23 @@ class Colorlist:
 
 @dataclass
 class LastMoveMonoEntry:
+    """
+    Ein Eintrag der lastMoveMono-HashMap, wie von XStreams
+    Standard-Map-Serialisierung erzeugt (kein eigener Converter registriert).
+
+    UNBESTÄTIGT: Struktur beruht auf XStream-Standardverhalten,
+    da lastMoveMono in allen Aufzeichnungen bisher leer war.
+    """
+
     class Meta:
         name = 'entry'
 
     color: str | None = field(
         default=None,
-        metadata={'type': 'Element'},
+        metadata={
+            'name': 'sc.plugin2027.Color',
+            'type': 'Element',
+        },
     )
     value: bool | None = field(
         default=None,
@@ -249,35 +259,35 @@ class State(ObservableRoomMessage):
             'type': 'Element',
         },
     )
-    blue_shapes: Shapelist | None = field(
+    blue_shapes: ShapeList | None = field(
         default=None,
         metadata={
             'name': 'blueShapes',
             'type': 'Element',
         },
     )
-    yellow_shapes: Shapelist | None = field(
+    yellow_shapes: ShapeList | None = field(
         default=None,
         metadata={
             'name': 'yellowShapes',
             'type': 'Element',
         },
     )
-    red_shapes: Shapelist | None = field(
+    red_shapes: ShapeList | None = field(
         default=None,
         metadata={
             'name': 'redShapes',
             'type': 'Element',
         },
     )
-    green_shapes: Shapelist | None = field(
+    green_shapes: ShapeList | None = field(
         default=None,
         metadata={
             'name': 'greenShapes',
             'type': 'Element',
         },
     )
-    valid_colors: Colorlist | None = field(
+    valid_colors: ColorList | None = field(
         default=None,
         metadata={
             'name': 'validColors',

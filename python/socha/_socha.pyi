@@ -598,36 +598,27 @@ class Constants:
 
 class WrongColor(Exception):
     """Die Farbe des Zuges ist nicht an der Reihe."""
-    ...
 
 class NotOnBorder(Exception):
     """Der erste Zug muss an den Rand gesetzt werden."""
-    ...
 
 class NoSharedCorner(Exception):
     """Alle Teile müssen ein vorheriges Teil gleicher Farbe über mindestens eine Ecke berühren."""
-    ...
 
 class WrongShape(Exception):
     """Der erste Zug muss den festgelegten Spielstein setzen."""
-    ...
 
 class SkipFirstTurn(Exception):
     """Der erste Zug muss einen Stein setzen."""
-    ...
 
 class DuplicateShape(Exception):
     """Der gewählte Stein wurde bereits gesetzt."""
-    ...
 
 class OutOfBounds(Exception):
     """Der Spielstein passt nicht vollständig auf das Spielfeld."""
-    ...
 
 class Obstructed(Exception):
     """Der Spielstein würde eine andere Farbe überlagern."""
-    ...
 
 class TouchesSameColor(Exception):
     """Der Spielstein berührt ein Feld gleicher Farbe."""
-    ...
