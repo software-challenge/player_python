@@ -6,11 +6,15 @@ import argparse
 import datetime
 import json
 import logging
+import sys
 import urllib.request
 
 import pkg_resources
+
 from socha.api.networking.game_client import GameClient, IClientHandler
 from socha.utils.package_builder import SochaPackageBuilder
+
+logger = logging.getLogger(__name__)
 
 
 class Starter:
@@ -25,17 +29,17 @@ class Starter:
         logic: IClientHandler,
         host: str = "localhost",
         port: int = 13050,
-        reservation: str = None,
-        room_id: str = None,
-        password: str = None,
+        reservation: str | None = None,
+        room_id: str | None = None,
+        password: str | None = None,
         survive: bool = False,
         auto_reconnect: bool = False,
         headless: bool = False,
         log: bool = False,
         verbose: bool = False,
         build: bool = False,
-        directory: str = None,
-        architecture: str = None,
+        directory: str | None = None,
+        architecture: str | None = None,
         log_level: int = logging.INFO,
         python_version: str = '3.10',
     ):
@@ -69,26 +73,26 @@ class Starter:
 
         self.check_socha_version()
 
-        self.directory: str = args.directory or directory
-        self.architecture: str = args.architecture or architecture
+        self.directory: str | None = args.directory or directory
+        self.architecture: str | None = args.architecture or architecture
         self.build: str = args.build or build
         self.python_version: str = args.python_version or python_version
         if self.build:
             builder = SochaPackageBuilder(self.directory, self.architecture, self.python_version)
             builder.build_package()
-            exit(0)
+            sys.exit(0)
 
         self.host: str = args.host or host
         self.port: int = args.port or port
-        self.reservation: str = args.reservation or reservation
-        self.room_id: str = args.room or room_id
+        self.reservation: str | None = args.reservation or reservation
+        self.room_id: str | None = args.room or room_id
         if self.room_id and self.reservation:
-            logging.warning(
+            logger.warning(
                 "The room ID is not taken into account because a reservation is available."
             )
-        self.password: str = args.password or password
+        self.password: str | None = args.password or password
         if self.password and (self.reservation or self.room_id):
-            logging.warning(
+            logger.warning(
                 "The password is not taken into account because a reservation or Room ID is available."
             )
         self.survive: bool = args.survive or survive
@@ -118,7 +122,7 @@ class Starter:
             level: int = log_level
 
         if self.write_log:
-            now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            now = datetime.datetime.now(tz=datetime.timezone.utc).strftime("%Y%m%d%H%M%S")
             logging.basicConfig(
                 filename=f"log{now}",
                 level=level,
@@ -129,8 +133,8 @@ class Starter:
             logging.basicConfig(
                 level=level, format="%(asctime)s: %(levelname)s - %(message)s"
             )
-        logging.info("Starting...")
-        logging.info(
+        logger.info("Starting...")
+        logger.info(
             "We would greatly appreciate it if you could share any issues "
             "or feature requests you may have regarding socha by either creating "
             "an issue on our GitHub repository or contributing to the project."
@@ -149,18 +153,18 @@ class Starter:
             json_data = json.loads(response.read())
             latest_version = json_data["info"]["version"]
             if installed_version != latest_version:
-                logging.warning(
+                logger.warning(
                     f"A newer version ({latest_version}) of {package_name} is available. You have version "
                     f"{installed_version}."
                 )
             else:
-                logging.info(
+                logger.info(
                     f"You're running the latest version of {package_name} ({latest_version})"
                 )
         except pkg_resources.DistributionNotFound:
-            logging.error(f"{package_name} is not installed.")
+            logger.error(f"{package_name} is not installed.")
         except urllib.error.URLError as e:
-            logging.warning(
+            logger.warning(
                 f"Could not check the latest version of {package_name} due to {type(e).__name__}: {e}"
             )
 

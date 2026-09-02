@@ -6,15 +6,20 @@ import random
 import time
 from typing import Optional, Tuple
 from socha import (
-    Coordinate,
-    Vector,
-    Direction,
-    FieldType,
-    TeamEnum,
-    Board,
     Move,
     GameState,
-    RulesEngine,
+    Color,
+    Piece,
+    PieceShape,
+    Rotation,
+    Coordinate,
+    Vector,
+    GameRuleLogic,
+    Board,
+    Direction,
+    TeamEnum,
+    Field,
+    FieldContent,
 )
 from socha.api.networking.game_client import IClientHandler
 from socha.starter import Starter

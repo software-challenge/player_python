@@ -72,3 +72,6 @@ docs/_build/
 
 # Pyenv
 .python-version
+
+# custom venv names
+venv*/

@@ -1,6 +1,6 @@
 <a target="_blank" rel="noopener noreferrer" href="https://www.software-challenge.de"><p align="center"><img width="128" src="https://software-challenge.de/site/themes/freebird/img/logo.png" alt="Software-Challenge Logo"></p></a>
 
-# Python-Client für die Software-Challenge Germany 2025
+# Python-Client für die Software-Challenge Germany 2027
 
 [![Read the Docs](https://img.shields.io/readthedocs/socha-python-client?label=Docs)](https://socha-python-client.readthedocs.io/de/latest/)
 [![PyPI](https://img.shields.io/pypi/v/socha?label=PyPi)](https://pypi.org/project/socha/)
@@ -12,11 +12,11 @@
 
 Dieses Repository enthält das Python-Paket für die [Software-Challenge Germany](https://www.software-challenge.de), einem Programmierwettbewerb für Schülerinnen und Schüler. Dabei muss eine künstliche Intelligenz entwickelt werden, die in einem jährlich wechselnden Spiel gegen andere Gegner antritt.
 
-> In diesem Jahr ist es das Spiel **[Piranhas](https://docs.software-challenge.de/spiele/26_piranhas/)**.
+> In diesem Jahr ist es das Spiel **[Blokus](https://docs.software-challenge.de/spiele/27_blokus/regeln)**.
 
 ## Inhaltsverzeichnis
 
-- [Python-Client für die Software-Challenge Germany 2025](#python-client-für-die-software-challenge-germany-2025)
+- [Python-Client für die Software-Challenge Germany 2027](#python-client-für-die-software-challenge-germany-2027)
   - [Inhaltsverzeichnis](#inhaltsverzeichnis)
   - [Installation](#installation)
     - [Global](#global)
@@ -117,6 +117,10 @@ Wenn eine funktionierende Version des Players fertiggestellt ist, sollte die Dat
 if __name__ == "__main__":
     Starter(Logik())
 ```
+
+**ACHTUNG** Die aktuelle ReadtheDocs Dokumentation ist nicht aktuell und leider Fehlerhaft. Die wichtigen Startschritte findetet ihr wie gehabt in dieser ReadMe.
+
+Eine Liste an Klassen und Methoden findet sich hier [`_socha.pyi`](https://github.com/software-challenge/player_python/blob/master/python/socha/_socha.pyi).
 
 > Ein komplettes Beispiel ist in dieser [`logic.py`](https://github.com/maxblan/socha-python-client/blob/master/logic.py) zu finden.
 

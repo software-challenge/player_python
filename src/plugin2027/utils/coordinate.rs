@@ -1,0 +1,74 @@
+use pyo3::*;
+
+use crate::plugin2027::{
+    utils::vector::Vector, utils::direction::Direction
+};
+
+#[pyclass]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct Coordinate {
+    #[pyo3(get, set)]
+    pub x: isize,
+    #[pyo3(get, set)]
+    pub y: isize,
+}
+
+#[pymethods]
+impl Coordinate {
+    #[new]
+    pub fn new(x: isize, y: isize) -> Self {
+        Self {
+            x, y
+        }
+    }
+
+    fn __str__(&self) -> String {self.to_string()}
+    fn __repr__(&self) -> String {format!("{:?}", self)}
+    fn __eq__(&self, other: &Coordinate) -> bool {self == other}
+    fn __ne__(&self, other: &Coordinate) -> bool {self != other}
+    fn deepcopy(&self) -> Coordinate {*self}
+
+    pub fn add_vector(&self, vector: &Vector) -> Coordinate {
+        Coordinate {
+            x: self.x + vector.delta_x,
+            y: self.y + vector.delta_y
+        }
+    }
+
+    pub fn add_vector_mut(&mut self, vector: &Vector) {
+
+        self.x += vector.delta_x;
+        self.y += vector.delta_y;
+    }
+
+    pub fn get_difference(&self, other: &Coordinate) -> Vector {
+        Vector {
+            delta_x: other.x - self.x,
+            delta_y: other.y - self.y
+        }
+    }
+
+    pub fn neighbors(&self) -> Vec<Coordinate> {
+        Direction::cardinals()
+            .iter()
+            .map(|d| self.add_vector(&d.to_vector()))
+            .collect()
+    }
+
+    pub fn diagonal_neighbors(&self) -> Vec<Coordinate> {
+        Direction::diagonals()
+            .iter()
+            .map(|d| self.add_vector(&d.to_vector()))
+            .collect()
+    }
+
+    pub fn as_vector(&self) -> Vector {
+        Vector::new(self.x, self.y)
+    }
+}
+
+impl std::fmt::Display for Coordinate {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
+    }
+}
