@@ -1,4 +1,7 @@
+# ruff: noqa: UP045
+
 from dataclasses import dataclass, field
+from typing import Optional
 
 from socha._socha import TeamEnum
 from socha.api.protocol.protocol_packet import (
@@ -23,11 +26,11 @@ class Position:
     class Meta:
         name = 'position'
 
-    x: int | None = field(
+    x: Optional[int] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    y: int | None = field(
+    y: Optional[int] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
@@ -42,26 +45,26 @@ class Piece:
     class Meta:
         name = 'piece'
 
-    color: str | None = field(
+    color: Optional[str] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    kind: str | None = field(
+    kind: Optional[str] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    rotation: str | None = field(
+    rotation: Optional[str] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    is_flipped: bool | None = field(
+    is_flipped: Optional[bool] = field(
         default=None,
         metadata={
             'name': 'isFlipped',
             'type': 'Attribute',
         },
     )
-    position: Position | None = field(
+    position: Optional[Position] = field(
         default=None,
         metadata={'type': 'Element'},
     )
@@ -72,8 +75,8 @@ class LastMove:
     class Meta:
         name = 'lastMove'
 
-    class_binding: object | None = field(default=None)
-    class_value: str | None = field(
+    class_binding: Optional[object] = field(default=None)
+    class_value: Optional[str] = field(
         default=None,
         metadata={
             'name': 'class',
@@ -81,13 +84,13 @@ class LastMove:
             'required': True,
         },
     )
-    piece: Piece | None = field(
+    piece: Optional[Piece] = field(
         default=None,
         metadata={'type': 'Element'},
     )
     # Für SkipMove: SkipMove.color hat kein @XStreamAsAttribute in Kotlin,
     # wird daher als Kindelement serialisiert (nicht als Attribut).
-    color: str | None = field(
+    color: Optional[str] = field(
         default=None,
         metadata={'type': 'Element'},
     )
@@ -98,15 +101,15 @@ class Field:
     class Meta:
         name = 'field'
 
-    x: int | None = field(
+    x: Optional[int] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    y: int | None = field(
+    y: Optional[int] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
-    content: str | None = field(
+    content: Optional[str] = field(
         default=None,
         metadata={'type': 'Attribute'},
     )
@@ -168,14 +171,14 @@ class LastMoveMonoEntry:
     class Meta:
         name = 'entry'
 
-    color: str | None = field(
+    color: Optional[str] = field(
         default=None,
         metadata={
             'name': 'sc.plugin2027.Color',
             'type': 'Element',
         },
     )
-    value: bool | None = field(
+    value: Optional[bool] = field(
         default=None,
         metadata={
             'name': 'boolean',
@@ -223,10 +226,17 @@ class State(ObservableRoomMessage):
             'required': True,
         },
     )
-    start_piece: str | None = field(
+    start_piece: Optional[str] = field(
         default=None,
         metadata={
             'name': 'startPiece',
+            'type': 'Attribute',
+            'required': True,
+        },
+    )
+    round: Optional[int] = field(
+        default=None,
+        metadata={
             'type': 'Attribute',
             'required': True,
         },
@@ -245,49 +255,49 @@ class State(ObservableRoomMessage):
             'type': 'Element',
         },
     )
-    board: Board | None = field(
+    board: Optional[Board] = field(
         default=None,
         metadata={
             'type': 'Element',
             'required': True,
         },
     )
-    last_move_mono: LastMoveMono | None = field(
+    last_move_mono: Optional[LastMoveMono] = field(
         default=None,
         metadata={
             'name': 'lastMoveMono',
             'type': 'Element',
         },
     )
-    blue_shapes: ShapeList | None = field(
+    blue_shapes: Optional[ShapeList] = field(
         default=None,
         metadata={
             'name': 'blueShapes',
             'type': 'Element',
         },
     )
-    yellow_shapes: ShapeList | None = field(
+    yellow_shapes: Optional[ShapeList] = field(
         default=None,
         metadata={
             'name': 'yellowShapes',
             'type': 'Element',
         },
     )
-    red_shapes: ShapeList | None = field(
+    red_shapes: Optional[ShapeList] = field(
         default=None,
         metadata={
             'name': 'redShapes',
             'type': 'Element',
         },
     )
-    green_shapes: ShapeList | None = field(
+    green_shapes: Optional[ShapeList] = field(
         default=None,
         metadata={
             'name': 'greenShapes',
             'type': 'Element',
         },
     )
-    valid_colors: ColorList | None = field(
+    valid_colors: Optional[ColorList] = field(
         default=None,
         metadata={
             'name': 'validColors',
@@ -301,14 +311,14 @@ class Player:
     class Meta:
         name = 'player'
 
-    name: str | None = field(
+    name: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
             'required': True,
         },
     )
-    team: str | None = field(
+    team: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
@@ -829,11 +839,11 @@ class OriginalMessage:
             'required': True,
         },
     )
-    piece: Piece | None = field(
+    piece: Optional[Piece] = field(
         default=None,
         metadata={'type': 'Element'},
     )
-    color: str | None = field(
+    color: Optional[str] = field(
         default=None,
         metadata={'type': 'Element'},
     )
@@ -895,21 +905,21 @@ class Data:
         },
     )
     # Nur für welcomeMessage: color="ONE"/"TWO" (TeamEnum), als Attribut.
-    color: str | None = field(
+    color: Optional[str] = field(
         default=None,
         metadata={
             'type': 'Attribute',
         },
     )
     # Für ausgehenden SetMove.
-    piece: Piece | None = field(
+    piece: Optional[Piece] = field(
         default=None,
         metadata={'type': 'Element'},
     )
     # Für ausgehenden SkipMove: eigenes Feld, da 'color' oben schon als
     # Attribut für welcomeMessage belegt ist. SkipMove.color ist ein
     # Kindelement (kein @XStreamAsAttribute in Kotlin).
-    skip_color: str | None = field(
+    skip_color: Optional[str] = field(
         default=None,
         metadata={
             'name': 'color',
