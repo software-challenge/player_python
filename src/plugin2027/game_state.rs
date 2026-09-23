@@ -6,7 +6,7 @@ use crate::plugin2027::{
     utils::{constants::Constants, game_rule_logic::GameRuleLogic, team::TeamEnum},
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GameState {
     #[pyo3(get, set)]

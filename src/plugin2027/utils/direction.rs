@@ -4,7 +4,7 @@ use crate::plugin2027::{
     utils::vector::Vector
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Direction {
     Up,

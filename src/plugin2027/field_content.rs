@@ -5,7 +5,7 @@ use crate::plugin2027::{
     color::Color,
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum FieldContent {
     BLUE,

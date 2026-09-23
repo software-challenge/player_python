@@ -1,5 +1,5 @@
 use pyo3::*;
-use types::PyModule;
+use types::{ PyModule, PyModuleMethods };
 
 pub mod plugin2027;
 

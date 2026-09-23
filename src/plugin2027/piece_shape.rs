@@ -6,7 +6,7 @@ use crate::plugin2027::{
     rotation::Rotation,
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PieceShape {
     Mono,

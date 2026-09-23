@@ -2,7 +2,7 @@ use pyo3::prelude::*;
 
 use crate::plugin2027::{color::Color, piece::Piece};
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Move {
     SetMove { piece: Piece },
