@@ -38,8 +38,8 @@ impl Piece {
     pub fn shape(&self) -> HashSet<Coordinate> {
         self.kind
             .coordinates()
-            .flip(self.is_flipped)
             .rotate(self.rotation)
+            .flip(self.is_flipped)
     }
 
     /// Die tatsächlichen Koordinaten, die der Stein am Ende auf dem Feld einnimmt.

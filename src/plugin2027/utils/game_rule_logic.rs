@@ -305,15 +305,12 @@ impl GameRuleLogic {
 
         let color = game_state.current_color();
         for field in &valid_fields {
-            for (_variant_shape, rotation, is_flipped) in shape.variants() {
-                let area = shape.transform(rotation, is_flipped).area();
-                for x in (field.x - area.delta_x)..=field.x {
-                    for y in (field.y - area.delta_y)..=field.y {
-                        let position = Coordinate::new(x, y);
-                        let piece = Piece::new(color, shape, rotation, is_flipped, position);
-                        if Self::is_valid_set_move(game_state, &piece) {
-                            moves.insert(piece);
-                        }
+            for (variant_coordinates, rotation, is_flipped) in shape.variants() {
+                for anchor in &variant_coordinates {
+                    let position = Coordinate::new(field.x - anchor.x, field.y - anchor.y);
+                    let piece = Piece::new(color, shape, rotation, is_flipped, position);
+                    if Self::is_valid_set_move(game_state, &piece) {
+                        moves.insert(piece);
                     }
                 }
             }
