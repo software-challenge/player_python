@@ -6,7 +6,7 @@ use crate::plugin2027::{
     utils::{coordinate::Coordinate, coordinate_helper::CoordinateSetExt},
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct Piece {
     #[pyo3(get, set)]

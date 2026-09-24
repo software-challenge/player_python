@@ -1,6 +1,6 @@
 use pyo3::*;
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Vector {
     #[pyo3(get, set)]

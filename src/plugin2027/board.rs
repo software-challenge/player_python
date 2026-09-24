@@ -5,7 +5,7 @@ use crate::plugin2027::{
     utils::{constants::Constants, coordinate::Coordinate},
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Board {
     #[pyo3(get, set)]

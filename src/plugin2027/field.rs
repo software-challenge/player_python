@@ -5,7 +5,7 @@ use crate::plugin2027::{
     color::Color, field_content::FieldContent, utils::coordinate::Coordinate
 };
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Field {
     #[pyo3(get, set)]
