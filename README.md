@@ -38,12 +38,14 @@ Es gibt zwei Methoden, um den `socha`-Client zu installieren. Die erste Methode 
 > - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
-> **Wichtig:** Der Client nutzt `pkg_resources` aus `setuptools`. Das Paket wird schon beim lokalen Starten gebraucht, nicht erst für die Abgabe. Wenn `ModuleNotFoundError: No module named 'pkg_resources'` erscheint, installiere die passende Version von `setuptools`:
+> Wenn beim Starten `No module named 'pkg_resources'` kommt, fehlt wahrscheinlich `setuptools`. Das braucht man nicht nur für die Abgabe, sondern schon zum Starten vom Player.
+>
+> Je nach Python-Version kann man es so installieren:
 >
 > - Python 3.10: `python -m pip install setuptools==58.1.0`
 > - Python 3.12: `python -m pip install setuptools==75.8.0`
 >
-> Falls du eine virtuelle Umgebung nutzt, aktiviere sie vorher. Mit `python -c "import pkg_resources"` kannst du prüfen, ob der Import klappt. Falls der Fehler bleibt, kontrolliere, ob du `setuptools` wirklich mit demselben Python installierst, mit dem du deinen Player startest.
+> Wenn du eine venv benutzt, aktiviere sie vorher. Mit `python -c "import pkg_resources"` kannst du testen, ob es klappt. Wenn der Fehler trotzdem kommt, schau mal, ob du den Player mit derselben Python-Umgebung startest.
 
 ### Global
 
