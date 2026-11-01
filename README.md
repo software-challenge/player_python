@@ -38,7 +38,7 @@ Es gibt zwei Methoden, um den `socha`-Client zu installieren. Die erste Methode 
 > - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
-> In seltenen Fällen kann es zu einer [fehlerhaften oder fehlenden Installation von `setuptools`](https://github.com/maxblan/socha-python-client/issues/40) kommen. In diesem Fall kann `setuptools` mit `pip install -I setuptools` erneut installiert werden.
+> In seltenen Fällen kann es zu einer [fehlerhaften oder fehlenden Installation von `setuptools`](https://github.com/maxblan/socha-python-client/issues/40) kommen. In diesem Fall kann `setuptools` mit `pip install -I "setuptools<81"` erneut installiert werden.
 
 ### Global
 
