@@ -38,7 +38,14 @@ Es gibt zwei Methoden, um den `socha`-Client zu installieren. Die erste Methode 
 > - Debian: `$ sudo apt install python3.10`
 > - Arch: `$ sudo pacman -S python`
 
-> In seltenen Fällen kann es zu einer [fehlerhaften oder fehlenden Installation von `setuptools`](https://github.com/maxblan/socha-python-client/issues/40) kommen. In diesem Fall kann `setuptools` mit `pip install -I setuptools` erneut installiert werden.
+> Wenn beim Starten `No module named 'pkg_resources'` kommt, fehlt wahrscheinlich `setuptools`. Das braucht man nicht nur für die Abgabe, sondern schon zum Starten vom Player.
+>
+> Je nach Python-Version kann man es so installieren:
+>
+> - Python 3.10: `python -m pip install setuptools==58.1.0`
+> - Python 3.12: `python -m pip install setuptools==75.8.0`
+>
+> Wenn du eine venv benutzt, aktiviere sie vorher. Mit `python -c "import pkg_resources"` kannst du testen, ob es klappt. Wenn der Fehler trotzdem kommt, schau mal, ob du den Player mit derselben Python-Umgebung startest.
 
 ### Global
 
@@ -83,14 +90,16 @@ Unter Windows:
 
 ```bash
 > Set-ExecutionPolicy Unrestricted -Scope Process
-> .venv\Scripts\activate
+> .\venv\Scripts\Activate.ps1
 ```
 
 Die _venv_ sollte nun geöffnet sein und Pakete können installiert sowie Skripte ausgeführt werden. Um den Player zu entwickeln, muss das Paket socha mit `pip` installiert werden.
 
 ```shell
-(venv) $ pip install socha
+(venv) $ python -m pip install socha
 ```
+
+Falls beim Start `pkg_resources` fehlt, installiere `setuptools` wie oben beschrieben in dieser virtuellen Umgebung.
 
 Damit sollten die Abhängigkeiten erfüllt sein und das Paket ist sofort einsatzbereit.
 
